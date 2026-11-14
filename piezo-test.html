@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piezo Disc Test</title>
+<style>
+:root{
+  --bg:#f6f5f2; --card:#ffffff; --ink:#1d1d1f; --muted:#6b6b70; --line:#dcdad5;
+  --board:#ecebe6; --hole:#b9b6ae; --pcb:#1f4f46;
+  --pwr:#d6453d; --gnd:#2f7de1; --sig:#8a4fd6; --pz:#d6453d; --blk:#2b2b2e;
+  --res:#d9c08f; --brass:#c8a464; --ok:#2f8f5b; --bad:#c2453b;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141416; --card:#1d1d20; --ink:#f0efec; --muted:#9a9aa0; --line:#2e2e33;
+  --board:#2a2a2e; --hole:#4a4a50; --pcb:#1d4a42; --blk:#d8d8dc;
+}}
+:root[data-theme="dark"]{
+  --bg:#141416; --card:#1d1d20; --ink:#f0efec; --muted:#9a9aa0; --line:#2e2e33;
+  --board:#2a2a2e; --hole:#4a4a50; --pcb:#1d4a42; --blk:#d8d8dc;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:28px 16px 48px}
+h1{font-size:24px;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 20px;max-width:70ch}
+.grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+svg{width:100%;height:auto;display:block}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.steps button{font:inherit;font-size:13px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.steps button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+h2{font-size:18px;margin:0 0 8px}
+p{margin:0 0 10px}
+.big{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--bg);margin:8px 0 12px;font-size:16px}
+.sw{width:14px;height:14px;border-radius:4px;flex:none}
+.hint{color:var(--muted);font-size:13px}
+.warn{border-left:3px solid var(--bad);padding:6px 10px;margin:10px 0 0;font-size:14px}
+.good{border-left:3px solid var(--ok);padding:6px 10px;margin:10px 0 0;font-size:14px}
+ol{padding-left:20px;margin:0 0 10px} li{margin:3px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:8px 6px;border-top:1px solid var(--line);vertical-align:top;text-align:left}
+th{font-weight:600;color:var(--muted);font-size:13px;border-top:none}
+code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);padding:1px 5px;border-radius:5px}
+.nav{display:flex;gap:8px;margin-top:14px}
+.nav button{font:inherit;padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.nav button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.nav button:disabled{opacity:.4;cursor:default}
+.lower{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+@media (max-width:860px){.lower{grid-template-columns:1fr}}
+.disc{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.disc:first-of-type{border-top:none}
+.disc b{flex:1}
+.disc button{font:inherit;font-size:13px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.disc button.on.y{background:var(--ok);border-color:var(--ok);color:#fff}
+.disc button.on.n{background:var(--bad);border-color:var(--bad);color:#fff}
+.part{transition:opacity .25s}
+.past{opacity:.4}
+.lbl{font:11px -apple-system,sans-serif;fill:var(--muted)}
+.lblb{font:600 12px -apple-system,sans-serif;fill:var(--ink)}
+.pinl{font:10.5px ui-monospace,Menlo,monospace;fill:#e8efe9}
+.rl{font:600 10px -apple-system,sans-serif;fill:#3a2e10}
+@keyframes pulse{0%,100%{r:6}50%{r:10}}
+.glow{animation:pulse 1.2s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.glow{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Piezo test: one disc at a time</h1>
+  <p class="sub">Build the <b>piezo 0 slot</b> once (1 GND wire, 2 resistors, 1 signal wire). Then plug each disc into it and tap. Only the <b>first piezo number</b> in <code>check.sh</code> matters here.</p>
+
+  <div class="grid">
+    <div class="card"><svg id="svg" viewBox="0 0 640 480" role="img" aria-label="Piezo 0 test circuit on the right half of the breadboard"></svg></div>
+    <div class="card">
+      <div class="steps" id="steps"></div>
+      <div id="panel"></div>
+      <div class="nav"><button id="prev">Back</button><button id="next" class="primary">Next</button></div>
+    </div>
+  </div>
+
+  <div class="lower">
+    <div class="card">
+      <h2>What the first number means</h2>
+      <table>
+        <tr><th>You see</th><th>Meaning</th></tr>
+        <tr><td>Near <b>0</b> at rest, <b>hundreds+</b> when tapped</td><td>✅ Disc works</td></tr>
+        <tr><td>Stays near 0, even when tapped</td><td>Disc wire loose in i6 / blue 8, or the 10 kΩ isn't in h6 and h9</td></tr>
+        <tr><td>Stuck at <b>4095</b></td><td>Right blue line has no GND. Add Part 0 (ESP32 GND → right blue 1)</td></tr>
+        <tr><td>High all the time (≈ 800–1200)</td><td>The 1 MΩ isn't touching the blue line (check j9 and blue 9)</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Disc results</h2>
+      <p class="hint">Tick each disc after its test. Saved in this browser only.</p>
+      <div id="discs"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const NS="http://www.w3.org/2000/svg", svg=document.getElementById("svg");
+const el=(t,a={},p=svg)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e};
+
+/* Checked against assemble.html:
+   ESP_L = EN, VP, VN, D34, D35, D32 ... -> D32 is the 6th pin on the LEFT row
+   Piezo 0 (k=0): red -> i6, black -> B-8, 10k h6->h9, 1M j9->B-9, D32 -> f9
+   B- = RIGHT blue line (outer), B+ = RIGHT red line (inner, not used)
+   railHas = n => n % 6 !== 0  -> rail row 6 has no hole; 8 and 9 do. */
+const ESP_L=["EN","VP","VN","D34","D35","D32","D33","D25","D26","D27","D14","D12","D13","GND","VIN"];
+const PIN_X=48, pinY=i=>70+i*25;
+const COL={f:322,g:348,h:374,i:400,j:426}, RAIL={"B+":466,"B-":492};
+const rowY=n=>58+(n-1)*35;   // rows 1..11
+const railHas=n=>n%6!==0;
+
+// ESP32 (left pin row shown on its left edge)
+el("rect",{x:34,y:40,width:150,height:400,rx:10,fill:"var(--pcb)"});
+el("rect",{x:92,y:46,width:54,height:54,rx:4,fill:"#c9ced6",opacity:.85});
+el("rect",{x:96,y:422,width:40,height:16,rx:4,fill:"#bfc4cc"});
+el("text",{x:150,y:434,"text-anchor":"middle",class:"lbl"}).textContent="USB";
+el("text",{x:116,y:32,"text-anchor":"middle",class:"lblb"}).textContent="ESP32 · left pin row";
+ESP_L.forEach((p,i)=>{
+  el("circle",{cx:PIN_X,cy:pinY(i),r:5,fill:"#d4af37"});
+  el("text",{x:PIN_X+11,y:pinY(i)+3.5,class:"pinl"}).textContent=`${i+1} ${p}`;
+  if(p==="VIN") el("text",{x:PIN_X+56,y:pinY(i)+3.5,class:"pinl",style:"fill:#ffb4ab;font-weight:700"}).textContent="5V never";
+});
+
+// Breadboard: right half f–j + right rails
+el("rect",{x:292,y:22,width:226,height:404,rx:8,fill:"var(--board)"});
+el("rect",{x:280,y:22,width:14,height:404,fill:"var(--line)",opacity:.8});
+el("text",{x:287,y:440,"text-anchor":"middle",class:"lbl"}).textContent="gap";
+for(const c in COL) el("text",{x:COL[c],y:40,"text-anchor":"middle",class:"lbl"}).textContent=c;
+el("line",{x1:RAIL["B+"]+9,y1:46,x2:RAIL["B+"]+9,y2:410,stroke:"var(--pwr)","stroke-width":2,opacity:.3});
+el("line",{x1:RAIL["B-"]+9,y1:46,x2:RAIL["B-"]+9,y2:410,stroke:"var(--gnd)","stroke-width":2,opacity:.85});
+el("text",{x:RAIL["B+"],y:40,"text-anchor":"middle",class:"lbl",style:"fill:var(--pwr)"}).textContent="+";
+el("text",{x:RAIL["B-"],y:40,"text-anchor":"middle",class:"lbl",style:"fill:var(--gnd);font-weight:700"}).textContent="−";
+el("text",{x:505,y:440,"text-anchor":"middle",class:"lbl"}).textContent="right blue";
+for(let n=1;n<=11;n++){
+  el("text",{x:304,y:rowY(n)+4,"text-anchor":"middle",class:"lbl"}).textContent=n;
+  for(const c in COL) el("circle",{cx:COL[c],cy:rowY(n),r:3.6,fill:"var(--hole)"});
+  for(const r in RAIL){
+    if(railHas(n)) el("circle",{cx:RAIL[r],cy:rowY(n),r:3.6,fill:"var(--hole)"});
+    else el("text",{x:RAIL[r],y:rowY(n)+4,"text-anchor":"middle",class:"lbl",style:"font-size:9px"}).textContent="×";
+  }
+}
+el("text",{x:530,y:rowY(6)+4,class:"lbl",style:"font-size:10px"}).textContent="no hole";
+
+// Piezo disc (off the board, right)
+const DX=586, DY=rowY(7);
+el("circle",{cx:DX,cy:DY,r:34,fill:"var(--brass)"});
+el("circle",{cx:DX,cy:DY,r:21,fill:"#e8e6e1"});
+el("text",{x:DX,y:DY+56,"text-anchor":"middle",class:"lblb"}).textContent="disc";
+
+// Parts
+const g=()=>el("g",{class:"part"});
+function resistor(x1,y1,x2,y2,label,bands){
+  const p=g(); const mx=(x1+x2)/2,my=(y1+y2)/2, vert=x1===x2;
+  el("line",{x1,y1,x2,y2,stroke:"#9aa0a6","stroke-width":2.5},p);
+  const w=vert?16:44,h=vert?44:16;
+  el("rect",{x:mx-w/2,y:my-h/2,width:w,height:h,rx:7,fill:"var(--res)",stroke:"#a8925f"},p);
+  bands.forEach((c,i)=>{ const o=-12+i*8;
+    vert? el("rect",{x:mx-8,y:my+o,width:16,height:4,fill:c},p) : el("rect",{x:mx+o,y:my-8,width:4,height:16,fill:c},p);});
+  el("text",{x:vert?mx+14:mx,y:vert?my+4:my-13,"text-anchor":vert?"start":"middle",class:"lblb"},p).textContent=label;
+  ends(p,[[x1,y1],[x2,y2]],"#9aa0a6"); return p;
+}
+function wire(d,color,a,b){const p=g(); el("path",{d,stroke:color,"stroke-width":4.5,fill:"none","stroke-linecap":"round","stroke-linejoin":"round"},p); ends(p,[a,b],color); return p;}
+function ends(p,pts,c){pts.forEach(([x,y])=>el("circle",{cx:x,cy:y,r:6,fill:c,class:"end"},p))}
+
+const f9=[COL.f,rowY(9)], d32=[PIN_X,pinY(5)], gndL=[PIN_X,pinY(13)], b1=[RAIL["B-"],rowY(1)];
+const PARTS={
+  gnd:  wire(`M${gndL[0]} ${gndL[1]} H 26 V 458 H 542 V ${b1[1]} H ${b1[0]}`,"var(--gnd)",gndL,b1),
+  r10k: resistor(COL.h,rowY(6),COL.h,rowY(9),"10 kΩ",["#8b5a2b","#1d1d1d","#e2742b"]),   // brown black orange
+  r1m:  resistor(COL.j,rowY(9),RAIL["B-"],rowY(9),"1 MΩ",["#8b5a2b","#1d1d1d","#2f9e5b"]),  // brown black green
+  sig:  wire(`M${d32[0]} ${d32[1]} H 16 V 12 H 287 V ${f9[1]} H ${f9[0]}`,"var(--sig)",d32,f9),
+  red:  wire(`M${DX-30} ${DY-16} C ${DX-80} ${DY-60}, ${COL.i+40} ${rowY(6)-40}, ${COL.i} ${rowY(6)}`,"var(--pz)",[DX-30,DY-16],[COL.i,rowY(6)]),
+  blk:  wire(`M${DX-26} ${DY+22} C ${DX-50} ${DY+40}, ${RAIL["B-"]+30} ${rowY(8)}, ${RAIL["B-"]} ${rowY(8)}`,"var(--blk)",[DX-26,DY+22],[RAIL["B-"],rowY(8)]),
+};
+// The disc is drawn always; its wires only from the disc steps
+const ORDER=["gnd","r10k","r1m","sig","red","blk"];
+
+const STEPS=[
+  {t:"Start",h:"Before you start",show:[],body:`<ol><li><b>Unplug USB.</b> Always, before moving parts.</li><li>All parts go on the <b>right half</b> of the board (columns <b>f–j</b>) and the <b>right blue line</b> (the outer one).</li><li>Leave both MPUs and their wires as they are.</li></ol><p class="hint">Pick resistors by their colour bands: <b>10 kΩ = brown, black, orange</b>. <b>1 MΩ = brown, black, green</b>.</p>`},
+  {t:"0 GND",h:"Part 0: ground the right blue line",show:["gnd"],body:`<div class="big"><span class="sw" style="background:var(--gnd)"></span>ESP32 <b>GND</b> → <b>right blue line 1</b></div><p><b>GND</b> is on the ESP32's <b>left</b> pin row: the <b>14th pin</b>, right above VIN.</p><div class="warn"><b>Not VIN</b> (the bottom pin, 5 V). It can damage the sensors.</div><p class="hint" style="margin-top:10px">Without this wire the blue line goes nowhere, and the first number gets stuck at 4095. Already in from step 2 of the main guide? Then skip.</p>`},
+  {t:"1 10kΩ",h:"Part 1: 10 kΩ resistor",show:["r10k"],body:`<div class="big"><span class="sw" style="background:var(--res)"></span>Hole <b>h6</b> → hole <b>h9</b></div><p>Bands <b>brown, black, orange</b>. One leg in <b>h6</b>, the other in <b>h9</b>. Both legs in column <b>h</b>.</p><p class="hint">It protects the ESP32 pin from the disc's voltage spike.</p>`},
+  {t:"2 1MΩ",h:"Part 2: 1 MΩ resistor",show:["r1m"],body:`<div class="big"><span class="sw" style="background:var(--res)"></span>Hole <b>j9</b> → <b>right blue line 9</b></div><p>Bands <b>brown, black, green</b>. One leg in <b>j9</b>, the other in the <b>right blue line</b> at row <b>9</b>.</p><p class="hint">It drains the charge after a tap, so the number goes back to 0.</p>`},
+  {t:"3 D32",h:"Part 3: wire from the ESP32",show:["sig"],body:`<div class="big"><span class="sw" style="background:var(--sig)"></span>ESP32 <b>D32</b> → hole <b>f9</b></div><p><b>D32</b> is on the ESP32's <b>left</b> pin row: the <b>6th pin from the top</b> (EN, VP, VN, D34, D35, <b>D32</b>). Read the label.</p><p>M–F wire: socket on D32, pin in <b>f9</b>.</p><div class="good">Now rows 6–9 form the slot. The resistors stay here for all 4 discs.</div>`},
+  {t:"4 red",h:"Part 4: disc red wire",show:["red"],body:`<div class="big"><span class="sw" style="background:var(--pz)"></span>Disc <b>red</b> wire → hole <b>i6</b></div><p>Hold the thin wire close to its tip and push it straight into <b>i6</b>.</p>`},
+  {t:"5 black",h:"Part 5: disc black wire",show:["blk"],body:`<div class="big"><span class="sw" style="background:var(--blk)"></span>Disc <b>black</b> wire → <b>right blue line 8</b></div><p>Row <b>8</b> of the outer right line. (Row 6 there has no hole. That's normal.)</p>`},
+  {t:"Test",h:"Test this disc",show:ORDER,body:`<ol><li>Plug in USB.</li><li>Tell Claude <b>"test now"</b>.</li><li>While it reads (15 s), <b>tap the disc</b> with a fingertip 3–4 times.</li></ol><p>Look at the <b>first</b> number after <code>piezo peak</code>. Near 0 at rest, jumping to hundreds when tapped = ✅.</p><p class="hint">Then tick the result for this disc below.</p>`},
+  {t:"Next disc",h:"Swap to the next disc",show:["gnd","r10k","r1m","sig"],body:`<ol><li><b>Unplug USB.</b></li><li>Pull the red wire out of <b>i6</b> and the black wire out of <b>blue line 8</b>.</li><li>Leave the GND wire, both resistors and the D32 wire in place.</li><li>Go back to <b>Part 4</b> with the next disc.</li></ol><div class="good">Repeat until all 4 discs are ticked.</div>`},
+];
+
+let cur=0;
+const stepsEl=document.getElementById("steps"), panel=document.getElementById("panel");
+STEPS.forEach((s,i)=>{const b=document.createElement("button");b.textContent=s.t;b.onclick=()=>go(i);stepsEl.appendChild(b)});
+function go(i){
+  cur=Math.max(0,Math.min(STEPS.length-1,i)); const s=STEPS[cur];
+  [...stepsEl.children].forEach((b,j)=>b.setAttribute("aria-pressed",j===cur));
+  panel.innerHTML=`<h2>${s.h}</h2>${s.body}`;
+  const single=s.show.length===1;
+  // parts placed in earlier build steps stay visible (faded)
+  const builtBefore = (cur>=1 && cur<=6) ? ORDER.slice(0,cur-1) : [];
+  ORDER.forEach(k=>{
+    const on=s.show.includes(k), past=builtBefore.includes(k)&&!on;
+    PARTS[k].style.display=(on||past)?"":"none";
+    PARTS[k].classList.toggle("past",past);
+    PARTS[k].querySelectorAll(".end").forEach(c=>c.classList.toggle("glow",on&&single));
+  });
+  document.getElementById("prev").disabled=cur===0;
+  const nx=document.getElementById("next");
+  nx.textContent = cur===STEPS.length-1 ? "Back to Part 4" : "Next";
+}
+document.getElementById("prev").onclick=()=>go(cur-1);
+document.getElementById("next").onclick=()=>go(cur===STEPS.length-1?5:cur+1);
+document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(cur+1);if(e.key==="ArrowLeft")go(cur-1)});
+go(0);
+
+// Disc results (per-viewer convenience only)
+const KEY="wristtap-piezo-discs";
+let res={}; try{res=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+const discs=document.getElementById("discs");
+function drawDiscs(){
+  discs.innerHTML="";
+  for(let d=1;d<=4;d++){
+    const row=document.createElement("div"); row.className="disc";
+    row.innerHTML=`<b>Disc ${d}</b>`;
+    [["y","✅ Works"],["n","❌ No reaction"]].forEach(([v,t])=>{
+      const b=document.createElement("button"); b.textContent=t; b.className=v+(res[d]===v?" on":"");
+      b.onclick=()=>{res[d]=res[d]===v?undefined:v; try{localStorage.setItem(KEY,JSON.stringify(res))}catch(e){} drawDiscs()};
+      row.appendChild(b);
+    });
+    discs.appendChild(row);
+  }
+}
+drawDiscs();
+</script>
+</body>
+</html>

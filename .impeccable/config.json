@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          "/Users/saikiran/Projects/WristTap/guide.html"
+        ],
+        "createdAt": "2026-11-14T00:23:06.826Z",
+        "reason": "Claude decided: guide.html is an A4 print PDF source (794px page); 11-12px is about 8-9pt, normal print size, and no text is under 11px"
+      },
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          "/Users/saikiran/Projects/WristTap/parts.html"
+        ],
+        "createdAt": "2026-11-14T05:16:33.857Z",
+        "reason": "Claude decided: A4 print PDF source; 11-12px is about 8-9pt print size"
+      }
+    ]
+  }
+}

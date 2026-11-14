@@ -1,0 +1,25 @@
+WRISTTAP - FINAL SHOPPING LIST (Lajpat Rai Market, Chandni Chowk)
+
+[ ] ESP32 DevKit V1, WROOM-32, 30-pin (CP2102 chip preferred)  x2
+[ ] MPU6050 module (GY-521)                                    x3
+[ ] Piezo disc 27 mm, wires attached                           x5
+[ ] FSR 402 round force sensor                                 x2
+[ ] Resistor 1 Mohm (brown-black-green)                        x10
+[ ] Resistor 10 kohm (brown-black-orange)                      x10
+[ ] Jumper wires female-female 20 cm                           x40
+[ ] Jumper wires male-female 20 cm                             x40
+[ ] Jumper wires male-male 10 cm                               x20
+[ ] Breadboard 400 point (half size)                           x1
+[ ] Elastic velcro strap 2.5 cm                                x2
+[ ] USB DATA cable micro-USB 1 m                               x1
+[ ] USB-C to USB-A adapter (if Mac has no USB-A)               x1
+[ ] Double-sided foam tape, insulation tape, small zip ties    x1 each
+Total: about Rs 2,000-2,600
+
+OPTIONAL: EMG sensor + gel electrodes (Rs 1,500-2,500), soldering iron kit, multimeter
+
+IN THE SHOP:
+1. "Header pins solder kar do" - both ESP32s + all 3 MPU6050s
+2. Solder a male header pin on the end of each piezo wire
+3. Plug ESP32 into a charger - red LED must light
+4. Test the USB cable on your phone - must offer file transfer

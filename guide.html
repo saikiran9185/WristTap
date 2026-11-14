@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WristTap Build Guide</title>
+<style>
+  :root { --ink:#16181d; --ink-2:#424752; --ink-3:#686d77; --rule:#dfe2e6; --tint:#f4f5f7; --red:#c8102e; --red-tint:#fbe9ec; --ok:#1f7a4d; --ok-tint:#e7f4ed; --warn:#8a5a00; --warn-tint:#fdf3e1; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { background:#d9dbe0; }
+  body { font-family:-apple-system,"SF Pro Text","Helvetica Neue",sans-serif; color:var(--ink); -webkit-font-smoothing:antialiased; }
+  .slide { width:794px; height:1123px; background:#fff; margin:0 auto 20px; padding:52px 56px 60px; position:relative; overflow:hidden; }
+  .foot { position:absolute; left:56px; right:56px; bottom:24px; display:flex; justify-content:space-between; font-size:11px; color:var(--ink-3); }
+  .kicker { font-size:11.5px; font-weight:700; color:var(--red); letter-spacing:.02em; margin-bottom:8px; }
+  h1 { font-size:34px; line-height:1.1; letter-spacing:-.02em; font-weight:700; text-wrap:balance; }
+  h2 { font-size:22px; line-height:1.2; letter-spacing:-.01em; font-weight:700; margin-bottom:10px; }
+  h3 { font-size:14px; font-weight:700; margin:16px 0 6px; }
+  p, li { font-size:12.5px; line-height:1.5; color:var(--ink-2); text-wrap:pretty; }
+  .lede { font-size:14px; margin-top:12px; max-width:62ch; }
+  table { width:100%; border-collapse:collapse; margin-top:6px; }
+  th { text-align:left; font-size:11px; font-weight:600; color:var(--ink-3); padding:0 8px 6px 0; border-bottom:1px solid var(--ink); }
+  td { font-size:12px; line-height:1.4; color:var(--ink-2); padding:6px 8px 6px 0; border-bottom:1px solid var(--rule); vertical-align:top; }
+  td.b { color:var(--ink); font-weight:600; }
+  td.box { width:20px; }
+  .cb { display:inline-block; width:12px; height:12px; border:1.5px solid var(--ink); border-radius:2px; vertical-align:-2px; }
+  .mono, code { font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:11.5px; }
+  code { background:var(--tint); padding:1px 5px; border-radius:3px; color:var(--ink); }
+  .cmd { font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:12px; background:#16181d; color:#f2f3f5; padding:8px 12px; border-radius:4px; margin:6px 0; display:block; }
+  .note { padding:10px 12px; margin:10px 0; font-size:12px; line-height:1.45; border-radius:4px; }
+  .note.red { background:var(--red-tint); color:#6e0a1a; }
+  .note.ok { background:var(--ok-tint); color:#0f4d2f; }
+  .note.warn { background:var(--warn-tint); color:#5a3b00; }
+  .note b { color:inherit; }
+  .step { display:flex; gap:14px; margin-top:14px; }
+  .step .n { flex:0 0 28px; height:28px; border-radius:50%; background:var(--ink); color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; }
+  .step .body { flex:1; }
+  .step .body h3 { margin-top:3px; }
+  ol.tight { padding-left:18px; } ol.tight li { margin-bottom:3px; }
+  .expect { font-size:12px; color:var(--ok); font-weight:600; margin-top:4px; }
+  .two { display:flex; gap:24px; } .two > div { flex:1; }
+  .total { font-size:15px; font-weight:700; color:var(--ink); margin-top:10px; }
+  @media print { html,body{background:#fff} .slide{margin:0} }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: overview -->
+<section class="slide">
+  <div class="kicker">WristTap · build guide · v1 · 14 Nov 2026</div>
+  <h1>A sensor wristband that detects mid-air pinches and taps without a camera</h1>
+  <p class="lede">Follow the pages in order. Each step ends with a <b>check</b>: don't move on until the check passes. If something fails, go to the troubleshooting page.</p>
+
+  <h3>What it does</h3>
+  <p>Sensors on your wrist pick up the small vibration and tendon movement made when your thumb touches a fingertip. While you record, the Mac camera labels each pinch automatically. Later a model learns to detect pinches from the band alone, with the camera off.</p>
+
+  <svg viewBox="0 0 680 300" width="680" height="300" style="margin-top:14px" font-family="-apple-system,Helvetica Neue,sans-serif">
+    <!-- forearm -->
+    <path d="M20 120 L430 105 L430 205 L20 190 Z" fill="#f1e2d8"/>
+    <!-- hand -->
+    <path d="M430 105 Q470 95 520 100 L600 92 Q620 96 600 110 L540 118 L620 120 Q640 126 620 136 L545 140 L625 146 Q642 154 620 162 L545 164 L612 172 Q628 180 608 188 L530 190 Q480 214 430 205 Z" fill="#f1e2d8"/>
+    <path d="M470 205 Q500 240 540 238 Q556 234 546 222 Q520 214 505 196" fill="#e8d3c6"/>
+    <!-- wrist band -->
+    <rect x="392" y="100" width="34" height="110" fill="#16181d" rx="4"/>
+    <!-- forearm strap with ESP32 -->
+    <rect x="150" y="108" width="28" height="92" fill="#16181d" rx="4"/>
+    <rect x="120" y="128" width="92" height="52" fill="#1f5f9a" rx="3"/>
+    <text x="166" y="158" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">ESP32</text>
+    <!-- IMU1 on band -->
+    <rect x="398" y="134" width="22" height="22" fill="#c8102e"/>
+    <!-- IMU2 on back of hand -->
+    <rect x="488" y="128" width="22" height="22" fill="#c8102e"/>
+    <!-- cable -->
+    <path d="M120 154 Q60 160 20 240" stroke="#7d828c" stroke-width="3" fill="none"/>
+    <text x="24" y="262" font-size="12" fill="#424752">USB to Mac</text>
+    <!-- labels -->
+    <line x1="409" y1="134" x2="380" y2="60" stroke="#16181d"/>
+    <text x="300" y="48" font-size="12" fill="#16181d" font-weight="600">IMU 1 on top of the wrist band</text>
+    <line x1="499" y1="128" x2="520" y2="60" stroke="#16181d"/>
+    <text x="500" y="32" font-size="12" fill="#16181d" font-weight="600">IMU 2 taped to the</text>
+    <text x="500" y="48" font-size="12" fill="#16181d" font-weight="600">back of the hand</text>
+    <line x1="409" y1="210" x2="380" y2="262" stroke="#16181d"/>
+    <text x="250" y="280" font-size="12" fill="#16181d" font-weight="600">Inside the band, against the skin:</text>
+    <text x="250" y="296" font-size="12" fill="#424752">4 piezos + 2 FSRs (see page 4)</text>
+    <line x1="166" y1="128" x2="190" y2="70" stroke="#16181d"/>
+    <text x="120" y="62" font-size="12" fill="#16181d" font-weight="600">ESP32 + breadboard on a forearm strap</text>
+  </svg>
+
+  <h3>What's already done on the Mac</h3>
+  <table>
+    <tr><td class="box"><span style="color:var(--ok);font-weight:700">✓</span></td><td class="b">arduino-cli + ESP32 support installed</td><td>Used to upload code to the board. You don't need the Arduino app.</td></tr>
+    <tr><td class="box"><span style="color:var(--ok);font-weight:700">✓</span></td><td class="b">Firmware compiles</td><td><code>firmware/wristtap/wristtap.ino</code>, 23% of the board's memory</td></tr>
+    <tr><td class="box"><span style="color:var(--ok);font-weight:700">✓</span></td><td class="b">Mac recorder tested</td><td><code>wristtap.py</code> handled 999 fake packets, caught the 1 dropped packet, ignored noise</td></tr>
+    <tr><td class="box"><span style="color:var(--ok);font-weight:700">✓</span></td><td class="b">One-click scripts</td><td><code>./flash.sh</code> uploads the code · <code>./check.sh</code> shows live sensor values · <code>./record.sh</code> records a session</td></tr>
+  </table>
+  <p style="margin-top:10px;">All files are in <code>~/Projects/WristTap</code>.</p>
+  <div class="foot"><span>WristTap build guide · Saikiran Chepuri</span><span>1 / 6</span></div>
+</section>
+
+<!-- PAGE 2: shopping -->
+<section class="slide">
+  <div class="kicker">Step 0 · Shopping · Lajpat Rai Market, Chandni Chowk</div>
+  <h2>Final parts list</h2>
+  <p>Prices are rough. Buying the spares means a single bad board won't stop the build.</p>
+  <h3>Must buy</h3>
+  <table>
+    <thead><tr><th></th><th>Part (say exactly this)</th><th>Qty</th><th>~₹</th><th>Check in the shop</th></tr></thead>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">ESP32 DevKit V1, WROOM-32, 30-pin</td><td>2</td><td>350–450 ea</td><td>Prefer the <b>CP2102</b> USB chip (square chip near the USB port). CH340 also works.</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">MPU6050 module (GY-521)</td><td>3</td><td>120–150 ea</td><td>Has 8 pins: VCC GND SCL SDA XDA XCL AD0 INT</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Piezo disc 27 mm, wires attached</td><td>5</td><td>10–20 ea</td><td>Red + black wire already soldered</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">FSR 402 round force sensor</td><td>2</td><td>250–400 ea</td><td>Round pad about 18 mm wide, 2 metal legs</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Resistor 1 MΩ (brown-black-green)</td><td>10</td><td>~1 ea</td><td></td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Resistor 10 kΩ (brown-black-orange)</td><td>10</td><td>~1 ea</td><td></td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Jumper wires female–female, 20 cm</td><td>40</td><td>60</td><td></td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Jumper wires male–female, 20 cm</td><td>40</td><td>60</td><td></td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Jumper wires male–male, 10 cm</td><td>20</td><td>40</td><td>For the breadboard</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Breadboard, 400 point (half size)</td><td>1</td><td>80</td><td>For power rails and resistors. The ESP32 stays loose (see page 3)</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Elastic velcro strap, 2.5 cm wide</td><td>2</td><td>50 ea</td><td>One for the wrist, one for the forearm</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">USB <u>data</u> cable, micro-USB, 1 m</td><td>1</td><td>100</td><td>Plug into your phone: it must offer file transfer</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">USB-C to USB-A adapter</td><td>1</td><td>100</td><td>Only if your Mac has no USB-A port</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Double-sided foam tape, insulation tape, small zip ties</td><td>1 each</td><td>100</td><td>To mount the sensors</td></tr>
+  </table>
+  <p class="total">Total must-buy: about ₹2,000–2,600</p>
+  <h3>Optional</h3>
+  <table>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">EMG muscle sensor (MyoWare-type) + gel electrodes</td><td>₹1,500–2,500</td><td>Closest to the KAIST setup. Add it later; the code would need a small update first</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Soldering iron 25 W + solder + stand</td><td>₹300–500</td><td>For later projects</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Basic multimeter</td><td>₹250–400</td><td>Very useful for troubleshooting</td></tr>
+  </table>
+  <div class="note red"><b>Before you leave the shop:</b> (1) Ask them to <b>solder the header pins</b> on both ESP32s and all 3 MPU6050s ("header pins solder kar do"). (2) Plug the ESP32 into a power bank or phone charger and check the <b>red LED</b> comes on. (3) Test the cable on your phone for file transfer. (4) Ask them to <b>solder a male header pin onto the end of each piezo wire</b>, so the wires go firmly into the breadboard.</div>
+  <div class="foot"><span>WristTap build guide · Saikiran Chepuri</span><span>2 / 6</span></div>
+</section>
+
+<!-- PAGE 3: pin map -->
+<section class="slide">
+  <div class="kicker">Wiring reference</div>
+  <h2>Every wire, in one table</h2>
+  <p>Pin names are printed on the ESP32 board. <b>D21</b> may also be printed as <b>G21</b> or <b>IO21</b>. <b>VP</b> may be printed as <b>SVP</b> (GPIO36), and <b>VN</b> as <b>SVN</b> (GPIO39).</p>
+  <table style="margin-top:12px;">
+    <thead><tr><th>Sensor</th><th>Sensor pin / wire</th><th>Goes to</th><th>Notes</th></tr></thead>
+    <tr><td class="b" rowspan="5">IMU 1 (wrist)</td><td>VCC</td><td class="b mono">3V3</td><td><b>Never</b> VIN or 5V</td></tr>
+    <tr><td>GND</td><td class="b mono">GND</td><td></td></tr>
+    <tr><td>SDA</td><td class="b mono">D21</td><td>Shared with IMU 2</td></tr>
+    <tr><td>SCL</td><td class="b mono">D22</td><td>Shared with IMU 2</td></tr>
+    <tr><td>AD0</td><td class="b mono">GND</td><td>Gives address 0x68</td></tr>
+    <tr><td class="b" rowspan="5">IMU 2 (hand)</td><td>VCC</td><td class="b mono">3V3</td><td></td></tr>
+    <tr><td>GND</td><td class="b mono">GND</td><td></td></tr>
+    <tr><td>SDA</td><td class="b mono">D21</td><td>Same breadboard row as IMU 1's SDA</td></tr>
+    <tr><td>SCL</td><td class="b mono">D22</td><td>Same breadboard row as IMU 1's SCL</td></tr>
+    <tr><td>AD0</td><td class="b mono" style="color:var(--red)">3V3</td><td><b>Must be 3V3</b>, or both IMUs get the same address</td></tr>
+    <tr><td class="b" rowspan="2">Piezo 0 / 1 / 2 / 3</td><td>Red wire</td><td class="b mono">10 kΩ → D32 / D33 / D34 / D35</td><td>The 10 kΩ protects the pin from voltage spikes</td></tr>
+    <tr><td>Black wire</td><td class="b mono">GND</td><td>Also add a <b>1 MΩ from the D-pin to GND</b> for each piezo</td></tr>
+    <tr><td class="b" rowspan="2">FSR 0 / 1</td><td>Leg A</td><td class="b mono">3V3</td><td>FSRs have no polarity; either leg works</td></tr>
+    <tr><td>Leg B</td><td class="b mono">VP / VN</td><td>Also add a <b>10 kΩ from VP (or VN) to GND</b></td></tr>
+    <tr><td class="b">INT, XDA, XCL</td><td colspan="3">Leave unconnected on both IMUs.</td></tr>
+  </table>
+
+  <h3>How to use the breadboard</h3>
+  <div class="note red" style="margin-top:4px;"><b>Don't push the ESP32 into the breadboard.</b> It's too wide and covers almost every hole. Leave it loose and connect to its pins with <b>female–male jumpers</b>.</div>
+  <table>
+    <tr><td class="b" style="width:30%">Power rails</td><td>One jumper from ESP32 <b>3V3</b> to the breadboard's <b>red (+) rail</b>, one from ESP32 <b>GND</b> to the <b>blue (−) rail</b>. Every "3V3" and "GND" in the table above means these rails.</td></tr>
+    <tr><td class="b">One row per signal</td><td>Give each ESP32 signal pin its own breadboard row (D21, D22, D32, D33, D34, D35, VP, VN = 8 rows), with a jumper from that row to the ESP32 pin.</td></tr>
+    <tr><td class="b">Sensors join the row</td><td>The sensor wire goes into the same row. For example, the D21 row holds: IMU 1 SDA, IMU 2 SDA and the jumper to ESP32 D21.</td></tr>
+    <tr><td class="b">Resistors to ground</td><td>The 1 MΩ (piezo rows) or 10 kΩ (FSR rows) goes from that row to the blue GND rail. The piezo's 10 kΩ sits between the piezo's red wire and the row.</td></tr>
+    <tr><td class="b">Label the rows</td><td>Write the pin name next to each row on a strip of tape. It's the easiest way to avoid wiring mistakes.</td></tr>
+  </table>
+  <div class="note warn"><b>Rule:</b> build with the USB cable <b>unplugged</b>. Plug in only after you've checked every new wire against this table.</div>
+  <div class="foot"><span>WristTap build guide · Saikiran Chepuri</span><span>3 / 6</span></div>
+</section>
+
+<!-- PAGE 4: build steps -->
+<section class="slide">
+  <div class="kicker">Build · one sensor at a time</div>
+  <h2>Six steps, each with a check</h2>
+
+  <div class="step"><div class="n">1</div><div class="body">
+    <h3>ESP32 alone: upload the code</h3>
+    <ol class="tight"><li>Keep the ESP32 loose, <b>not</b> in the breadboard (see page 3). Plug it into the Mac.</li>
+    <li>Open Terminal and run:</li></ol>
+    <span class="cmd">cd ~/Projects/WristTap &amp;&amp; ./flash.sh</span>
+    <p>If it stalls at <code>Connecting....</code>, <b>hold the BOOT button</b> on the ESP32 until writing starts.</p>
+    <span class="cmd">./check.sh</span>
+    <div class="expect">Check: about 500 pkt/s, drops 0, both IMUs show MISSING. That's correct for now.</div>
+  </div></div>
+
+  <div class="step"><div class="n">2</div><div class="body">
+    <h3>IMU 1</h3>
+    <p>Unplug USB. Run 3V3 and GND wires to the breadboard rails. Wire IMU 1 using the table on page 3 (AD0 → GND). Plug in, then run <code>./check.sh</code>.</p>
+    <div class="expect">Check: IMU1 |a| ≈ 1.00 g when it's lying still (that's gravity). Shake it and the peak goes up.</div>
+  </div></div>
+
+  <div class="step"><div class="n">3</div><div class="body">
+    <h3>IMU 2</h3>
+    <p>Unplug. Wire IMU 2 with <b>AD0 → 3V3</b>. <b>Press the EN (reset) button</b> after plugging in, because the IMUs are only detected at startup.</p>
+    <div class="expect">Check: IMU1 and IMU2 both ≈ 1.00 g. Move only one: only its peak should change.</div>
+  </div></div>
+
+  <div class="step"><div class="n">4</div><div class="body">
+    <h3>Piezos (one at a time)</h3>
+    <p>Piezo 0: red → 10 kΩ → D32, black → GND, 1 MΩ from D32 to GND. Then check, then piezo 1 on D33, piezo 2 on D34, piezo 3 on D35.</p>
+    <div class="expect">Check: that piezo's number jumps clearly when you tap it lightly with a fingernail, and stays low when you don't.</div>
+  </div></div>
+
+  <div class="step"><div class="n">5</div><div class="body">
+    <h3>FSRs</h3>
+    <p>FSR 0: one leg → 3V3, other leg → VP, 10 kΩ from VP to GND. FSR 1 on VN, the same way.</p>
+    <div class="expect">Check: near 0 when untouched, rising to 1000–4000 as you press harder.</div>
+  </div></div>
+
+  <div class="step"><div class="n">6</div><div class="body">
+    <h3>Mount on your wrist (use your dominant hand)</h3>
+    <ol class="tight">
+      <li><b>Inside the wrist band, against the skin:</b> FSR 0 at the centre of the inner wrist (palm side), FSR 1 toward the pinky side. Piezo 0 on the thumb side, piezo 1 on the pinky side, piezo 2 under IMU 1, piezo 3 next to FSR 0. Hold them in place with foam tape.</li>
+      <li><b>On top of the band:</b> IMU 1, like a watch face. <b>Back of the hand:</b> IMU 2, held with insulation tape.</li>
+      <li>ESP32 + breadboard on the forearm strap. Fix the wires with zip ties so they don't pull on the sensors.</li>
+      <li><b>Snug, not tight:</b> the band shouldn't slide, but your fingers must stay comfortable.</li>
+      <li>Take a photo of where everything sits, so every session uses the same placement.</li>
+    </ol>
+    <div class="expect">Check: <code>./check.sh</code> still shows all sensors. Pinch thumb to index firmly: at least one piezo or FSR should react.</div>
+  </div></div>
+  <div class="foot"><span>WristTap build guide · Saikiran Chepuri</span><span>4 / 6</span></div>
+</section>
+
+<!-- PAGE 5: record -->
+<section class="slide">
+  <div class="kicker">Record the dataset</div>
+  <h2>The camera labels, the band learns</h2>
+  <p>Each session cues 5 gestures in random order. The Mac camera measures thumb-to-fingertip distance in every frame, which gives an automatic label for training the band.</p>
+
+  <h3>Setup</h3>
+  <ol class="tight">
+    <li>Sit at the desk, elbow on the table, with your band hand <b>clearly visible to the Mac camera</b> (palm facing the camera works best). Good light.</li>
+    <li>The first time, macOS will ask to allow the camera for Terminal: click <b>Allow</b>.</li>
+  </ol>
+  <span class="cmd">cd ~/Projects/WristTap &amp;&amp; ./record.sh --reps 20 --note "session 1, right wrist"</span>
+  <p>Press <b>SPACE</b> to start. Each cue shows "next: …" for 1.2 s, then "NOW: …" for 1.5 s. Do the gesture <b>once</b>, then relax. Press <b>Q</b> to stop early. One session takes about 5 minutes.</p>
+
+  <table style="margin-top:12px;">
+    <thead><tr><th>Gesture</th><th>What to do when you see NOW</th></tr></thead>
+    <tr><td class="b">REST</td><td>Keep your hand still and relaxed</td></tr>
+    <tr><td class="b">PINCH INDEX</td><td>Tap the thumb against the index fingertip once, firmly, then open</td></tr>
+    <tr><td class="b">PINCH MIDDLE</td><td>Same, with the middle finger</td></tr>
+    <tr><td class="b">PINCH PINKY</td><td>Same, with the pinky</td></tr>
+    <tr><td class="b">AIR TAP</td><td>Flick the index finger down in the air once, as if tapping a glass wall</td></tr>
+  </table>
+
+  <h3>Plan for a clean dataset</h3>
+  <table>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Session 1</td><td>20 reps × 5 gestures. Band on, sitting.</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Session 2</td><td>Take the band off, put it back on, record again. This tests whether the model survives re-wearing.</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Session 3</td><td>A different hand angle (palm down). This tests robustness.</td></tr>
+    <tr><td class="box"><span class="cb"></span></td><td class="b">Optional</td><td>1–2 friends, one session each. More people makes the result much more convincing.</td></tr>
+  </table>
+  <p style="margin-top:8px;">Sessions are saved in <code>~/Projects/WristTap/sessions/</code>. Next we train a model in PyTorch and score it <b>leave-one-session-out</b>, the same honest method you used in the sign study.</p>
+
+  <div class="note ok"><b>What counts as a result:</b> "Detected pinch vs rest X% of the time, which finger Y%, latency Z ms, on sessions it never saw." Even a modest number is a real result if it's measured honestly. If "which finger" fails, that's still a finding: report it and explain why.</div>
+  <div class="note warn"><b>Privacy:</b> the recorder saves only numbers (sensor values and finger distances), never camera images.</div>
+  <div class="foot"><span>WristTap build guide · Saikiran Chepuri</span><span>5 / 6</span></div>
+</section>
+
+<!-- PAGE 6: troubleshooting -->
+<section class="slide">
+  <div class="kicker">Troubleshooting + safety</div>
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th style="width:32%">Problem</th><th style="width:34%">Most likely cause</th><th>Fix</th></tr></thead>
+    <tr><td class="b">flash.sh: "No ESP32 port found"</td><td>Charge-only cable, or a missing USB driver</td><td>Try the other cable or USB port. If it's still missing, tell Claude the chip name (CP2102 or CH340) to install its driver.</td></tr>
+    <tr><td class="b">Upload stuck at "Connecting…"</td><td>Board not in upload mode</td><td>Hold <b>BOOT</b> while it connects. Release once it shows "Writing".</td></tr>
+    <tr><td class="b">check.sh: "no packets yet"</td><td>Firmware not running</td><td>Press <b>EN</b>. Make sure only one program is using the port (close other terminals running check or record).</td></tr>
+    <tr><td class="b">IMU shows MISSING</td><td>SDA/SCL swapped, loose wire, or VCC not on 3V3</td><td>Unplug and re-check against page 3. Then press <b>EN</b>, because IMUs are only detected at startup.</td></tr>
+    <tr><td class="b">IMU 2 MISSING but IMU 1 works</td><td>AD0 of IMU 2 not on 3V3</td><td>Move IMU 2's AD0 wire to the 3V3 rail, then press EN.</td></tr>
+    <tr><td class="b">IMU |a| reads 0 or ≫ 1 g at rest</td><td>Faulty module</td><td>Swap in the spare MPU6050.</td></tr>
+    <tr><td class="b">Piezo always about 4095</td><td>Missing 1 MΩ to GND (the pin is floating)</td><td>Add the 1 MΩ from the D-pin to GND.</td></tr>
+    <tr><td class="b">Piezo never reacts</td><td>Red wire on the wrong pin, or the disc isn't pressed against anything</td><td>Check the pin. Tap the disc directly. On the wrist it must be pressed firmly against the skin.</td></tr>
+    <tr><td class="b">FSR always about 4095</td><td>Missing 10 kΩ to GND</td><td>Add the 10 kΩ from VP/VN to GND.</td></tr>
+    <tr><td class="b">FSR always 0</td><td>Leg not on 3V3, or a loose wire</td><td>FSR legs are thin. Use a female jumper on each leg and wrap it with tape.</td></tr>
+    <tr><td class="b">"drops" keep climbing</td><td>Loose USB connection or a cheap hub</td><td>Plug straight into the Mac. Don't use a hub.</td></tr>
+    <tr><td class="b">Board resets / gets hot</td><td><b>Short circuit:</b> 3V3 touching GND</td><td><b>Unplug immediately.</b> Look for bare wires touching each other.</td></tr>
+    <tr><td class="b">Camera: no hand detected</td><td>Hand out of frame, or poor light</td><td>Move closer, face your palm to the camera, turn on a lamp.</td></tr>
+  </table>
+
+  <h3>Safety rules</h3>
+  <ol class="tight">
+    <li><b>Never connect 5V or VIN</b> to any sensor or to D-pins. Use 3V3 only.</li>
+    <li>Change wiring only with the USB cable <b>unplugged</b>.</li>
+    <li>Don't hit the piezos hard while they're connected: a strong hit can make a voltage spike. The 10 kΩ resistors are there to protect the pins.</li>
+    <li>Keep exposed metal (resistor legs, header pins) off your skin. Insulation tape over the FSR legs is enough.</li>
+  </ol>
+  <div class="note ok"><b>Stuck?</b> Run <code>./check.sh</code>, take a phone photo of the wiring, and send both to Claude.</div>
+  <div class="foot"><span>WristTap build guide · Saikiran Chepuri</span><span>6 / 6</span></div>
+</section>
+
+</body>
+</html>

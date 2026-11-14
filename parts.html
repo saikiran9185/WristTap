@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WristTap Parts</title>
+<style>
+  :root { --ink:#16181d; --ink-2:#3f444e; --ink-3:#5f646e; --rule:#e1e3e7; --tint:#f5f6f8; --red:#c8102e; --red-tint:#fbe9ec; --ok:#1f7a4d; --ok-tint:#e7f4ed; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { background:#d9dbe0; }
+  body { font-family:-apple-system,"SF Pro Text","Helvetica Neue",sans-serif; color:var(--ink); -webkit-font-smoothing:antialiased; }
+  .slide { width:794px; height:1123px; background:#fff; margin:0 auto 20px; padding:46px 48px 56px; position:relative; overflow:hidden; }
+  .foot { position:absolute; left:48px; right:48px; bottom:22px; display:flex; justify-content:space-between; font-size:11px; color:var(--ink-3); }
+  .kicker { font-size:12px; font-weight:700; color:var(--red); margin-bottom:6px; }
+  h1 { font-size:28px; line-height:1.1; letter-spacing:-.02em; font-weight:700; }
+  .lede { font-size:13px; line-height:1.5; color:var(--ink-2); margin-top:8px; max-width:66ch; }
+  .card { display:flex; gap:16px; padding:13px 0; border-bottom:1px solid var(--rule); }
+  .card:first-of-type { border-top:1px solid var(--ink); }
+  .pic { flex:0 0 170px; height:118px; background:var(--tint); border-radius:6px; display:flex; align-items:center; justify-content:center; }
+  .txt { flex:1; }
+  .top { display:flex; align-items:baseline; gap:10px; }
+  .cb { display:inline-block; width:13px; height:13px; border:1.5px solid var(--ink); border-radius:2px; flex:0 0 13px; transform:translateY(1px); }
+  .name { font-size:15px; font-weight:700; }
+  .meta { margin-left:auto; font-size:12px; color:var(--ink-3); white-space:nowrap; }
+  .meta b { color:var(--ink); }
+  .row { font-size:12px; line-height:1.45; color:var(--ink-2); margin-top:4px; }
+  .row b { color:var(--ink); }
+  .imp { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:3px; margin-left:4px; vertical-align:1px; }
+  .imp.crit { background:var(--red-tint); color:#8e0b21; }
+  .imp.need { background:#eef0f3; color:var(--ink-2); }
+  .spot { font-size:12px; line-height:1.45; color:#0f4d2f; background:var(--ok-tint); padding:7px 10px; border-radius:4px; margin-top:6px; }
+  .total { margin-top:14px; font-size:15px; font-weight:700; }
+  .note { padding:10px 12px; margin-top:12px; font-size:12.5px; line-height:1.45; border-radius:4px; background:var(--red-tint); color:#6e0a1a; }
+  @media print { html,body{background:#fff} .slide{margin:0} }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<section class="slide">
+  <div class="kicker">WristTap · visual parts list · take this to Lajpat Rai Market</div>
+  <h1>What each part looks like, and why you need it</h1>
+  <p class="lede">Each part has a <span class="imp crit">CRITICAL</span> or <span class="imp need">NEEDED</span> tag. Without a CRITICAL part the band can't work at all. The green box tells you how to recognise the right one in the shop.</p>
+
+  <div style="margin-top:14px"></div>
+
+  <!-- ESP32 -->
+  <div class="card">
+    <div class="pic"><svg viewBox="5 22 160 92" width="170" height="118">
+      <rect x="20" y="30" width="130" height="58" rx="3" fill="#1d2a3a"/>
+      <g fill="#c9a227">
+        <!-- 15 pins each side -->
+        <g id="pinrow"><rect x="27" y="31" width="4" height="4"/><rect x="35" y="31" width="4" height="4"/><rect x="43" y="31" width="4" height="4"/><rect x="51" y="31" width="4" height="4"/><rect x="59" y="31" width="4" height="4"/><rect x="67" y="31" width="4" height="4"/><rect x="75" y="31" width="4" height="4"/><rect x="83" y="31" width="4" height="4"/><rect x="91" y="31" width="4" height="4"/><rect x="99" y="31" width="4" height="4"/><rect x="107" y="31" width="4" height="4"/><rect x="115" y="31" width="4" height="4"/><rect x="123" y="31" width="4" height="4"/><rect x="131" y="31" width="4" height="4"/><rect x="139" y="31" width="4" height="4"/></g>
+        <use href="#pinrow" y="52"/>
+      </g>
+      <rect x="92" y="40" width="52" height="38" rx="2" fill="#b9bdc4"/>
+      <text x="118" y="62" font-size="7" fill="#3f444e" text-anchor="middle" font-family="Helvetica">ESP32-WROOM</text>
+      <path d="M144 42 h4 v34 h-4" fill="none" stroke="#c9a227" stroke-width="1.2"/>
+      <rect x="10" y="50" width="14" height="18" rx="2" fill="#9aa0a8"/>
+      <rect x="40" y="52" width="14" height="14" fill="#2b2b2b"/>
+      <text x="47" y="62" font-size="4.5" fill="#d7dade" text-anchor="middle" font-family="Helvetica">CP2102</text>
+      <rect x="28" y="40" width="9" height="7" fill="#e6e6e6"/><rect x="28" y="71" width="9" height="7" fill="#e6e6e6"/>
+      
+      <text x="85" y="104" font-size="7.5" fill="#3f444e" text-anchor="middle" font-family="Helvetica">USB (left) · 2 buttons · metal module (right)</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">ESP32 DevKit V1 (WROOM-32, 30-pin)</span><span class="imp crit">CRITICAL</span><span class="meta"><b>×2</b> · ₹350–450 each</span></div>
+      <div class="row"><b>What it does:</b> the brain. It reads every sensor 500 times a second and sends the data to your Mac over USB.</div>
+      <div class="row"><b>Why ×2:</b> if one is faulty or gets damaged by a wiring mistake, the spare saves the day.</div>
+      <div class="spot">Silver metal box on one end, micro-USB port on the other, 2 small buttons (EN, BOOT), 15 pins per side. Ask for the <b>CP2102</b> chip version.</div>
+    </div>
+  </div>
+
+  <!-- MPU6050 -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118">
+      <rect x="45" y="18" width="80" height="62" rx="3" fill="#1f5fb0"/>
+      <circle cx="53" cy="26" r="3.5" fill="#d9dbe0"/><circle cx="117" cy="26" r="3.5" fill="#d9dbe0"/>
+      <rect x="72" y="34" width="26" height="26" fill="#222"/>
+      <circle cx="76" cy="38" r="1.3" fill="#888"/>
+      <text x="85" y="68" font-size="6" fill="#d7e3f5" text-anchor="middle" font-family="Helvetica">GY-521</text>
+      <g fill="#c9a227"><rect x="50" y="74" width="5" height="10"/><rect x="59" y="74" width="5" height="10"/><rect x="68" y="74" width="5" height="10"/><rect x="77" y="74" width="5" height="10"/><rect x="86" y="74" width="5" height="10"/><rect x="95" y="74" width="5" height="10"/><rect x="104" y="74" width="5" height="10"/><rect x="113" y="74" width="5" height="10"/></g>
+      <text x="85" y="96" font-size="6.2" fill="#3f444e" text-anchor="middle" font-family="Helvetica">VCC GND SCL SDA XDA XCL AD0 INT</text>
+      <text x="85" y="110" font-size="8" fill="#5f646e" text-anchor="middle" font-family="Helvetica">blue, about 2 × 1.6 cm, 8 pins</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">MPU6050 module (GY-521)</span><span class="imp crit">CRITICAL</span><span class="meta"><b>×3</b> · ₹120–150 each</span></div>
+      <div class="row"><b>What it does:</b> an IMU, which measures movement and rotation. One on the wrist, one on the back of the hand. A pinch makes a tiny jolt they can feel.</div>
+      <div class="row"><b>Why it matters:</b> this is the "IMU" in KAIST's Project #1 setup. ×3 = 2 used + 1 spare.</div>
+      <div class="spot">Small blue board, black square chip in the middle, 8 pins labelled VCC GND SCL SDA XDA XCL AD0 INT.</div>
+    </div>
+  </div>
+
+  <!-- Piezo -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118">
+      <circle cx="70" cy="56" r="36" fill="#c8a24a"/>
+      <circle cx="70" cy="56" r="25" fill="#e8e3d6"/>
+      <circle cx="70" cy="56" r="20" fill="#d2ccbd"/>
+      <path d="M78 50 Q110 40 150 30" stroke="#c8102e" stroke-width="2.5" fill="none"/>
+      <path d="M100 62 Q125 64 150 70" stroke="#16181d" stroke-width="2.5" fill="none"/>
+      <rect x="148" y="27" width="8" height="6" fill="#c9a227"/><rect x="148" y="67" width="8" height="6" fill="#c9a227"/>
+      <circle cx="78" cy="50" r="2.5" fill="#999"/><circle cx="100" cy="62" r="2.5" fill="#999"/>
+      <text x="85" y="108" font-size="8" fill="#5f646e" text-anchor="middle" font-family="Helvetica">brass disc, 27 mm · red + black wire</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">Piezo disc 27 mm, wires attached</span><span class="imp crit">CRITICAL</span><span class="meta"><b>×5</b> · ₹10–20 each</span></div>
+      <div class="row"><b>What it does:</b> a vibration sensor. Pressed against your skin, it picks up the tiny "click" that travels up the wrist when your thumb meets a fingertip.</div>
+      <div class="row"><b>Why it matters:</b> the cheapest and probably the most useful sensor for detecting <i>when</i> a tap happens. ×5 = 4 used + 1 spare.</div>
+      <div class="spot">Gold/brass disc with a white or grey centre. Get ones with wires <b>already soldered</b>. Ask the shop to add a pin on each wire end.</div>
+    </div>
+  </div>
+
+  <!-- FSR -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118">
+      <circle cx="58" cy="54" r="22" fill="#2a2a2a"/>
+      <circle cx="58" cy="54" r="15" fill="none" stroke="#5a5a5a" stroke-width="1"/>
+      <circle cx="58" cy="54" r="9" fill="none" stroke="#5a5a5a" stroke-width="1"/>
+      <rect x="78" y="48" width="56" height="12" fill="#c49a3a"/>
+      <rect x="134" y="46" width="14" height="4" fill="#c9a227"/><rect x="134" y="58" width="14" height="4" fill="#c9a227"/>
+      <text x="85" y="100" font-size="8" fill="#5f646e" text-anchor="middle" font-family="Helvetica">round pad about 18 mm + flat tail + 2 legs</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">FSR 402 (force sensing resistor)</span><span class="imp crit">CRITICAL</span><span class="meta"><b>×2</b> · ₹250–400 each</span></div>
+      <div class="row"><b>What it does:</b> measures pressure. Inside the band it feels your wrist tendons bulge when a finger moves, a method called force myography.</div>
+      <div class="row"><b>Why it matters:</b> this is the "FSR" in KAIST's setup, and it helps tell <i>which</i> finger pinched.</div>
+      <div class="spot">Thin flexible round pad on a flat tail with 2 metal legs. Not the square one, not the long strip.</div>
+    </div>
+  </div>
+
+  <div class="foot"><span>WristTap visual parts list · Saikiran Chepuri</span><span>1 / 3</span></div>
+</section>
+
+<!-- PAGE 2 -->
+<section class="slide">
+  <div class="kicker">Connecting parts</div>
+  <div style="margin-top:8px"></div>
+
+  <!-- Resistors -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118" font-family="Helvetica">
+      <line x1="12" y1="36" x2="158" y2="36" stroke="#9aa0a8" stroke-width="2"/>
+      <rect x="55" y="27" width="60" height="18" rx="8" fill="#e9d7b0"/>
+      <rect x="64" y="27" width="5" height="18" fill="#7a4a1e"/><rect x="74" y="27" width="5" height="18" fill="#111"/><rect x="84" y="27" width="5" height="18" fill="#1f8a3a"/><rect x="102" y="27" width="5" height="18" fill="#c9a227"/>
+      <text x="85" y="60" font-size="9" fill="#16181d" text-anchor="middle" font-weight="700">1 MΩ = brown · black · GREEN · gold</text>
+      <line x1="12" y1="80" x2="158" y2="80" stroke="#9aa0a8" stroke-width="2"/>
+      <rect x="55" y="71" width="60" height="18" rx="8" fill="#e9d7b0"/>
+      <rect x="64" y="71" width="5" height="18" fill="#7a4a1e"/><rect x="74" y="71" width="5" height="18" fill="#111"/><rect x="84" y="71" width="5" height="18" fill="#e07b16"/><rect x="102" y="71" width="5" height="18" fill="#c9a227"/>
+      <text x="85" y="104" font-size="9" fill="#16181d" text-anchor="middle" font-weight="700">10 kΩ = brown · black · ORANGE · gold</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">Resistors: 1 MΩ and 10 kΩ</span><span class="imp crit">CRITICAL</span><span class="meta"><b>×10 each</b> · ~₹1 each</span></div>
+      <div class="row"><b>1 MΩ:</b> drains the piezo so its reading settles back to zero after each tap. Without it the reading sticks at maximum.</div>
+      <div class="row"><b>10 kΩ:</b> (a) protects the ESP32 pins from piezo voltage spikes, (b) turns the FSR's pressure into a voltage the ESP32 can read.</div>
+      <div class="spot">The only difference is the <b>3rd colour band</b>: GREEN = 1 MΩ, ORANGE = 10 kΩ. Keep them in two labelled bags so they don't get mixed up.</div>
+    </div>
+  </div>
+
+  <!-- Jumpers -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118" font-family="Helvetica">
+      <g>
+        <rect x="14" y="16" width="12" height="18" fill="#222"/><path d="M26 25 H144" stroke="#e05a2a" stroke-width="3"/><rect x="144" y="16" width="12" height="18" fill="#222"/>
+        <text x="85" y="44" font-size="8" fill="#3f444e" text-anchor="middle">female – female (holes both ends)</text>
+      </g>
+      <g>
+        <rect x="14" y="52" width="12" height="18" fill="#222"/><path d="M26 61 H144" stroke="#2a7ae0" stroke-width="3"/><rect x="144" y="56" width="8" height="10" fill="#222"/><rect x="152" y="59" width="8" height="4" fill="#c9a227"/>
+        <text x="85" y="80" font-size="8" fill="#3f444e" text-anchor="middle">male – female (pin one end)</text>
+      </g>
+      <g>
+        <rect x="10" y="91" width="8" height="4" fill="#c9a227"/><rect x="18" y="88" width="8" height="10" fill="#222"/><path d="M26 93 H144" stroke="#2aa05a" stroke-width="3"/><rect x="144" y="88" width="8" height="10" fill="#222"/><rect x="152" y="91" width="8" height="4" fill="#c9a227"/>
+        <text x="85" y="112" font-size="8" fill="#3f444e" text-anchor="middle">male – male (pins both ends)</text>
+      </g>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">Jumper wires (3 kinds)</span><span class="imp crit">CRITICAL</span><span class="meta"><b>F–F ×40, M–F ×40, M–M ×20</b> · ~₹160</span></div>
+      <div class="row"><b>What they do:</b> connect everything without soldering.</div>
+      <div class="row"><b>Female–male</b> (20 cm) goes from the ESP32 and sensor pins to the breadboard. You'll use these the most. <b>Female–female</b> joins pin to pin. <b>Male–male</b> (10 cm) is for short links on the breadboard.</div>
+      <div class="spot">Usually sold as a joined ribbon of 40 that you peel apart. Check both ends of each kind before paying.</div>
+    </div>
+  </div>
+
+  <!-- Breadboard -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118" font-family="Helvetica">
+      <rect x="14" y="14" width="142" height="86" rx="3" fill="#f2f2ef" stroke="#cfcfca"/>
+      <line x1="20" y1="22" x2="150" y2="22" stroke="#c8102e" stroke-width="1.2"/><line x1="20" y1="30" x2="150" y2="30" stroke="#2a5ab0" stroke-width="1.2"/>
+      <line x1="20" y1="84" x2="150" y2="84" stroke="#c8102e" stroke-width="1.2"/><line x1="20" y1="92" x2="150" y2="92" stroke="#2a5ab0" stroke-width="1.2"/>
+      <rect x="14" y="55" width="142" height="5" fill="#e3e3de"/>
+      <g fill="#9a9a94">
+        <g id="holes"><circle cx="24" cy="38" r="1.3"/><circle cx="32" cy="38" r="1.3"/><circle cx="40" cy="38" r="1.3"/><circle cx="48" cy="38" r="1.3"/><circle cx="56" cy="38" r="1.3"/><circle cx="64" cy="38" r="1.3"/><circle cx="72" cy="38" r="1.3"/><circle cx="80" cy="38" r="1.3"/><circle cx="88" cy="38" r="1.3"/><circle cx="96" cy="38" r="1.3"/><circle cx="104" cy="38" r="1.3"/><circle cx="112" cy="38" r="1.3"/><circle cx="120" cy="38" r="1.3"/><circle cx="128" cy="38" r="1.3"/><circle cx="136" cy="38" r="1.3"/><circle cx="144" cy="38" r="1.3"/></g>
+        <use href="#holes" y="8"/><use href="#holes" y="26"/><use href="#holes" y="34"/>
+      </g>
+      <text x="85" y="112" font-size="8" fill="#5f646e" text-anchor="middle">red line = +3V3 rail · blue line = GND rail</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">Breadboard, 400 point (half size)</span><span class="imp crit">CRITICAL</span><span class="meta"><b>×1</b> · ~₹80</span></div>
+      <div class="row"><b>What it does:</b> a board full of connected holes. The long red and blue rails share power (3V3) and ground with every sensor, and the resistors plug in here.</div>
+      <div class="row"><b>Remember:</b> the ESP32 does <b>not</b> go into it, because it's too wide. It stays loose and connects with jumpers.</div>
+      <div class="spot">White plastic, red and blue lines along both long edges, a groove down the middle.</div>
+    </div>
+  </div>
+
+  <!-- USB cable -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118" font-family="Helvetica">
+      <rect x="14" y="44" width="30" height="18" rx="2" fill="#9aa0a8"/><rect x="18" y="48" width="22" height="10" fill="#e6e6e6"/>
+      <text x="29" y="74" font-size="8" fill="#3f444e" text-anchor="middle">USB-A</text>
+      <path d="M44 53 Q85 20 126 53" stroke="#222" stroke-width="4" fill="none"/>
+      <rect x="126" y="47" width="14" height="12" rx="2" fill="#222"/><rect x="140" y="49" width="12" height="8" rx="2" fill="#9aa0a8"/>
+      <text x="146" y="74" font-size="8" fill="#3f444e" text-anchor="middle">micro-USB</text>
+      <text x="85" y="100" font-size="8.5" fill="#c8102e" text-anchor="middle" font-weight="700">must be a DATA cable</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">USB data cable (micro-USB, 1 m)</span><span class="imp crit">CRITICAL</span><span class="meta"><b>×1</b> · ~₹100</span></div>
+      <div class="row"><b>What it does:</b> powers the ESP32, uploads the code and carries all the sensor data to the Mac.</div>
+      <div class="row"><b>The #1 beginner mistake:</b> many cheap cables only charge and carry no data. The Mac then never sees the board.</div>
+      <div class="spot">Test it in the shop: plug it into your phone. If the phone asks "File transfer / USB options", it's a data cable. Check the ESP32's port too: micro-USB (most) or USB-C.</div>
+    </div>
+  </div>
+
+  <!-- Adapter -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118" font-family="Helvetica">
+      <rect x="40" y="44" width="56" height="26" rx="4" fill="#cfd2d7"/><rect x="48" y="51" width="34" height="12" fill="#2b2b2b"/><rect x="52" y="54" width="26" height="6" fill="#e6e6e6"/>
+      <rect x="96" y="50" width="22" height="14" rx="5" fill="#9aa0a8"/>
+      <text x="85" y="90" font-size="8" fill="#5f646e" text-anchor="middle">USB-A socket → USB-C plug</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">USB-C to USB-A adapter</span><span class="imp need">ONLY IF NEEDED</span><span class="meta"><b>×1</b> · ~₹100</span></div>
+      <div class="row"><b>What it does:</b> newer Macs only have USB-C ports, and the ESP32 cable has the big USB-A end.</div>
+      <div class="row"><b>Skip it if</b> your Mac has a rectangular USB-A port, or you buy a USB-C to micro-USB cable instead.</div>
+      <div class="spot">Plug straight into the Mac, not through a hub: hubs cause data dropouts.</div>
+    </div>
+  </div>
+
+  <div class="foot"><span>WristTap visual parts list · Saikiran Chepuri</span><span>2 / 3</span></div>
+</section>
+
+<!-- PAGE 3 -->
+<section class="slide">
+  <div class="kicker">Wearing it + optional extras</div>
+  <div style="margin-top:8px"></div>
+
+  <!-- Straps -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118" font-family="Helvetica">
+      <rect x="14" y="44" width="142" height="22" rx="3" fill="#2b2f36"/>
+      <rect x="110" y="44" width="46" height="22" fill="#4a505a"/>
+      <g stroke="#5f656f" stroke-width="1"><line x1="114" y1="47" x2="114" y2="63"/><line x1="120" y1="47" x2="120" y2="63"/><line x1="126" y1="47" x2="126" y2="63"/><line x1="132" y1="47" x2="132" y2="63"/><line x1="138" y1="47" x2="138" y2="63"/><line x1="144" y1="47" x2="144" y2="63"/><line x1="150" y1="47" x2="150" y2="63"/></g>
+      <text x="85" y="88" font-size="8" fill="#5f646e" text-anchor="middle">elastic strap, 2.5 cm wide, velcro end</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">Elastic velcro strap, 2.5 cm wide</span><span class="imp crit">CRITICAL</span><span class="meta"><b>×2</b> · ~₹50 each</span></div>
+      <div class="row"><b>What it does:</b> strap 1 is the wristband and presses the piezos and FSRs against your skin. Strap 2 holds the ESP32 and breadboard on your forearm.</div>
+      <div class="row"><b>Why elastic:</b> the sensors need steady, even pressure on the skin. Too loose and they pick up nothing, too tight and it's uncomfortable.</div>
+      <div class="spot">Stretchy, with velcro, about 2.5 cm wide and at least 25 cm long. Watch-strap or bag shops also have these.</div>
+    </div>
+  </div>
+
+  <!-- Tapes -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118" font-family="Helvetica">
+      <circle cx="44" cy="52" r="24" fill="#f0eee8" stroke="#d6d3ca"/><circle cx="44" cy="52" r="11" fill="#fff" stroke="#d6d3ca"/>
+      <circle cx="96" cy="52" r="22" fill="#1d1d1d"/><circle cx="96" cy="52" r="10" fill="#fff"/>
+      <path d="M128 30 L152 74" stroke="#e6e6e6" stroke-width="5"/><rect x="146" y="70" width="10" height="8" fill="#e6e6e6"/>
+      <text x="44" y="92" font-size="7.5" fill="#5f646e" text-anchor="middle">foam tape</text>
+      <text x="96" y="92" font-size="7.5" fill="#5f646e" text-anchor="middle">insulation</text>
+      <text x="142" y="92" font-size="7.5" fill="#5f646e" text-anchor="middle">zip ties</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">Foam tape, insulation tape, small zip ties</span><span class="imp need">NEEDED</span><span class="meta"><b>1 each</b> · ~₹100 total</span></div>
+      <div class="row"><b>Foam tape (double-sided):</b> sticks the sensors inside the band. The foam also helps press them onto the skin.</div>
+      <div class="row"><b>Insulation tape:</b> holds IMU 2 on the back of your hand and covers bare metal legs. <b>Zip ties:</b> keep wires from pulling on the sensors.</div>
+    </div>
+  </div>
+
+  <div class="kicker" style="margin-top:20px">Optional, only if your budget allows</div>
+
+  <!-- EMG -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118" font-family="Helvetica">
+      <rect x="40" y="30" width="70" height="40" rx="5" fill="#c8102e"/>
+      <circle cx="54" cy="50" r="7" fill="#e6e6e6"/><circle cx="96" cy="50" r="7" fill="#e6e6e6"/>
+      <circle cx="132" cy="40" r="11" fill="#f5f5f5" stroke="#cfcfca"/><circle cx="132" cy="40" r="4" fill="#bdbdbd"/>
+      <circle cx="132" cy="70" r="11" fill="#f5f5f5" stroke="#cfcfca"/><circle cx="132" cy="70" r="4" fill="#bdbdbd"/>
+      <text x="75" y="92" font-size="8" fill="#5f646e" text-anchor="middle">EMG board + sticky gel pads</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">EMG muscle sensor + gel electrodes</span><span class="imp need">OPTIONAL</span><span class="meta">₹1,500–2,500</span></div>
+      <div class="row"><b>What it does:</b> reads the electrical signal of your forearm muscles. It's the "EMG" in KAIST's Project #1, so it's the closest match to their setup.</div>
+      <div class="row"><b>Why optional:</b> costly, needs fresh sticky pads every session, and the code needs a small update first. Build the main band first.</div>
+    </div>
+  </div>
+
+  <!-- Tools -->
+  <div class="card">
+    <div class="pic"><svg viewBox="0 0 170 118" width="170" height="118" font-family="Helvetica">
+      <rect x="20" y="50" width="60" height="10" rx="5" fill="#2a5ab0"/><path d="M80 55 L104 55" stroke="#9aa0a8" stroke-width="4"/><path d="M104 55 L114 55" stroke="#9aa0a8" stroke-width="1.6"/>
+      <rect x="122" y="24" width="34" height="56" rx="4" fill="#e0b024"/><rect x="127" y="30" width="24" height="12" fill="#cfe0c8"/><circle cx="139" cy="60" r="8" fill="#222"/>
+      <text x="66" y="84" font-size="8" fill="#5f646e" text-anchor="middle">soldering iron</text>
+      <text x="139" y="96" font-size="8" fill="#5f646e" text-anchor="middle">multimeter</text>
+    </svg></div>
+    <div class="txt">
+      <div class="top"><span class="cb"></span><span class="name">Soldering iron kit · multimeter</span><span class="imp need">OPTIONAL</span><span class="meta">₹300–500 · ₹250–400</span></div>
+      <div class="row"><b>Soldering iron (25 W + solder + stand):</b> not needed today if the shop solders the pins for you, but useful for every future hardware project.</div>
+      <div class="row"><b>Multimeter:</b> checks whether a wire is actually connected. It makes troubleshooting much faster.</div>
+    </div>
+  </div>
+
+  <p class="total">Total for CRITICAL + NEEDED: about ₹2,000–2,600</p>
+  <div class="note"><b>At the counter, before you pay:</b> (1) "Header pins solder kar do" on both ESP32s and all 3 MPU6050s. (2) Solder a pin onto each piezo wire end. (3) Plug the ESP32 into a charger: the red LED must light. (4) Test the USB cable on your phone for file transfer.</div>
+  <div class="foot"><span>WristTap visual parts list · Saikiran Chepuri</span><span>3 / 3</span></div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WristTap Breadboard Steps</title>
+<style>
+:root{
+  --bg:#f4f2ee; --panel:#ffffff; --ink:#1c1e22; --muted:#5b616b; --line:#dcd8d0; --soft:#f0ede7;
+  --board:#ece8df; --board-edge:#cdc6b6; --hole:#8c8576; --hole-lit:#0f9d58;
+  --chip:#1f232a; --chip-ink:#e9ecf1; --pcb:#1f5fa8; --pcb2:#174a85;
+  --pwr:#d93025; --gnd:#2b2b2b; --sda:#1a73e8; --scl:#e09a00; --sig:#0f9d58; --fsr:#8e44ad; --pz:#c0392b;
+  --accent:#d35400; --ok:#0f7b43; --warn:#b3261e; --warnbg:#fdecea; --okbg:#e6f3eb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14161a; --panel:#1c1f25; --ink:#e8eaee; --muted:#a1a7b2; --line:#333842; --soft:#23272e;
+    --board:#2a2c31; --board-edge:#3e4148; --hole:#70747c; --hole-lit:#3ddc84;
+    --chip:#0d0f12; --gnd:#d4d4d4; --warnbg:#3a1f1d; --okbg:#17301f; --warn:#ff8a80; --ok:#7ee2a8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14161a; --panel:#1c1f25; --ink:#e8eaee; --muted:#a1a7b2; --line:#333842; --soft:#23272e;
+  --board:#2a2c31; --board-edge:#3e4148; --hole:#70747c; --hole-lit:#3ddc84;
+  --chip:#0d0f12; --gnd:#d4d4d4; --warnbg:#3a1f1d; --okbg:#17301f; --warn:#ff8a80; --ok:#7ee2a8;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:14px 20px 10px}
+h1{font-size:18px;margin:0;white-space:nowrap}
+.steps{display:flex;flex-wrap:wrap;gap:6px}
+.steps button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:4px 11px;font:inherit;font-size:13px;cursor:pointer}
+.steps button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.steps button.past{border-color:var(--ok);color:var(--ok)}
+button:focus-visible{outline:3px solid var(--sda);outline-offset:2px}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;padding:0 20px 20px;min-height:0}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;position:relative;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.stage svg{flex:1;width:100%;height:100%;min-height:420px;display:block}
+.tools{position:absolute;top:10px;right:10px;display:flex;gap:6px}
+.tools button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:5px 10px;font:inherit;font-size:13px;cursor:pointer}
+.tools button.on{background:var(--ink);color:var(--panel)}
+.hint{font-size:13px;color:var(--muted);padding:8px 14px;border-top:1px solid var(--line);min-height:38px}
+.foot{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:8px 14px}
+.foot .hint{border:0;padding:0;min-height:0}
+.legend{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;overflow:auto;min-height:0}
+.count{font-size:12px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.panel h2{font-size:19px;line-height:1.25;margin:0}
+.idea{margin:0;background:var(--soft);border-radius:10px;padding:10px 12px}
+.idea b{color:var(--accent)}
+h3{font-size:12px;margin:2px 0 -4px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.wires{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.wires li{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer;border:1px solid transparent}
+.wires li:hover,.wires li.sel{background:var(--soft);border-color:var(--line)}
+.num{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff}
+.wtxt{font-size:14px;line-height:1.3}
+.wtxt small{display:block;color:var(--muted);font-size:12px}
+.tag{font:600 11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--muted);white-space:nowrap}
+.box{border-radius:10px;padding:9px 12px;font-size:14px}
+.box.ok{background:var(--okbg)}
+.box.bad{background:var(--warnbg)}
+.cmd{display:flex;gap:8px;align-items:center;background:var(--chip);color:var(--chip-ink);border-radius:8px;padding:7px 10px;font:12.5px ui-monospace,Menlo,monospace}
+.cmd code{flex:1;overflow-x:auto;white-space:nowrap}
+.cmd button{background:#ffffff22;color:inherit;border:0;border-radius:6px;padding:3px 9px;cursor:pointer;font:inherit}
+details{font-size:14px;color:var(--muted)}
+summary{cursor:pointer;color:var(--ink)}
+.nav{display:flex;gap:8px;margin-top:auto;padding-top:4px}
+.nav button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.nav button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.nav button:disabled{opacity:.4;cursor:default}
+.plain{padding-left:20px;margin:0}
+.plain li{margin:4px 0}
+.types{display:grid;grid-template-columns:1fr;gap:6px}
+.types div{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;font-size:14px}
+
+/* svg */
+.boardrect{fill:var(--board);stroke:var(--board-edge)}
+.hole{fill:var(--hole);cursor:pointer}
+.hole:hover{fill:var(--accent)}
+.hole.lit{fill:var(--hole-lit)}
+.lbl{font:10px ui-monospace,Menlo,monospace;fill:var(--muted)}
+.lbl-ink{font:600 11px -apple-system,sans-serif;fill:var(--ink)}
+.pinlbl{font:9px ui-monospace,Menlo,monospace;fill:#e8eef7}
+.item{transition:opacity .3s}
+.item.hide{opacity:0;pointer-events:none}
+.item.done{opacity:.22}
+.item.done.mpu{opacity:.75}
+.item.dim{opacity:.35}
+.wire{fill:none;stroke-linecap:round;stroke-width:3}
+.item.now .wire{stroke-width:4.2}
+.item.now.draw .wire{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw .8s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.badge{display:none;cursor:pointer}
+.item.now .badge{display:block}
+.badge circle{stroke:var(--panel);stroke-width:2}
+.badge text{font:700 10px -apple-system,sans-serif;fill:#fff}
+.end{fill:none;stroke-width:2.2;opacity:0}
+.item.sel .end{opacity:1}
+.item.sel .wire{stroke-width:6}
+.res-body{stroke:#6d5a3a;stroke-width:.8}
+.leg{stroke:#9aa0a6;stroke-width:1.8}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+  .item.now.draw .wire{stroke-dashoffset:0}
+}
+@media (max-width:980px){
+  main{grid-template-columns:1fr;padding:0 16px 16px}
+  header{padding:12px 16px}
+  .legend{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>WristTap · breadboard build</h1>
+  <nav class="steps" id="steps" aria-label="Steps"></nav>
+</header>
+<main>
+  <section class="stage">
+    <svg id="svg" viewBox="0 0 900 625" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Breadboard wiring diagram"></svg>
+
+    <div class="tools"><button id="zoomBtn" class="on" title="Zoom to this step">Zoom: this step</button></div>
+    <div class="foot"><div class="hint" id="hint"></div>
+<div class="legend">
+      <span><i style="background:var(--pwr)"></i>3V3</span><span><i style="background:var(--gnd)"></i>GND</span>
+      <span><i style="background:var(--sda)"></i>SDA</span><span><i style="background:var(--scl)"></i>SCL</span>
+      <span><i style="background:var(--sig)"></i>piezo</span><span><i style="background:var(--fsr)"></i>FSR</span>
+    </div></div>
+  </section>
+  <section class="panel" aria-live="polite">
+    <div class="count" id="count"></div>
+    <h2 id="title"></h2>
+    <p class="idea" id="idea"></p>
+    <div id="body"></div>
+    <div class="nav"><button id="prev">← Back</button><button id="next" class="primary">Next →</button></div>
+  </section>
+</main>
+
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("svg");
+const el = (tag, attrs = {}, parent = svg) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+
+/* ---------- geometry ---------- */
+const Y = n => 120 + (n - 1) * 18;
+const X = Y;  // legacy alias (number -> position along the board)
+const COLX = {a:450,b:468,c:486,d:504,e:522,f:556,g:574,h:592,i:610,j:628};
+const RAILX = {"T+":400,"T-":418,"B+":660,"B-":678};   // LEFT: + outer, - inner.  RIGHT: + inner, - outer (as on the real board)
+const railHas = n => n % 6 !== 0;
+function hole(h){
+  let m = h.match(/^([TB][+-])(\d+)$/);
+  if (m) return {x:RAILX[m[1]], y:Y(+m[2]), rail:m[1]};
+  m = h.match(/^([a-j])(\d+)$/);
+  return {x:COLX[m[1]], y:Y(+m[2]), row:m[1], col:+m[2]};
+}
+const ESP_L = ["EN","VP 36","VN 39","D34","D35","D32","D33","D25","D26","D27","D14","D12","D13","GND","VIN"];
+const ESP_R = ["D23","D22","TX0","RX0","D21","D19","D18","D5","TX2","RX2","D4","D2","D15","GND","3V3"];
+const IMU_P = ["VCC","GND","SCL","SDA","XDA","XCL","AD0","INT"];
+function pt(spec){
+  if (!spec.includes(":")) { const h = hole(spec); return {x:h.x, y:h.y, dir:null}; }
+  const [dev, pin] = spec.split(":");
+  if (dev === "esp"){
+    if (pin === "GND_L") return {x:58, y:450, dir:[-1,0]};
+    if (pin === "GND_R") return {x:182, y:450, dir:[1,0]};
+    let i = ESP_R.indexOf(pin); if (i >= 0) return {x:182, y:190+i*20, dir:[1,0]};
+    i = ESP_L.findIndex(p => p.split(" ")[0] === pin); return {x:58, y:190+i*20, dir:[-1,0]};
+  }
+  if (dev.startsWith("imu")){ const k = +dev[3]-1, ox = 330+k*150; return {x:ox+16+IMU_P.indexOf(pin)*12, y:128, dir:[0,1]}; }
+  if (dev.startsWith("fsr")){ const k = +dev[3], cy = 560+k*70; return {x:345, y:cy+(pin==="A"?-6:6), dir:[1,0]}; }
+  if (dev.startsWith("pz")){ const k = +dev[2], cy = Y(6+5*k)+20; return {x:762, y:cy+(pin==="red"?-7:7), dir:[-1,0]}; }
+}
+const MPU_AT = [[1,3],[2,14]];   // [mpu number, row of its INT pin (top pin)]; VCC is 7 rows lower; pins sit in column a
+function mpuPinAt(h){
+  if (!h.row || h.row > "e") return null;
+  for (const [n,c0] of MPU_AT) if (h.col>=c0 && h.col<c0+8) return `MPU #${n} ${IMU_P[c0+7-h.col]}`;
+  return null;
+}
+function name(spec){
+  if (!spec.includes(":")) {
+    const h = hole(spec);
+    if (h.rail) return {"T+":"LEFT red + line (3V3)","T-":"LEFT blue − line (GND)","B-":"RIGHT blue − line (GND)","B+":"RIGHT red + line (not used)"}[h.rail];
+    const mp = mpuPinAt(h);
+    return mp ? `hole ${spec} (${mp} row)` : `hole ${spec}`;
+  }
+  const [d,p] = spec.split(":");
+  if (d==="esp") return `ESP32 ${p==="GND_L"?"GND (left side, next to VIN)":p==="GND_R"?"GND (right side, next to 3V3)":"pin "+p}`;
+  if (d.startsWith("imu")) return `MPU #${d[3]} pin ${p}`;
+  if (d.startsWith("fsr")) return `FSR ${d[3]} leg ${p}`;
+  if (d.startsWith("pz")) return `Piezo ${d[2]} ${p} wire`;
+}
+
+/* ---------- the build ---------- */
+const W = (step, from, to, color, type, extra={}) => ({kind:"wire", step, from, to, color, type, ...extra});
+const R = (step, from, to, val) => ({kind:"res", step, from, to, val});
+const ITEMS = [
+  {kind:"mpu", step:1, n:1, c0:3},
+  W(2,"esp:3V3","T+1","--pwr","M–F"),
+  W(2,"esp:GND_R","T-1","--gnd","M–F"),
+  W(2,"esp:GND_L","B-1","--gnd","M–F"),
+ W(3,"esp:D22","c8","--scl","M–F"),
+  W(3,"esp:D21","c7","--sda","M–F"),
+  W(3,"b10","T+11","--pwr","M–M"),
+  W(3,"b9","T-11","--gnd","M–M"),
+  W(3,"b4","T-13","--gnd","M–M",{warn:"AD0 → BLUE line (hole 13: hole 2 is under the MPU, and 12 has no hole)"}),
+  {kind:"mpu", step:4, n:2, c0:14},
+ W(4,"b19","e8","--scl","M–M",{warn:"joins MPU #1's SCL row"}),
+  W(4,"b18","d7","--sda","M–M",{warn:"joins MPU #1's SDA row"}),
+  W(4,"b21","T+22","--pwr","M–M"),
+  W(4,"b20","T-22","--gnd","M–M"),
+  W(4,"b15","T+13","--pwr","M–M",{warn:"AD0 → RED line (not blue!)"}),
+];
+const PZPIN = ["D32","D33","D34","D35"];
+for (let k = 0; k < 4; k++){
+  const r = 6+5*k, s = r+3, st = k === 0 ? 5 : 6, blk = [8,13,17,22][k], gnd = [9,14,19,23][k];
+  ITEMS.push(
+    W(st,`pz${k}:red`,`i${r}`,"--pz","own wire",{grp:k}),
+    W(st,`pz${k}:black`,`B-${blk}`,"--gnd","own wire",{grp:k}),
+    R(st,`h${r}`,`h${s}`,"10k"),
+    R(st,`j${s}`,`B-${gnd}`,"1M"),
+    W(st,`esp:${PZPIN[k]}`,`f${s}`,"--sig","M–F",{grp:k})
+  );
+}
+[[0,25,27,"VP"],[1,28,29,"VN"]].forEach(([k,plus,col,pin]) => ITEMS.push(
+  W(7,`fsr${k}:A`,`T+${plus}`,"--pwr","M–F"),
+  W(7,`fsr${k}:B`,`c${col}`,"--fsr","M–F"),
+  R(7,`a${col}`,`T-${col}`,"10k"),
+  W(7,`esp:${pin}`,`e${col}`,"--fsr","M–F")
+));
+
+/* ---------- step text (short, plain) ---------- */
+const CHECK = "cd ~/Projects/WristTap && ./check.sh";
+const cmd = c => `<div class="cmd"><code>${c}</code><button data-copy>Copy</button></div>`;
+const STEPS = [
+ {chip:"0 Basics", title:"How the breadboard connects things",
+  idea:`Inside the board are hidden metal strips. <b>5 holes side by side (a–e) in one numbered row = 1 strip.</b> Two wires in the same strip are connected, like two plugs in the same extension board. <b>Each long red or blue line = 1 strip</b> from top to bottom.`,
+  body:`<h3>Try it</h3><p style="margin:0">Tap any hole in the picture. The holes that light up are all joined.</p>
+   <h3>Your 3 wire types</h3>
+   <div class="types">
+    <div>${wireIcon("m","f")}<span><b>M–F</b>: pin end goes in a <b>hole</b>, socket end slides onto a <b>sensor or ESP32 pin</b>. You'll use this most.</span></div>
+    <div>${wireIcon("f","f")}<span><b>F–F</b>: sensor pin to ESP32 pin, no board. Not needed now (spare).</span></div>
+    <div>${wireIcon("m","m")}<span><b>M–M</b>: hole to hole. Used to connect the MPU rows to the red/blue lines.</span></div>
+   </div>
+   <div class="box bad"><b>Always unplug USB before moving any wire.</b> Never touch <b>VIN</b> (it's 5 V and will damage the sensors).</div>`,
+  check:null},
+ {chip:"1 Mount MPU", title:"Put MPU #1 on the board (no solder)", scene:true,
+  idea:`No soldering. The pins just <b>press against</b> the MPU's metal rings. Pushing the MPU <b>a little sideways</b> and taping it makes every pin touch its ring.`,
+  body:`<h3>Do this</h3><ol class="plain">
+   <li>Take the <b>straight</b> pin strip (the bent one is a spare).</li>
+   <li>Push its <b>long pins</b> into holes <b>a3, a4, a5 … a10</b>: letter <b>a</b>, numbers <b>3 to 10</b>.</li>
+   <li>Drop MPU #1 onto the short pins, <b>chip side up</b>, with the body pointing <b>LEFT</b> over the + and − lines (off the edge). Then <b>INT is on a3 (top)</b> and <b>VCC on a10 (bottom)</b>.</li>
+   <li>Push the MPU gently <b>down, toward row 10</b>. Keep pushing and tape it down: one strip of insulation tape over the MPU, stuck to the board on both sides.</li></ol>
+   <div class="box ok">Now rows 3–10 each carry one MPU pin, and holes b–e in those rows are free for wires. Row 10 = VCC, 9 = GND, 8 = SCL, 7 = SDA, 4 = AD0.</div>
+   <div class="box bad">Without solder the contact can be loose. If the sensor flickers in step 3, press it again and use tighter tape.</div>`,
+  check:null},
+ {chip:"2 Power lines", title:"Give the board power",
+  idea:`Now the ESP32 fills the <b>red line with 3V3</b> and <b>both blue lines with GND</b>. Every sensor will plug its power into these lines.`,
+  check:{expect:"The red LED stays on. check.sh still shows about <b>500 pkt/s</b>.",
+   fix:"LED went off or the Mac lost the port? 3V3 is touching GND (a <b>short</b>). Unplug at once and check wire 1 is on the RED line."}},
+ {chip:"3 Sensor 1", title:"Wire MPU #1",
+  idea:`The MPU is already in rows 3–10. Now <b>connect those rows</b>: power from the red/blue lines, and the two "talking" wires (<b>SCL, SDA</b>) to the ESP32. AD0 → blue gives it the name 0x68.`,
+  check:{expect:"IMU1 shows <b>|a| ≈ 1.00 g</b> when still (that's gravity!) and jumps when you shake it.",
+   fix:"MISSING? <b>Unplug USB</b>, then check in this order:<ol class=\"plain\"><li>Yellow on <b>D22</b> (2nd pin from the top), blue on <b>D21</b> (5th pin). They are <b>3 pins apart</b>. Read the printed labels.</li><li>Both wires in column <b>c</b> (c8 and c7), on the <b>left</b> of the gap, not f–j.</li><li>Press the MPU sideways and re-tape it (the firmware retries every 0.5 s by itself).</li><li>Still nothing: swap yellow and blue (SCL/SDA).</li></ol>If IMU1 <b>and</b> IMU2 both say MISSING, AD0 is not the problem."}},
+ {chip:"4 Sensor 2", title:"MPU #2 (optional for now)",
+  idea:`Mount MPU #2 the same way in <b>a14 → a21</b> (VCC at a21, body pointing left). It shares the <b>same SCL and SDA</b> as MPU #1. Its <b>AD0 goes to RED</b>, so it gets a different name (0x69). <b>Skip this step if MPU #1 is enough for today.</b>`,
+  check:{expect:"IMU1 <b>and</b> IMU2 both ≈ 1.00 g.", fix:"One vanished? Both AD0 wires are on the same colour line. MPU #1 AD0 → blue, MPU #2 AD0 → red."}},
+ {chip:"5 Piezo 0", title:"First piezo (tap sensor)",
+  idea:`A tap squeezes the piezo disc and it makes a tiny <b>voltage spike</b>. The <b>10 kΩ</b> resistor is a speed bump that protects the pin. The <b>1 MΩ</b> resistor is a drain that pulls it back to 0 after the tap.`,
+  check:{expect:"First piezo number ≈ <b>0</b> at rest. <b>Tap the disc → it jumps to hundreds.</b>",
+   fix:"Always high? The 1 MΩ isn't touching the blue line. Never moves? The 10 kΩ isn't bridging rows 6 and 9."}},
+ {chip:"6 Piezos 1–3", title:"Three more piezos, same pattern",
+  idea:`Copy step 5, moved <b>5 rows down</b> each time. Do <b>one piezo, test, then the next</b>. If something breaks, you know which one.`,
+  check:{expect:"Tapping disc N moves <b>only</b> number N.", fix:"Two numbers move together? Their wires share a row. Check the row numbers."}},
+ {chip:"7 Force sensors", title:"Two force sensors (FSRs)",
+  idea:`An FSR is a <b>pressure-controlled tap</b>: press harder → more electricity flows. The 10 kΩ resistor turns that flow into a voltage the ESP32 can read.`,
+  check:{expect:"FSR ≈ <b>0</b> at rest. Press with a finger → <b>1000–4000</b>.", fix:"Always 0? Leg A must reach the RED line. The FSR legs are fragile: don't bend them at the root."}},
+ {chip:"8 Record", title:"All 8 sensors work. Record a test.",
+  idea:`The MPUs live on the breadboard, so <b>tape or strap the whole breadboard to your forearm</b>, near the wrist. Tape the piezos on the wrist skin, FSRs under the strap. The Mac camera watches your fingers and labels each pinch automatically.`,
+  body:`${cmd('cd ~/Projects/WristTap && ./record.sh --reps 3 --note "first test"')}
+   <div class="box ok">It ends with <b>"Saved … band packets, … camera frames, 15 cues"</b>. Send me that line.</div><p style="margin:0;font-size:13px;color:var(--muted)">Honest limit: without solder, both MPUs measure the wrist. A sensor on the back of the hand needs a soldered MPU on wires (a shop can do that later).</p>`, check:null},
+];
+function wireIcon(a,b){
+  const end = (x,t,flip) => {
+    const hx = flip ? x-22 : x;
+    if (t==="m") return `<rect x="${hx}" y="7" width="16" height="14" rx="2" fill="#3a3d44" stroke="#9aa0a6"/><rect x="${flip?hx-9:hx+16}" y="12.5" width="9" height="3" fill="#e0b84a"/><text x="${hx+8}" y="34" text-anchor="middle" font-size="9" fill="currentColor">pin</text>`;
+    return `<rect x="${hx}" y="6" width="20" height="16" rx="2" fill="#3a3d44" stroke="#9aa0a6"/><rect x="${hx+7}" y="11.5" width="6" height="5" fill="#111"/><text x="${hx+10}" y="34" text-anchor="middle" font-size="9" fill="currentColor">socket</text>`;
+  };
+  return `<svg width="120" height="38" viewBox="-8 0 128 38" aria-hidden="true" style="color:var(--muted)"><path d="M26 14 C50 2 70 26 94 14" stroke="#e67e22" stroke-width="3.5" fill="none"/>${end(2,a,false)}${end(118,b,true)}</svg>`;
+}
+/* ---------- static drawing ---------- */
+el("rect",{x:30,y:160,width:180,height:345,rx:8,fill:"var(--pcb)"});
+el("rect",{x:104,y:165,width:32,height:60,rx:3,fill:"#c9ced6"});
+el("rect",{x:105,y:492,width:30,height:16,rx:3,fill:"#bfc4cc"});
+el("text",{x:120,y:525,"text-anchor":"middle",class:"lbl"}).textContent = "USB → Mac";
+el("text",{x:120,y:150,"text-anchor":"middle",class:"lbl-ink"}).textContent = "ESP32 (beside the board)";
+const pinDots = {};
+ESP_L.forEach((p,i)=>{ const y=190+i*20;
+  pinDots["L"+i] = el("circle",{cx:58,cy:y,r:4.5,fill:"#d4af37"});
+  el("text",{x:68,y:y+3,class:"pinlbl"}).textContent = p;
+  if (p==="VIN") el("text",{x:92,y:y+3,class:"pinlbl",style:"fill:#ffb4ab;font-weight:700"}).textContent = "5V never";
+});
+ESP_R.forEach((p,i)=>{ const y=190+i*20;
+  el("circle",{cx:182,cy:y,r:4.5,fill:"#d4af37"});
+  el("text",{x:172,y:y+3,"text-anchor":"end",class:"pinlbl"}).textContent = p;
+});
+[0,1].forEach(k=>{ const cy=560+k*70;
+  el("circle",{cx:262,cy,r:22,fill:"#2a2a2a"});
+  el("circle",{cx:262,cy,r:15,fill:"none",stroke:"#555"});
+  el("rect",{x:284,y:cy-8,width:46,height:16,fill:"#a8a29a"});
+  el("line",{x1:330,y1:cy-6,x2:345,y2:cy-6,class:"leg"});
+  el("line",{x1:330,y1:cy+6,x2:345,y2:cy+6,class:"leg"});
+  el("text",{x:262,y:cy-28,"text-anchor":"middle",class:"lbl-ink"}).textContent = `FSR ${k}`;
+  el("text",{x:338,y:cy-11,"text-anchor":"middle",class:"lbl"}).textContent = "A";
+  el("text",{x:338,y:cy+21,"text-anchor":"middle",class:"lbl"}).textContent = "B";
+});
+for (let k=0;k<4;k++){ const cy=Y(6+5*k)+20;
+  el("circle",{cx:792,cy,r:22,fill:"#c8a464"});
+  el("circle",{cx:792,cy,r:13,fill:"#e8e6e1"});
+  el("text",{x:822,y:cy+4,class:"lbl-ink"}).textContent = `Piezo ${k}`;
+}
+el("rect",{x:384,y:92,width:310,height:574,rx:8,class:"boardrect"});
+el("rect",{x:533,y:92,width:12,height:574,fill:"var(--board-edge)",opacity:.6});
+const railCol = {"T+":"var(--pwr)","T-":"var(--sda)","B-":"var(--sda)","B+":"var(--pwr)"};
+for (const r in RAILX){
+  const x = RAILX[r] + (r==="T+"?-8:r==="T-"?8:r==="B+"?-8:8);
+  el("line",{x1:x,y1:104,x2:x,y2:654,stroke:railCol[r],"stroke-width":2,opacity:.7});
+}
+[["+",392,"var(--pwr)"],["−",426,"var(--sda)"],["+",652,"var(--pwr)"],["−",686,"var(--sda)"]].forEach(([t,x,c])=>{
+  el("text",{x,y:104,"text-anchor":"middle",style:`font:700 13px -apple-system,sans-serif;fill:${c}`}).textContent = t;
+  el("text",{x,y:664,"text-anchor":"middle",style:`font:700 13px -apple-system,sans-serif;fill:${c}`}).textContent = t;
+});
+"abcdefghij".split("").forEach(r=>{ el("text",{x:COLX[r],y:106,"text-anchor":"middle",class:"lbl"}).textContent = r;
+                                   el("text",{x:COLX[r],y:660,"text-anchor":"middle",class:"lbl"}).textContent = r; });
+for (let n=1;n<=30;n++){
+  el("text",{x:435,y:Y(n)+3,"text-anchor":"middle",class:"lbl",style:"font-size:8px"}).textContent = n;
+  el("text",{x:643,y:Y(n)+3,"text-anchor":"middle",class:"lbl",style:"font-size:8px"}).textContent = n;
+}
+const holes = [];
+for (let n=1;n<=30;n++){
+  for (const r in COLX) holes.push(el("circle",{cx:COLX[r],cy:Y(n),r:3.2,class:"hole","data-h":r+n}));
+  for (const r in RAILX) if (railHas(n)) holes.push(el("circle",{cx:RAILX[r],cy:Y(n),r:3.2,class:"hole","data-h":r+n}));
+}
+el("text",{x:539,y:84,"text-anchor":"middle",class:"lbl-ink"}).textContent = "Breadboard (turned like yours: number 1 at the top)";
+
+/* ---------- solder scene (x >= 1000, shown in the "Solder pins" step) ---------- */
+(function(){
+  const g = el("g");
+  const pins = (ox, yTop, yBot) => Array.from({length:8},(_,i)=>`<rect x="${ox+i*24-2}" y="${yTop}" width="4" height="${yBot-yTop}" fill="#d4af37"/>`).join("");
+  const bb = ox => `<rect x="${ox}" y="410" width="250" height="64" rx="5" fill="var(--board)" stroke="var(--board-edge)"/>
+     ${Array.from({length:8},(_,i)=>`<rect x="${ox+37+i*24}" y="407" width="8" height="5" fill="var(--hole)"/>`).join("")}
+     <text x="${ox+125}" y="452" text-anchor="middle" class="lbl">breadboard</text>`;
+  const strip = ox => `${pins(ox+41,340,436)}<rect x="${ox+28}" y="380" width="194" height="14" rx="2" fill="#2a2a2a" stroke="#777"/>`;
+  const head = (x,y,n,t) => `<circle cx="${x}" cy="${y}" r="13" fill="var(--accent)"/><text x="${x}" y="${y+5}" text-anchor="middle" style="font:700 14px -apple-system,sans-serif;fill:#fff">${n}</text>
+     <text x="${x+22}" y="${y+5}" style="font:600 15px -apple-system,sans-serif;fill:var(--ink)">${t}</text>`;
+  g.innerHTML = `
+   <!-- TOP VIEW: wrong (like the photo) vs right -->
+   ${(function(){
+     const mini = (x0, good) => {
+       const RY = n => 92 + (n-1)*17, cx = {Lp:x0+14, Lm:x0+30, a:x0+54, b:x0+70, c:x0+86, d:x0+102, e:x0+118, f:x0+146, g:x0+162, h:x0+178};
+       let o = `<rect x="${x0}" y="72" width="196" height="230" rx="6" fill="var(--board)" stroke="var(--board-edge)"/>
+         <line x1="${x0+6}" y1="80" x2="${x0+6}" y2="296" stroke="var(--pwr)" stroke-width="2" opacity=".7"/>
+         <line x1="${x0+38}" y1="80" x2="${x0+38}" y2="296" stroke="var(--sda)" stroke-width="2" opacity=".7"/>
+         <rect x="${x0+128}" y="72" width="8" height="230" fill="var(--board-edge)" opacity=".6"/>
+         <text x="${x0+14}" y="68" text-anchor="middle" style="font:700 12px -apple-system,sans-serif;fill:var(--pwr)">+</text>
+         <text x="${x0+30}" y="68" text-anchor="middle" style="font:700 12px -apple-system,sans-serif;fill:var(--sda)">−</text>`;
+       "abcdefgh".split("").forEach(r=>{ o += `<text x="${cx[r]}" y="68" text-anchor="middle" class="lbl">${r}</text>`; });
+       for (let n=1;n<=12;n++){
+         o += `<text x="${x0+42}" y="${RY(n)+3}" text-anchor="middle" style="font:8px ui-monospace,Menlo,monospace;fill:var(--muted)">${n}</text>`;
+         ["Lp","Lm","a","b","c","d","e","f","g","h"].forEach(k=>{ if ((k==="Lp"||k==="Lm") && n%6===0) return; o += `<rect x="${cx[k]-2}" y="${RY(n)-2}" width="4" height="4" fill="var(--hole)"/>`; });
+       }
+       const names = ["VCC","GND","SCL","SDA","XDA","XCL","AD0","INT"];
+       if (good){
+         o += `<rect x="${cx.a-112}" y="${RY(3)-11}" width="120" height="${RY(10)-RY(3)+22}" rx="4" fill="var(--pcb2)" opacity=".92"/>
+               <rect x="${cx.a-80}" y="${RY(6)-2}" width="20" height="20" fill="#111"/>`;
+         names.forEach((p,i)=>{ const y=RY(10-i); o += `<rect x="${cx.a-4}" y="${y-4}" width="8" height="8" fill="#d4af37" stroke="var(--accent)" stroke-width="2"/><text x="${cx.a-10}" y="${y+3}" text-anchor="end" style="font:600 8px ui-monospace,Menlo,monospace;fill:#fff">${p}</text>`; });
+         ["b","c","d","e"].forEach(k=>{ for (let n=3;n<=10;n++) o += `<rect x="${cx[k]-3}" y="${RY(n)-3}" width="6" height="6" fill="none" stroke="var(--ok)" stroke-width="1.5"/>`; });
+       } else {
+         o += `<rect x="${cx.a-8}" y="${RY(2)-11}" width="120" height="${RY(9)-RY(2)+22}" rx="4" fill="var(--pcb2)" opacity=".92"/>
+               <rect x="${cx.a+50}" y="${RY(5)-2}" width="20" height="20" fill="#111"/>`;
+         names.forEach((p,i)=>{ const y=RY(2+i); o += `<rect x="${cx.a-4}" y="${y-4}" width="8" height="8" fill="#d4af37"/><text x="${cx.a+10}" y="${y+3}" style="font:600 8px ui-monospace,Menlo,monospace;fill:#fff">${p}</text>`; });
+       }
+       return o;
+     };
+     return `
+     <text x="1030" y="44" style="font:600 15px -apple-system,sans-serif;fill:var(--warn)">✗ Like your photo</text>
+     ${mini(1050,false)}
+     <text x="1050" y="322" style="font:600 12px -apple-system,sans-serif;fill:var(--warn)">The body covers b–e in rows 2–9.</text>
+     <text x="1050" y="338" class="lbl">No free hole left for wires.</text>
+     <text x="1330" y="44" style="font:600 15px -apple-system,sans-serif;fill:var(--ok)">✓ Turn it around (chip still up)</text>
+     ${mini(1390,true)}
+     <text x="1330" y="322" style="font:600 12px -apple-system,sans-serif;fill:var(--ok)">Pins in a3 → a10, body hangs LEFT off the board.</text>
+     <text x="1330" y="338" class="lbl">INT at a3, VCC at a10. Green holes stay free for wires.</text>
+     <text x="1640" y="120" class="lbl-ink">Only the 8 pins</text>
+     <text x="1640" y="136" class="lbl-ink">touch the board.</text>
+     <text x="1640" y="156" class="lbl">The body can sit over the</text>
+     <text x="1640" y="170" class="lbl">+ and − lines: they still</text>
+     <text x="1640" y="184" class="lbl">work above and below it.</text>`;
+   })()}
+
+   <!-- SIDE VIEWS -->
+   <g transform="translate(0,110)">
+   ${head(1030,250,1,"Long pins DOWN into a3 … a10")}
+   ${bb(1020)}${strip(1020)}
+   <path d="M1145 300 v30 m-8 -10 l8 10 l8 -10" stroke="var(--muted)" stroke-width="2" fill="none"/>
+   <text x="1145" y="292" text-anchor="middle" class="lbl">short pins point up</text>
+
+   ${head(1320,250,2,"MPU on top, chip side UP")}
+   ${bb(1320)}${strip(1320)}
+   <rect x="1335" y="330" width="220" height="10" rx="2" fill="var(--pcb2)"/>
+   <rect x="1415" y="316" width="44" height="14" fill="#111"/><text x="1437" y="308" text-anchor="middle" class="lbl">chip</text>
+   ${pins(1361,322,330)}
+   <text x="1445" y="292" text-anchor="middle" class="lbl">(side view)</text>
+
+   ${head(1610,250,3,"Push sideways + tape")}
+   ${bb(1620)}${strip(1620)}
+   <rect x="1640" y="330" width="220" height="10" rx="2" fill="var(--pcb2)" transform="translate(6,0)"/>
+   <rect x="1726" y="316" width="44" height="14" fill="#111"/>
+   ${pins(1661,322,330)}
+   <path d="M1624 335 h-0" />
+   <path d="M1605 335 h26 m-10 -8 l10 8 l-10 8" stroke="var(--accent)" stroke-width="3" fill="none"/>
+   <text x="1600" y="320" text-anchor="end" class="lbl-ink">push</text>
+   <path d="M1630 412 L1640 322 H1870 L1880 412" fill="#c8b48a" opacity=".55" stroke="#a08a5a"/>
+   <text x="1750" y="292" text-anchor="middle" class="lbl">insulation tape over it,</text>
+   <text x="1750" y="304" text-anchor="middle" class="lbl">stuck to the board both sides</text>
+   </g>
+
+   <!-- CONTACT CLOSE-UP + STRIP -->
+   ${head(1030,610,4,"Why push sideways?")}
+   <circle cx="1080" cy="670" r="22" fill="none" stroke="#d4af37" stroke-width="7"/>
+   <rect x="1074" y="664" width="12" height="12" fill="#e0b84a" stroke="#7a5c00"/>
+   <path d="M1066 712 l12 12 m0 -12 l-12 12" stroke="var(--warn)" stroke-width="3"/>
+   <text x="1084" y="723" style="font:600 13px -apple-system,sans-serif;fill:var(--warn)">pin in the middle:</text>
+   <text x="1084" y="738" class="lbl">no contact</text>
+   <circle cx="1260" cy="670" r="22" fill="none" stroke="#d4af37" stroke-width="7"/>
+   <rect x="1268" y="664" width="12" height="12" fill="#e0b84a" stroke="#7a5c00"/>
+   <circle cx="1281" cy="670" r="5" fill="none" stroke="var(--ok)" stroke-width="2.5"/>
+   <path d="M1240 718 l6 6 l12 -14" stroke="var(--ok)" stroke-width="3" fill="none"/>
+   <text x="1264" y="723" style="font:600 13px -apple-system,sans-serif;fill:var(--ok)">pushed to the side:</text>
+   <text x="1264" y="738" class="lbl">pin touches the ring ✓</text>
+   <text x="1030" y="640" class="lbl">(looking down into one MPU hole)</text>
+
+   ${head(1530,600,5,"Which strip?")}
+   <rect x="1540" y="668" width="120" height="12" rx="2" fill="#2a2a2a" stroke="#777"/>
+   ${Array.from({length:6},(_,i)=>`<rect x="${1550+i*19}" y="648" width="4" height="52" fill="#d4af37"/>`).join("")}
+   <path d="M1556 716 l6 6 l12 -14" stroke="var(--ok)" stroke-width="3" fill="none"/>
+   <text x="1580" y="722" style="font:600 13px -apple-system,sans-serif;fill:var(--ok)">straight: USE</text>
+   <rect x="1720" y="668" width="120" height="12" rx="2" fill="#2a2a2a" stroke="#777"/>
+   ${Array.from({length:6},(_,i)=>`<path d="M${1732+i*19} 648 V674 h22" stroke="#d4af37" stroke-width="4" fill="none"/>`).join("")}
+   <text x="1730" y="722" class="lbl">bent: spare</text>`;
+})();
+
+/* ---------- items ---------- */
+const layer = el("g"), badges = el("g");
+function bez(a,b){
+  const dx=b.x-a.x, dy=b.y-a.y, L=Math.max(40, Math.hypot(dx,dy)*0.38);
+  const sx = Math.sign(dx)||1, da = a.dir || [sx, 0], db = b.dir || [-sx, 0];
+  return `M${a.x},${a.y} C${a.x+da[0]*L},${a.y+da[1]*L} ${b.x+db[0]*L},${b.y+db[1]*L} ${b.x},${b.y}`;
+}
+ITEMS.forEach(it=>{
+  const g = el("g",{class:"item"+(it.kind==="mpu"?" mpu":"")},layer); it.g = g;
+  let a, b, mid;
+  if (it.kind==="mpu"){
+    a=hole("a"+it.c0); b=hole("a"+(it.c0+7));
+    const x0=a.x-118, x1=a.x+9, yt=a.y-13, yb=b.y+13;
+    el("rect",{x:x0,y:yt,width:x1-x0,height:yb-yt,rx:5,fill:"var(--pcb2)",opacity:.93},g);
+    el("rect",{x:x0+30,y:(yt+yb)/2-11,width:22,height:22,fill:"#111"},g);
+    el("text",{x:x0+8,y:(yt+yb)/2+4,class:"pinlbl",style:"font-weight:700",transform:`rotate(-90 ${x0+14} ${(yt+yb)/2})`},g).textContent = `MPU #${it.n}`;
+    IMU_P.forEach((p,i)=>{ const y=Y(it.c0+7-i);
+      el("rect",{x:a.x-4,y:y-4,width:8,height:8,rx:1.5,fill:"#d4af37",stroke:"#7a5c00"},g);
+      el("text",{x:a.x-10,y:y+3,"text-anchor":"end",class:"pinlbl"},g).textContent = p;
+    });
+    mid={x:x0+10,y:yt-12}; it.extraBox=[{x:x0-14,y:yt-24},{x:x1+40,y:yb+14}];
+  } else if (it.kind==="wire"){
+    a=pt(it.from); b=pt(it.to);
+    const p = el("path",{d:bez(a,b),class:"wire",stroke:`var(${it.color})`},g);
+    const len = p.getTotalLength(); g.style.setProperty("--len", Math.ceil(len+2));
+    mid = p.getPointAtLength(len*(0.4 + 0.15*((ITEMS.indexOf(it)%3))));
+  } else {
+    a=hole(it.from); b=hole(it.to);
+    el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:"leg"},g);
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2, ang=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;
+    const body = el("g",{transform:`translate(${mx},${my}) rotate(${ang})`},g);
+    el("rect",{x:-11,y:-4.5,width:22,height:9,rx:4,fill:"#e3cfa3",class:"res-body"},body);
+    const bands = it.val==="10k" ? ["#6b3e1f","#111","#e67e22","#c9a227"] : ["#6b3e1f","#111","#27ae60","#c9a227"];
+    bands.forEach((c,i)=> el("rect",{x:-7+i*4.2+(i===3?2:0),y:-4.5,width:2.2,height:9,fill:c},body));
+    mid = {x:mx, y:my-13};
+  }
+  it.a=a; it.b=b; it.mid=mid;
+  el("circle",{cx:a.x,cy:a.y,r:8,class:"end",stroke:"var(--accent)"},g);
+  el("circle",{cx:b.x,cy:b.y,r:8,class:"end",stroke:"var(--accent)"},g);
+  const bg = el("g",{class:"badge"},g);
+  it.badgeC = el("circle",{cx:mid.x,cy:mid.y,r:8.5,fill:it.kind==="res"?"#7a5c2e":it.kind==="mpu"?"var(--pcb2)":`var(${it.color})`},bg);
+  it.badgeT = el("text",{x:mid.x,y:mid.y+3.5,"text-anchor":"middle"},bg);
+  bg.addEventListener("click", e=>{ e.stopPropagation(); select(it); });
+});
+
+/* ---------- interaction ---------- */
+let cur = 0, zoomOn = true, sel = null; const LAST = STEPS.length-1;
+const hint = document.getElementById("hint");
+const DEF_HINT = "Tap any hole to see which holes are joined. Tap a number (in the picture or the list) to highlight that one wire.";
+function group(h){
+  const o = hole(h);
+  if (o.rail) return holes.filter(e=>e.dataset.h.startsWith(o.rail));
+  const half = "abcde".includes(o.row) ? "abcde" : "fghij";
+  return holes.filter(e=>{ const m=e.dataset.h.match(/^([a-j])(\d+)$/); return m && +m[2]===o.col && half.includes(m[1]); });
+}
+function light(h){
+  holes.forEach(e=>e.classList.remove("lit"));
+  group(h).forEach(e=>e.classList.add("lit"));
+  const o = hole(h);
+  hint.textContent = o.rail ? `This whole ${o.rail[0]==="T"?"LEFT":"RIGHT"} ${o.rail[1]==="+"?"red +":"blue −"} line is ONE strip, top to bottom. Anything plugged in anywhere on it is connected.`
+                            : `Holes ${o.row<"f"?"a–e":"f–j"} in row ${o.col} are ONE strip. Anything in these 5 holes is connected.`;
+}
+svg.addEventListener("click", e=>{ const h=e.target.dataset && e.target.dataset.h; if (h) light(h); else if (sel) select(null); });
+
+function stepItems(n){ return ITEMS.filter(it => it.step===n); }
+function itemText(it){
+  if (it.kind==="mpu") return {t:`Pin strip in holes a${it.c0} → a${it.c0+7}, MPU #${it.n} on top`, s:`VCC at a${it.c0+7} (bottom), INT at a${it.c0} · body hangs LEFT over the + − lines · tape it`, tag:"strip"};
+  if (it.kind==="res"){
+    const big = it.val==="10k" ? "10 kΩ" : "1 MΩ", bands = it.val==="10k" ? "brown-black-<b>orange</b>" : "brown-black-<b>green</b>";
+    return {t:`${big} resistor: ${name(it.from)} ↔ ${name(it.to)}`, s:bands+" · either way round", tag:"legs"};
+  }
+  const s = it.type==="M–M" ? "pin end in both holes" : it.type==="own wire" ? "the piezo's own wire (pin soldered on)" : it.type==="F–F" ? "socket on both pins" :
+            "socket end on the pin · pin end in the hole";
+  return {t:`${name(it.from)} → ${name(it.to)}`, s: it.warn ? `<b style="color:var(--warn)">${it.warn}</b> · ${s}` : s, tag:it.type};
+}
+function select(it){
+  sel = it;
+  ITEMS.forEach(x=>{ x.g.classList.toggle("sel", x===it); if (x.step===cur) x.g.classList.toggle("dim", !!it && x!==it); });
+  document.querySelectorAll(".wires li").forEach(li=> li.classList.toggle("sel", it && +li.dataset.i===ITEMS.indexOf(it)));
+  if (it){ const t=itemText(it); hint.innerHTML = `<b>${it.n}.</b> ${t.t}`; } else hint.textContent = DEF_HINT;
+}
+
+/* zoom: animate the viewBox to the current step's parts */
+let vb = [0,0,900,625];
+function targetBox(){
+  const its = stepItems(cur).filter(it=>!it.only || it.only===cur);
+  if (STEPS[cur].scene) return [990,20,920,740];
+  if (!zoomOn || !its.length || cur===LAST) return [0,0,900,625];
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  const extra = [];
+  its.forEach(it=>[it.from,it.to].filter(Boolean).forEach(sp=>{
+    if (sp.startsWith("imu")){ const k=+sp[3]-1; extra.push({x:330+k*150-4,y:18},{x:330+k*150+114,y:18}); }
+    if (sp.startsWith("fsr")){ const p=pt(sp); extra.push({x:230,y:p.y-34},{x:230,y:p.y+30}); }
+    if (sp.startsWith("esp")){ const p=pt(sp); extra.push({x:p.x<100?p.x-20:p.x-110,y:p.y},{x:p.x<100?p.x+70:p.x+10,y:p.y}); }
+    if (sp.startsWith("pz")){ const p=pt(sp); extra.push({x:870,y:p.y}); }
+    if (!sp.includes(":")){ const h=hole(sp), m=mpuPinAt(h); if (m){ const mi=ITEMS.find(x=>x.kind==="mpu"&&m.startsWith("MPU #"+x.n)); if (mi&&mi.extraBox) extra.push(...mi.extraBox); } }
+  }));
+  its.forEach(it=>{ if (it.extraBox) extra.push(...it.extraBox); });
+  its.forEach(it=>[it.a,it.b,it.mid].concat(extra).forEach(p=>{ x0=Math.min(x0,p.x); y0=Math.min(y0,p.y); x1=Math.max(x1,p.x); y1=Math.max(y1,p.y); }));
+  // include the parts the wires come from
+  const pad = 46; x0-=pad; y0-=pad+14; x1+=pad; y1+=pad;
+  let w=x1-x0, h=y1-y0; const ar=900/625;
+  if (w/h < ar){ const nw=h*ar; x0-=(nw-w)/2; w=nw; } else { const nh=w/ar; y0-=(nh-h)/2; h=nh; }
+  if (w<420){ const s=420/w; x0-= (w*s-w)/2; y0-=(h*s-h)/2; w*=s; h*=s; }
+  return [x0,y0,w,h];
+}
+let anim;
+function zoomTo(t){
+  cancelAnimationFrame(anim);
+  const from = vb.slice(), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, t0 = performance.now(), D = reduce ? 0 : 650;
+  const tick = now => {
+    const k = D ? Math.min(1,(now-t0)/D) : 1, e = 1-Math.pow(1-k,3);
+    vb = from.map((v,i)=> v+(t[i]-v)*e);
+    svg.setAttribute("viewBox", vb.join(" "));
+    if (k<1) anim = requestAnimationFrame(tick);
+  };
+  anim = requestAnimationFrame(tick);
+}
+document.getElementById("zoomBtn").onclick = e => {
+  zoomOn = !zoomOn; e.target.classList.toggle("on", zoomOn);
+  e.target.textContent = zoomOn ? "Zoom: this step" : "Zoom: whole board"; zoomTo(targetBox());
+};
+
+const stepsNav = document.getElementById("steps");
+STEPS.forEach((s,i)=>{ const b=document.createElement("button"); b.textContent=s.chip; b.onclick=()=>go(i); stepsNav.appendChild(b); });
+
+function go(n){
+  cur = Math.max(0, Math.min(STEPS.length-1, n)); sel = null;
+  const s = STEPS[cur], its = stepItems(cur);
+  its.forEach((it,i)=>{ it.n=i+1; it.badgeT.textContent=i+1; });
+  document.getElementById("count").textContent = `Step ${cur} of ${STEPS.length-1}` + (its.length ? ` · ${its.length} things to connect` : "");
+  document.getElementById("title").textContent = s.title;
+  document.getElementById("idea").innerHTML = s.idea;
+  let html = s.body || "";
+  if (its.length){
+    html += `<div class="box bad" style="margin-bottom:10px"><b>USB unplugged?</b> Plug in each wire below, in order.</div><h3>Connect</h3><ul class="wires">` +
+      its.map(it=>{ const t=itemText(it), col = it.kind==="res" ? "#7a5c2e" : `var(${it.color})`;
+        return `<li data-i="${ITEMS.indexOf(it)}"><span class="num" style="background:${col}">${it.n}</span><span class="wtxt">${t.t}<small>${t.s}</small></span><span class="tag">${t.tag}</span></li>`; }).join("") + `</ul>`;
+  }
+  if (s.check){
+    html += `<h3 style="margin-top:12px">Check</h3><p style="margin:0 0 6px;font-size:14px">Plug USB back in, then run:</p>${cmd(CHECK)}
+      <div class="box ok" style="margin-top:8px">${s.check.expect}</div><details style="margin-top:6px"><summary>Not working?</summary><div style="margin:6px 0 0">${s.check.fix}</div></details>`;
+  }
+  const body = document.getElementById("body"); body.innerHTML = html;
+  body.querySelectorAll(".wires li").forEach(li=> li.onclick = () => { const it=ITEMS[+li.dataset.i]; select(sel===it?null:it); });
+  [...stepsNav.children].forEach((b,i)=>{ b.className = i===cur ? "on" : (i<cur ? "past" : ""); });
+  ITEMS.forEach(it=>{
+    const vis = it.only ? it.only===cur : it.step<=cur;
+    const now = vis && it.step===cur && cur!==LAST;
+    it.g.classList.toggle("hide", !vis);
+    it.g.classList.toggle("now", now);
+    it.g.classList.toggle("done", vis && it.step<cur);
+    it.g.classList.remove("sel","dim","draw");
+    if (now){ void it.g.getBoundingClientRect(); it.g.classList.add("draw"); }
+  });
+  document.getElementById("prev").disabled = cur===0;
+  document.getElementById("next").disabled = cur===STEPS.length-1;
+  body.querySelectorAll("[data-copy]").forEach(b=> b.onclick=()=>{
+    const t=b.previousElementSibling.textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>{b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1200);}).catch(()=>{b.textContent="Select it";});
+  });
+  holes.forEach(e=>e.classList.remove("lit"));
+  const demo = {0:"c6",2:"T+1",3:"c8",5:"f9"}[cur];
+  if (demo) light(demo); else hint.textContent = DEF_HINT;
+  zoomTo(targetBox());
+}
+document.getElementById("prev").onclick=()=>go(cur-1);
+document.getElementById("next").onclick=()=>go(cur+1);
+document.addEventListener("keydown", e=>{ if (e.key==="ArrowRight") go(cur+1); if (e.key==="ArrowLeft") go(cur-1); });
+go(0);
+</script>
+</body>
+</html>
