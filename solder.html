@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solder WristTap</title>
+<style>
+:root{--bg:#f8f7f4;--card:#fff;--ink:#1c1e21;--muted:#646b73;--line:#e3e0da;--red:#d0362b;--blk:#2b2b2b;--sig:#2f74c0;--ok:#2f7d4f;--warn:#b3412f;--accent:#c98a10}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121416;--card:#1a1d20;--ink:#ebe9e5;--muted:#9aa1a8;--line:#2c3036;--blk:#cfcfcf;--accent:#f2b134;--ok:#69c48f;--warn:#e98371}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:28px 18px 90px}
+h1{font-size:30px;margin:0 0 6px;letter-spacing:-.4px}
+.lede{color:var(--muted);margin:0 0 22px;max-width:64ch}
+h2{font-size:20px;margin:36px 0 12px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.rule{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14.5px}
+.rule b{display:block;font-size:15px;margin-bottom:2px}
+.rule.danger{border-color:color-mix(in srgb,var(--warn) 45%,var(--line));background:color-mix(in srgb,var(--warn) 7%,var(--card))}
+.diagram{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;overflow-x:auto}
+.diagram svg{display:block;min-width:820px}
+svg text{font-family:-apple-system,system-ui,sans-serif}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+.step.done{opacity:.55}
+.step header{display:flex;gap:12px;align-items:center;cursor:pointer}
+.num{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--ink);color:var(--bg);font-size:14px}
+.step.done .num{background:var(--ok)}
+.step h3{margin:0;font-size:17px;flex:1}
+.step label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+.body{margin-top:10px}
+.body ol,.body ul{margin:6px 0;padding-left:22px}.body li{margin:5px 0}
+.check{margin-top:10px;padding:10px 12px;border-radius:8px;background:color-mix(in srgb,var(--ok) 9%,var(--card));border:1px solid color-mix(in srgb,var(--ok) 35%,var(--line));font-size:14.5px}
+.check b{color:var(--ok)}
+.fix{margin-top:8px;font-size:14px;color:var(--muted)}
+code{font:13.5px ui-monospace,Menlo,monospace;background:color-mix(in srgb,var(--line) 60%,transparent);padding:1px 6px;border-radius:5px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:8px 0}
+th,td{text-align:left;padding:6px 10px;border-top:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);border-top:none}
+.pill{display:inline-block;padding:0 7px;border-radius:5px;font-size:13px;font-weight:600;color:#fff}
+.r{background:var(--red)}.k{background:#2b2b2b}.s{background:var(--sig)}
+.mini{background:#fff;border:1px solid var(--line);border-radius:8px;margin:10px 0;max-width:560px}
+.progress{position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:2;border-bottom:1px solid var(--line);font-size:14px;color:var(--muted)}
+.bar{height:6px;background:var(--line);border-radius:4px;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Solder WristTap, one step at a time</h1>
+<p class="lede">No breadboard. Two header-pin strips become the power hubs, resistors sit right in the wires, and every sensor gets tested before the next one. About 40 joints, roughly 2 hours.</p>
+
+<div class="progress">Progress: <b id="pc">0</b> of 10 steps<div class="bar"><i id="pb"></i></div></div>
+
+<h2>Rules for every joint</h2>
+<div class="rules">
+  <div class="rule danger"><b>Power OFF while soldering</b>Unplug the USB cable and the power bank every time the iron comes near.</div>
+  <div class="rule"><b>Tin first</b>Strip 8 mm, twist the strands, touch solder to the wire until it's shiny. Then joining takes 2 seconds.</div>
+  <div class="rule"><b>Heat the metal, not the solder</b>Hold the iron on the joint 2–3 s, feed solder into the joint. Shiny and smooth = good; grey and lumpy = reheat.</div>
+  <div class="rule"><b>Tape every joint</b>No heat shrink, so wrap each joint in its own piece of insulation tape. No bare metal may touch another.</div>
+  <div class="rule"><b>Test after each sensor</b>Plug in, run the check, then unplug. Then you always know which joint broke.</div>
+  <div class="rule danger"><b>Never use VIN</b>VIN (bottom-left pin) is 5 V and kills the sensors. Only 3V3 and GND.</div>
+</div>
+
+<h2>The whole circuit</h2>
+<div class="diagram">
+<svg viewBox="0 0 980 560" aria-label="WristTap soldered wiring diagram">
+  <!-- ESP32 -->
+  <rect x="400" y="70" width="180" height="400" rx="10" fill="#1e2a38"/>
+  <rect x="455" y="78" width="70" height="70" rx="3" fill="#8a96a3"/>
+  <text x="490" y="118" text-anchor="middle" font-size="12" fill="#1e2a38">ESP32</text>
+  <rect x="475" y="455" width="30" height="20" fill="#bbb"/><text x="490" y="495" text-anchor="middle" font-size="11" fill="#555">USB</text>
+  <g font-size="11" fill="#fff">
+    <text x="412" y="178">EN</text><text x="412" y="200">VP 36</text><text x="412" y="222">VN 39</text><text x="412" y="244">D34</text><text x="412" y="266">D35</text><text x="412" y="288">D32</text><text x="412" y="310">D33</text>
+    <text x="412" y="332" opacity=".75">D25 … D13</text><text x="412" y="420">GND</text><text x="412" y="442" fill="#ff8a7a">VIN ✕</text>
+    <text x="568" y="178" text-anchor="end">D23</text><text x="568" y="200" text-anchor="end">D22 SCL</text><text x="568" y="222" text-anchor="end" opacity=".75">TX0</text><text x="568" y="244" text-anchor="end" opacity=".75">RX0</text><text x="568" y="266" text-anchor="end">D21 SDA</text>
+    <text x="568" y="332" text-anchor="end" opacity=".75">D19 … D15</text><text x="568" y="420" text-anchor="end">GND</text><text x="568" y="442" text-anchor="end">3V3</text>
+  </g>
+  <g fill="#d4af37"><circle cx="402" cy="196" r="4"/><circle cx="402" cy="218" r="4"/><circle cx="402" cy="240" r="4"/><circle cx="402" cy="262" r="4"/><circle cx="402" cy="284" r="4"/><circle cx="402" cy="306" r="4"/><circle cx="578" cy="196" r="4"/><circle cx="578" cy="262" r="4"/><circle cx="578" cy="416" r="4"/><circle cx="578" cy="438" r="4"/></g>
+
+  <!-- hubs -->
+  <g>
+    <rect x="690" y="420" width="150" height="20" rx="3" fill="#d0362b"/><text x="765" y="434" text-anchor="middle" font-size="12" fill="#fff" font-weight="600">RED HUB 3V3 · 6 pins</text>
+    <rect x="690" y="480" width="250" height="20" rx="3" fill="#2b2b2b"/><text x="815" y="494" text-anchor="middle" font-size="12" fill="#fff" font-weight="600">BLACK HUB GND · 10 pins</text>
+    <path d="M578 438 C630 438 640 430 690 430" stroke="#d0362b" stroke-width="3" fill="none"/>
+    <path d="M578 416 C640 416 640 490 690 490" stroke="#2b2b2b" stroke-width="3" fill="none"/>
+  </g>
+
+  <!-- MPUs -->
+  <g>
+    <rect x="690" y="70" width="110" height="70" rx="6" fill="#2b6cb0"/><text x="745" y="100" text-anchor="middle" font-size="13" fill="#fff" font-weight="600">MPU #1</text><text x="745" y="118" text-anchor="middle" font-size="11" fill="#dbe7f5">forearm, by ESP32</text>
+    <rect x="840" y="70" width="110" height="70" rx="6" fill="#6b4fb8"/><text x="895" y="100" text-anchor="middle" font-size="13" fill="#fff" font-weight="600">MPU #2</text><text x="895" y="118" text-anchor="middle" font-size="11" fill="#e6defa">back of hand</text>
+    <!-- SDA / SCL -->
+    <path d="M578 196 C640 196 700 170 720 140" stroke="#e0a400" stroke-width="2.5" fill="none"/>
+    <path d="M578 262 C650 262 720 190 740 140" stroke="#2f74c0" stroke-width="2.5" fill="none"/>
+    <path d="M578 196 C700 200 850 190 870 140" stroke="#e0a400" stroke-width="2.5" fill="none"/>
+    <path d="M578 262 C720 268 870 210 890 140" stroke="#2f74c0" stroke-width="2.5" fill="none"/>
+    <text x="640" y="186" font-size="11" fill="#b38300">SCL (yellow)</text><text x="640" y="280" font-size="11" fill="#2f74c0">SDA (blue)</text>
+    <!-- power -->
+    <path d="M760 140 C760 300 720 380 712 420" stroke="#d0362b" stroke-width="2" fill="none"/>
+    <path d="M780 140 C790 330 760 440 740 480" stroke="#2b2b2b" stroke-width="2" fill="none"/>
+    <path d="M910 140 C910 300 800 380 735 420" stroke="#d0362b" stroke-width="2" fill="none"/>
+    <path d="M930 140 C940 330 880 440 860 480" stroke="#2b2b2b" stroke-width="2" fill="none"/>
+    <text x="700" y="160" font-size="10.5" fill="#555">AD0 + GND → black</text><text x="850" y="160" font-size="10.5" fill="#555">AD0 + VCC → red</text>
+  </g>
+
+  <!-- piezos -->
+  <g font-size="11">
+    <g id="pz">
+    </g>
+  </g>
+  <!-- FSRs -->
+</svg>
+</div>
+
+<h3>Every connection in one table</h3>
+<table>
+<tr><th>From</th><th>Through</th><th>To</th></tr>
+<tr><td>ESP32 <b>3V3</b> (right, bottom)</td><td>short wire</td><td><span class="pill r">red hub</span></td></tr>
+<tr><td>ESP32 <b>GND</b> (right, 2nd from bottom)</td><td>short wire</td><td><span class="pill k">black hub</span></td></tr>
+<tr><td>MPU #1 VCC · GND+AD0 · SDA · SCL</td><td>its jumper wires, cut short</td><td>red hub · black hub · <b>D21</b> · <b>D22</b></td></tr>
+<tr><td>MPU #2 VCC+AD0 · GND · SDA · SCL</td><td>ribbon wires</td><td>red hub · black hub · <b>D21</b> · <b>D22</b> (same pins as MPU #1)</td></tr>
+<tr><td>Piezo n <b>red</b></td><td><b>10 kΩ</b> (brown-black-orange)</td><td>ESP32 pin: disc 0 <b>D32</b>, disc 1 <b>D33</b>, disc 2 <b>D34</b>, disc 3 <b>D35</b></td></tr>
+<tr><td>Piezo n <b>red</b> ↔ piezo n <b>black</b></td><td><b>1 MΩ</b> (brown-black-green) across them</td><td>black → <span class="pill k">black hub</span></td></tr>
+<tr><td>FSR n leg A</td><td>wire</td><td><span class="pill r">red hub</span></td></tr>
+<tr><td>FSR n leg B</td><td>wire</td><td>ESP32 <b>VP (36)</b> for FSR 0, <b>VN (39)</b> for FSR 1, plus a <b>10 kΩ</b> from that pin to the <span class="pill k">black hub</span></td></tr>
+</table>
+
+<h2>Steps</h2>
+<div id="steps"></div>
+</div>
+
+<script>
+/* piezo + FSR drawing */
+const svg = document.querySelector(".diagram svg"), NS="http://www.w3.org/2000/svg";
+const E=(t,a,p=svg)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const T=(x,y,s,o={})=>{const e=E("text",{x,y,"font-size":o.fs||11,fill:o.fill||"#333","text-anchor":o.a||"start","font-weight":o.w||400});e.textContent=s;return e;};
+[["disc 0",284,"D32"],["disc 1",306,"D33"],["disc 2",240,"D34"],["disc 3",262,"D35"]].forEach(([n,py,pin],k)=>{
+  const cy = 90+k*80;
+  E("circle",{cx:60,cy,r:24,fill:"#c8a464"}); E("circle",{cx:60,cy,r:14,fill:"#efece6"}); T(60,cy+40,n,{a:"middle",w:600});
+  // red to 10k to pin
+  E("path",{d:`M84 ${cy-8} L170 ${cy-8}`,stroke:"#d0362b","stroke-width":2.5});
+  E("rect",{x:170,y:cy-13,width:42,height:10,rx:4,fill:"#e8d9b5",stroke:"#8a6d3b"}); T(191,cy-17,"10k",{a:"middle",fs:10});
+  E("path",{d:`M212 ${cy-8} C300 ${cy-8} 330 ${py} 398 ${py}`,stroke:"#2f74c0","stroke-width":2,fill:"none"});
+  // 1M across red-black
+  E("path",{d:`M130 ${cy-8} L130 ${cy+2}`,stroke:"#555","stroke-width":1.5});
+  E("rect",{x:124,y:cy+2,width:12,height:22,rx:4,fill:"#e8d9b5",stroke:"#8a6d3b"}); T(142,cy+18,"1M",{fs:10});
+  E("path",{d:`M84 ${cy+10} L130 ${cy+10}`,stroke:"#2b2b2b","stroke-width":2.5});
+  E("path",{d:`M130 ${cy+24} L130 ${cy+30} C200 ${cy+30} 300 520 360 520 L700 520 L760 500`,stroke:"#2b2b2b","stroke-width":1.2,fill:"none",opacity:.45});
+});
+[["FSR 0",200,"VP"],["FSR 1",222,"VN"]].forEach(([n,py],k)=>{
+  const cy=430+k*60, cx=230;
+  E("circle",{cx,cy,r:18,fill:"#2a2a2a"}); E("rect",{x:cx+18,y:cy-5,width:36,height:10,fill:"#7fa38d"}); T(cx,cy+34,n,{a:"middle",w:600});
+  E("path",{d:`M${cx+54} ${cy-3} C330 ${cy-3} 330 ${py} 398 ${py}`,stroke:"#2f74c0","stroke-width":2,fill:"none"});
+  E("path",{d:`M${cx+54} ${cy+4} C300 ${cy+60} 600 470 700 440`,stroke:"#d0362b","stroke-width":1.5,fill:"none",opacity:.6});
+  T(cx+64,cy+18,"10k pin→black hub",{fs:10,fill:"#666"});
+});
+T(160,30,"piezo: red → 10k → pin · 1M across red/black · black → black hub",{fs:12,fill:"#555"});
+
+/* steps */
+const S = [
+ {t:"Baseline test (before cutting anything)", b:`<ol><li>Plug the band into the Mac with USB.</li><li>Run <code>cd ~/Projects/WristTap && ./check.sh</code>. Tap each disc and press each FSR.</li><li>Take one photo of the current wiring for reference.</li></ol>`,
+  c:"IMU1 and IMU2 ≈ 1 g, each disc jumps to hundreds when tapped, FSRs read 1000+ when pressed. Note anything that's already broken."},
+ {t:"Plan the layout and wire lengths", b:`<ul><li><b>ESP32</b>: top of the forearm, 3 cm behind the wrist strap, USB end pointing to the elbow (power-bank cable goes in your pocket).</li><li><b>MPU #1</b>: taped flat right next to the ESP32 (same forearm).</li><li><b>Hubs</b>: taped under/next to the ESP32.</li><li>Lengths, with 3 cm slack each: piezo wires to the ESP32 ≈ 10–12 cm · MPU #2 ribbon from back of hand ≈ 15 cm · FSRs from inner forearm ≈ 12 cm · MPU #1 ≈ 6 cm.</li></ul>`,
+  c:"You know how long to cut every wire. Short wires = light and tidy, nothing to snag."},
+ {t:"Unplug everything + label", b:`<ol><li>Unplug USB. Pull every jumper off the breadboards and off the ESP32 pins.</li><li>Put a tape flag on each sensor wire: P0 red, P0 blk, P1 red… FSR0 A, FSR0 B, MPU1 VCC/GND/SDA/SCL/AD0, MPU2 the same.</li><li>Keep the resistors: 6× 10 kΩ (brown-black-orange), 4× 1 MΩ (brown-black-green).</li></ol>`,
+  c:"Loose labelled sensors, an empty ESP32, 10 resistors sorted into two piles."},
+ {t:"Make the two hubs + power", b:`<ol><li>Snap a <b>6-pin</b> piece and a <b>10-pin</b> piece off your header strip (bend at the gap between pins).</li><li>Strip 3 cm of insulation off a thin wire (or use a clipped resistor leg). Lay it along the <b>short</b> pin ends of the 6-pin strip and solder it to every pin. Repeat on the 10-pin strip. Now all pins on a strip are one connection.</li><li>Mark them: red tape on the 6-pin (<b>RED HUB = 3V3</b>), black marker on the 10-pin (<b>BLACK HUB = GND</b>).</li><li>Solder a 5 cm wire from ESP32 <b>3V3</b> (right side, bottom pin) to a red-hub pin. Another from ESP32 <b>GND</b> (right side, 2nd from bottom) to a black-hub pin.</li><li>Tape both hubs so the two can never touch.</li></ol>`,
+  c:"Plug USB in: the red LED lights and <code>./check.sh</code> runs at ~500 pkt/s (sensors still missing, that's fine).", f:"Mac loses the USB device or the LED stays off = 3V3 touches GND. Unplug at once and look for a solder bridge between the hubs."},
+ {t:"MPU #1", b:`<ol><li>Leave the female plugs on the MPU. Cut its 5 jumper wires to ~6 cm and strip the cut ends: VCC, GND, SDA, SCL, <b>AD0</b>. (INT, XDA, XCL: unplug, not needed.)</li><li>Twist <b>AD0 + GND</b> together, solder them onto one black-hub pin. (AD0 to GND = address 0x68.)</li><li>VCC → a red-hub pin.</li><li>SDA → ESP32 <b>D21</b> (right side, 5th pin). SCL → ESP32 <b>D22</b> (right side, 2nd pin). Wrap the wire round the pin close to the board, then solder.</li><li>Tape each joint.</li></ol>`,
+  c:"<code>./check.sh</code>: IMU1 |a| ≈ 1 g, jumps when you move it.", f:"MISSING: SDA/SCL swapped, or the D21/D22 joint is cold (grey). Reheat."},
+ {t:"MPU #2", b:`<ol><li>On the ribbon, find VCC, GND, SDA, SCL, AD0. Cut INT, XDA, XCL short and tape their ends.</li><li>Twist <b>AD0 + VCC</b> together → a red-hub pin. (AD0 to 3V3 = address 0x69.)</li><li>GND → a black-hub pin.</li><li>SDA → <b>D21</b>, SCL → <b>D22</b>: the <b>same pins</b> as MPU #1. Two wires on one pin is correct.</li><li>Tape.</li></ol>`,
+  c:"IMU1 <b>and</b> IMU2 both ≈ 1 g.", f:"Only one shows: both AD0s went to the same hub. MPU #1 AD0 → black, MPU #2 AD0 → red. If IMU1 vanished too, the D21/D22 joint got disturbed: reheat it."},
+ {t:"Piezo 0 (the pattern for all 4)", b:`<ol><li>Cut the disc's red + black wires to length, strip both ends.</li><li>Twist <b>red + one leg of a 1 MΩ</b>. Solder <b>one leg of a 10 kΩ</b> onto that twist.</li><li>Twist <b>black + the other leg of the 1 MΩ</b> → a black-hub pin.</li><li>Other leg of the 10 kΩ → ESP32 <b>D32</b> (left side, 6th pin). Trim the leg, solder.</li><li>Tape: the 1 MΩ, the 10 kΩ and the joints each get their own wrap.</li></ol>`,
+  c:"Tap disc 0: its number jumps to hundreds; ≈ 0 at rest. Or run <code>python taptest.py 0 5</code>.", f:"Always high/stuck = the 1 MΩ isn't touching black. Never moves = the 10 kΩ joint at D32 is cold."},
+ {t:"Piezos 1, 2, 3", b:`Same as step 7, one disc at a time, testing each:<table><tr><th>Disc</th><th>Pin</th><th>Where on the ESP32 (left side)</th></tr><tr><td>1</td><td>D33</td><td>7th pin</td></tr><tr><td>2</td><td>D34</td><td>4th pin</td></tr><tr><td>3</td><td>D35</td><td>5th pin</td></tr></table>`,
+  c:"<code>~/Projects/PhoneStereo/.venv/bin/python taptest_all.py</code>: tapping disc N lights only column N.", f:"Two columns move together: two piezo wires touch at a bare spot. Tape it."},
+ {t:"FSR 0 and FSR 1", b:`<ol><li>Leave the plugs on the FSR legs, cut those wires to length, strip.</li><li>FSR 0: leg A → a red-hub pin. Leg B → ESP32 <b>VP</b> (left side, 2nd pin).</li><li>Wrap one leg of a <b>10 kΩ</b> round the VP pin too and solder; extend its other leg with wire → black-hub pin.</li><li>FSR 1: same, on <b>VN</b> (left side, 3rd pin).</li><li>Tape.</li></ol>`,
+  c:"FSR ≈ 0 at rest, 1000–4000 when pressed.", f:"Always 0 = leg A not on the red hub. Always 4095 = the 10 kΩ isn't reaching black."},
+ {t:"Insulate, strain relief, wear it", b:`<ol><li>Check every joint: no bare metal anywhere, neighbouring ESP32 pins not bridged.</li><li>Bundle the wires with tape every 4–5 cm. A zip tie round the bundle next to the ESP32 so a tug pulls on the tie, not on a joint.</li><li>Discs into the piezo pods, MPU #2 into the hand shell, ESP32 + MPU #1 + hubs taped onto the forearm strap (foam/tape under the ESP32 so the pins don't scratch).</li><li>Power bank in your pocket, cable to the ESP32.</li><li>Run <code>./demo.sh --ble</code>.</li></ol>`,
+  c:"Everything moves the demo: arm in 3D, taps, squeeze, air mouse. Done!"},
+];
+const done = JSON.parse((()=>{try{return localStorage.getItem("wt-solder")}catch(e){return null}})()||"[]");
+const box = document.getElementById("steps");
+S.forEach((s,i)=>{
+  const d=document.createElement("div"); d.className="step"+(done.includes(i)?" done":"");
+  d.innerHTML=`<header><span class="num">${i+1}</span><h3>${s.t}</h3><label><input type="checkbox" ${done.includes(i)?"checked":""}> done</label></header><div class="body">${s.b}<div class="check"><b>Check:</b> ${s.c}</div>${s.f?`<div class="fix">If not: ${s.f}</div>`:""}</div>`;
+  d.querySelector("input").onchange=e=>{ const k=done.indexOf(i); if(e.target.checked&&k<0)done.push(i); if(!e.target.checked&&k>=0)done.splice(k,1);
+    d.classList.toggle("done",e.target.checked); try{localStorage.setItem("wt-solder",JSON.stringify(done))}catch(_){} prog(); };
+  box.appendChild(d);
+});
+function prog(){ document.getElementById("pc").textContent=done.length; document.getElementById("pb").style.width=(done.length*10)+"%"; }
+prog();
+</script>
+</body>
+</html>

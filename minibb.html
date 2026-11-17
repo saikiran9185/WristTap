@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WristTap Mini Board</title>
+<style>
+:root{--bg:#f8f7f4;--card:#fff;--ink:#1c1e21;--muted:#5d646c;--line:#e3e0da;--ok:#2f7d4f;--warn:#b3412f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121416;--card:#1a1d20;--ink:#ebe9e5;--muted:#a3aab1;--line:#2c3036;--ok:#69c48f;--warn:#e98371}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 18px 80px}
+h1{font-size:30px;margin:0 0 6px;letter-spacing:-.4px}
+.lede{color:var(--muted);margin:0 0 20px;max-width:66ch}
+h2{font-size:20px;margin:30px 0 10px}
+.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.board{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;position:sticky;top:10px}
+.board svg{display:block;width:100%;height:auto}
+svg text{font-family:-apple-system,system-ui,sans-serif}
+.steps{display:grid;gap:10px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.step.on{border-color:#c98a10;box-shadow:0 0 0 2px color-mix(in srgb,#c98a10 30%,transparent)}
+.step h3{margin:0 0 6px;font-size:16px;display:flex;gap:10px;align-items:center}
+.n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:13px;font-weight:700}
+.step table{width:100%;border-collapse:collapse;font-size:14px}
+.step td{padding:4px 6px;border-top:1px solid var(--line);vertical-align:top}
+.step td:first-child{white-space:nowrap}
+.hole{font:600 13px ui-monospace,Menlo,monospace}
+.check{margin-top:8px;font-size:14px;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--ok) 9%,var(--card));border:1px solid color-mix(in srgb,var(--ok) 35%,var(--line))}
+.note{font-size:14px;color:var(--muted)}
+code{font:13.5px ui-monospace,Menlo,monospace;background:color-mix(in srgb,var(--line) 60%,transparent);padding:1px 6px;border-radius:5px}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:8px 0 4px}
+.cmp div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.cmp b{display:block;font-size:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>WristTap on one mini breadboard</h1>
+<p class="lede">The whole circuit in <b>10 rows</b> of one half breadboard. The second board goes away, nothing is soldered, and the piece can be cut down to about 55 × 30 mm. Tap a step to light up its holes on the board.</p>
+<div class="cmp">
+  <div>Breadboards<b>2 → 1</b></div>
+  <div>Rows used<b>60 → 10</b></div>
+  <div>Board size<b>17 × 6 → 3 × 5.5 cm</b></div>
+  <div>Solder joints<b>0</b></div>
+</div>
+
+<div class="grid">
+<div class="board"><svg id="svg" viewBox="0 0 560 560" aria-label="Mini breadboard layout"></svg></div>
+<div>
+<h2 style="margin-top:0">Build it (USB unplugged)</h2>
+<div class="steps" id="steps"></div>
+</div>
+</div>
+</div>
+<script>
+/* ---------- geometry: rows 1..10 top to bottom, columns left to right ---------- */
+const NS="http://www.w3.org/2000/svg", svg=document.getElementById("svg");
+const E=(t,a,p=svg)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const T=(x,y,s,o={})=>{const e=E("text",{x,y,"font-size":o.fs||12,fill:o.fill||"#555","text-anchor":o.a||"middle","font-weight":o.w||400},o.p||svg);e.textContent=s;return e;};
+const RY = r => 110 + (r-1)*38;
+const CX = {"T+":70,"T-":100,a:150,b:180,c:210,d:240,e:270,f:330,g:360,h:390,i:420,j:450,"B+":500,"B-":530};
+const railHas = r => r % 6 !== 0;
+const P = h => { const m = h.match(/^([TB][+-]|[a-j])(\d+)$/); return {x:CX[m[1]], y:RY(+m[2])}; };
+// board body
+E("rect",{x:40,y:70,width:520,height:400,rx:10,fill:"#f3f3f1",stroke:"#cfcfcf"});
+E("rect",{x:290,y:80,width:20,height:380,fill:"#e4e4e1"});
+// rail lines
+[["T+","#d0362b"],["T-","#2f74c0"],["B+","#d0362b"],["B-","#2f74c0"]].forEach(([k,c])=>E("line",{x1:CX[k],y1:85,x2:CX[k],y2:455,stroke:c,"stroke-width":2,opacity:.55}));
+// cut line
+E("line",{x1:30,y1:480,x2:570,y2:480,stroke:"#b3412f","stroke-width":2,"stroke-dasharray":"8 6"});
+T(300,500,"✂ cut here (between rows 10 and 11), optional",{fill:"#b3412f",fs:12,w:600});
+// column labels
+for (const k in CX) T(CX[k],62,k,{fs:12,fill:"#444",w:600});
+const holes = {};
+for (let r=1;r<=10;r++){
+  T(22,RY(r)+4,r,{fs:12,fill:"#444"});
+  for (const k in CX){
+    if (k.length===2 && !railHas(r)) continue;
+    holes[k+r] = E("rect",{x:CX[k]-6,y:RY(r)-6,width:12,height:12,rx:2,fill:"#cfd0cc"});
+  }
+}
+// half-row strips (a-e, f-j) as faint bars
+for (let r=1;r<=10;r++){ E("rect",{x:140,y:RY(r)-9,width:140,height:18,rx:4,fill:"none",stroke:"#e0dfdb"}); E("rect",{x:320,y:RY(r)-9,width:140,height:18,rx:4,fill:"none",stroke:"#e0dfdb"}); }
+// row meaning labels (right margin is tight, so draw small tags inside the gap)
+const ROWS = {1:"piezo 0",2:"piezo 1",3:"piezo 2",4:"piezo 3",5:"SDA | SCL",7:"FSR 0 | FSR 1"};
+for (const r in ROWS) T(300,RY(r)-12,ROWS[r],{fs:9.5,fill:"#7a5a10",w:600});
+
+/* ---------- parts ---------- */
+const layer = E("g",{});
+const items = [];   // {step, kind, a, b, label, color}
+const W=(step,a,b,label,color)=>items.push({step,kind:"wire",a,b,label,color});
+const R=(step,a,b,label)=>items.push({step,kind:"res",a,b,label});
+const PIN=(step,h,label,color)=>items.push({step,kind:"pin",a:h,label,color});
+// step 1 power
+PIN(1,"T+1","ESP32 3V3","#d0362b"); PIN(1,"T-8","ESP32 GND (right)","#2b2b2b"); PIN(1,"B-8","ESP32 GND (left)","#2b2b2b");
+// step 2 MPU1
+PIN(2,"T+2","MPU1 VCC","#d0362b"); PIN(2,"B-5","MPU1 GND","#2b2b2b"); PIN(2,"B-10","MPU1 AD0","#2b2b2b");
+PIN(2,"b5","MPU1 SDA","#2f74c0"); PIN(2,"i5","MPU1 SCL","#e0a400"); PIN(2,"a5","ESP32 D21","#2f74c0"); PIN(2,"j5","ESP32 D22","#e0a400");
+// step 3 MPU2
+PIN(3,"T+3","MPU2 VCC","#d0362b"); PIN(3,"T+4","MPU2 AD0","#d0362b"); PIN(3,"B-9","MPU2 GND","#2b2b2b");
+PIN(3,"c5","MPU2 SDA","#2f74c0"); PIN(3,"h5","MPU2 SCL","#e0a400");
+// step 4 piezos
+[["D32",1],["D33",2],["D34",3],["D35",4]].forEach(([pin,r],k)=>{
+  PIN(4+(k>0?1:0),`a${r}`,`piezo ${k} red`,"#d0362b");
+  R(4+(k>0?1:0),`b${r}`,`T-${r}`,"1M");
+  R(4+(k>0?1:0),`e${r}`,`f${r}`,"10k");
+  PIN(4+(k>0?1:0),`j${r}`,`ESP32 ${pin}`,"#6b4fb8");
+  PIN(4+(k>0?1:0),`B-${r}`,`piezo ${k} black`,"#2b2b2b");
+});
+// step 6 FSRs
+PIN(6,"a7","FSR0 leg B","#3d8b5a"); PIN(6,"b7","ESP32 VP","#6b4fb8"); R(6,"c7","T-7","10k"); PIN(6,"T+5","FSR0 leg A","#d0362b");
+PIN(6,"j7","FSR1 leg B","#3d8b5a"); PIN(6,"i7","ESP32 VN","#6b4fb8"); R(6,"h7","B-7","10k"); PIN(6,"T+7","FSR1 leg A","#d0362b");
+
+const drawn = items.map(it=>{
+  const g = E("g",{opacity:1},layer); const a=P(it.a);
+  if (it.kind==="pin"){
+    E("circle",{cx:a.x,cy:a.y,r:7,fill:it.color,stroke:"#fff","stroke-width":1.5},g);
+  } else {
+    const b=P(it.b), mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    E("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#8a8a8a","stroke-width":2},g);
+    const len=Math.hypot(b.x-a.x,b.y-a.y), ang=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI, bw=Math.min(26,len*0.6);
+    const rg=E("g",{transform:`translate(${mx},${my}) rotate(${ang})`},g);
+    E("rect",{x:-bw/2,y:-5,width:bw,height:10,rx:4,fill:it.label==="1M"?"#e8d3e8":"#e8d9b5",stroke:"#8a6d3b"},rg);
+    E("circle",{cx:a.x,cy:a.y,r:3,fill:"#666"},g); E("circle",{cx:b.x,cy:b.y,r:3,fill:"#666"},g);
+  }
+  return g;
+});
+
+/* ---------- steps ---------- */
+const H = h => `<span class="hole">${h}</span>`;
+const STEPS = [
+ {t:"Power lines", rows:[["ESP32 <b>3V3</b> (right, bottom pin)","T+1 · left red line"],["ESP32 <b>GND</b> (right, 2nd from bottom)","T-8 · left blue line"],["ESP32 <b>GND</b> (left, 2nd from bottom)","B-8 · right blue line"]],
+  c:"Plug in: red LED on, <code>./check.sh</code> runs ~500 pkt/s."},
+ {t:"MPU #1 (its 5 cable wires)", rows:[["VCC","T+2"],["GND","B-5"],["AD0","B-10 (GND → address 0x68)"],["SDA","b5"],["SCL","i5"],["ESP32 <b>D21</b> (right, 5th pin)","a5"],["ESP32 <b>D22</b> (right, 2nd pin)","j5"]],
+  c:"IMU1 ≈ 1 g. (INT, XDA, XCL stay unplugged.)"},
+ {t:"MPU #2 (ribbon)", rows:[["VCC","T+3"],["AD0","T+4 (3V3 → address 0x69)"],["GND","B-9"],["SDA","c5 (same row as D21)"],["SCL","h5 (same row as D22)"]],
+  c:"IMU1 and IMU2 both ≈ 1 g."},
+ {t:"Piezo 0: one row does it all", rows:[["red wire","a1"],["1 MΩ","b1 → T-1"],["10 kΩ","e1 → f1 (across the middle gap)"],["ESP32 <b>D32</b>","j1"],["black wire","B-1"]],
+  c:"Tap disc 0 → hundreds, ≈ 0 at rest."},
+ {t:"Piezos 1, 2, 3: same pattern, one row each", rows:[["Disc 1","row 2 · ESP32 <b>D33</b> → j2 · black → B-2"],["Disc 2","row 3 · ESP32 <b>D34</b> → j3 · black → B-3"],["Disc 3","row 4 · ESP32 <b>D35</b> → j4 · black → B-4"],["each","red in a, 1 MΩ b→T-, 10 kΩ e→f"]],
+  c:"<code>taptest_all.py</code>: tapping disc N lights only column N."},
+ {t:"FSRs", rows:[["FSR 0 leg A","T+5"],["FSR 0 leg B","a7"],["ESP32 <b>VP</b> (left, 2nd pin)","b7"],["10 kΩ","c7 → T-7"],["FSR 1 leg A","T+7"],["FSR 1 leg B","j7"],["ESP32 <b>VN</b> (left, 3rd pin)","i7"],["10 kΩ","h7 → B-7"]],
+  c:"FSR ≈ 0 at rest, 1000–4000 pressed. Row 6 stays empty (the rails have no hole at 6)."},
+ {t:"Make it small (optional)", rows:[["Cut","Fine saw or hacksaw between rows 10 and 11, through rails and backing. Go slow, then put tape over the cut edge."],["Or","Keep the whole half board: rows 11–30 just stay empty."]],
+  c:"A 55 × 30 mm board that sits next to the ESP32. Everything above still checks out with <code>./check.sh</code>."},
+];
+const box=document.getElementById("steps");
+STEPS.forEach((s,i)=>{
+  const d=document.createElement("div"); d.className="step";
+  d.innerHTML=`<h3><span class="n">${i+1}</span>${s.t}</h3><table>${s.rows.map(([a,b])=>`<tr><td>${a}</td><td>${b.replace(/\b([TB][+-]\d+|[a-j]\d+)\b/g,m=>H(m))}</td></tr>`).join("")}</table><div class="check">${s.c}</div>`;
+  d.onclick=()=>select(i+1,d); box.appendChild(d);
+});
+function select(n,el){
+  document.querySelectorAll(".step").forEach(x=>x.classList.toggle("on",x===el));
+  drawn.forEach((g,k)=>g.setAttribute("opacity", items[k].step<=n ? (items[k].step===n?1:.35) : 0));
+}
+drawn.forEach(g=>g.setAttribute("opacity",1));
+</script>
+</body>
+</html>
