@@ -1,0 +1,90 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 4854 >>
+stream
+[] 0 d 0.6 w 48.19 785.20 m 68.03 790.87 l 470.55 790.87 l 490.39 785.20 l 490.39 768.19 l 470.55 762.52 l 498.90 762.52 l 498.90 592.44 l 470.55 592.44 l 490.39 586.77 l 490.39 569.76 l 470.55 564.09 l 68.03 564.09 l 48.19 569.76 l 48.19 586.77 l 68.03 592.44 l 39.69 592.44 l 39.69 762.52 l 68.03 762.52 l 48.19 768.19 l h S
+0.88 g [] 0 d 0.6 w 48.19 785.20 m 68.03 790.87 l 68.03 762.52 l 48.19 768.19 l h B 0 g
+0.88 g [] 0 d 0.6 w 470.55 790.87 m 490.39 785.20 l 490.39 768.19 l 470.55 762.52 l h B 0 g
+0.88 g [] 0 d 0.6 w 470.55 592.44 m 490.39 586.77 l 490.39 569.76 l 470.55 564.09 l h B 0 g
+0.88 g [] 0 d 0.6 w 68.03 592.44 m 48.19 586.77 l 48.19 569.76 l 68.03 564.09 l h B 0 g
+[4 3] 0 d 0.6 w 68.03 762.52 m 470.55 762.52 l S
+[4 3] 0 d 0.6 w 68.03 592.44 m 470.55 592.44 l S
+[4 3] 0 d 0.6 w 68.03 762.52 m 68.03 592.44 l S
+[4 3] 0 d 0.6 w 470.55 762.52 m 470.55 592.44 l S
+[4 3] 0 d 0.6 w 68.03 790.87 m 68.03 762.52 l S
+[4 3] 0 d 0.6 w 470.55 790.87 m 470.55 762.52 l S
+[4 3] 0 d 0.6 w 68.03 592.44 m 68.03 564.09 l S
+[4 3] 0 d 0.6 w 470.55 592.44 m 470.55 564.09 l S
+[] 0 d 0.6 w 153.07 751.18 m 232.44 751.18 l 232.44 742.68 l 153.07 742.68 l h S
+[] 0 d 0.6 w 348.66 751.18 m 428.03 751.18 l 428.03 742.68 l 348.66 742.68 l h S
+[] 0 d 0.6 w 153.07 612.28 m 232.44 612.28 l 232.44 603.78 l 153.07 603.78 l h S
+[] 0 d 0.6 w 348.66 612.28 m 428.03 612.28 l 428.03 603.78 l 348.66 603.78 l h S
+BT /F1 8 Tf 79.37 683.15 Td (TRAY FLOOR  -  breadboard goes here \(this end\)) Tj ET
+BT /F1 8 Tf 340.16 683.15 Td (ESP32 end  ->  USB) Tj ET
+BT /F1 7 Tf 79.37 660.47 Td (Strap: up through slit A, across under the board, down through slit B) Tj ET
+BT /F1 6 Tf 153.07 732.76 Td (slit A) Tj ET
+BT /F1 6 Tf 153.07 616.54 Td (slit B) Tj ET
+BT /F1 8 Tf 39.69 807.87 Td (1. TRAY  -  cut solid lines, cut the 4 slits, fold every dashed line UP, glue grey tabs inside the short walls) Tj ET
+[] 0 d 0.6 w 68.03 462.05 m 90.71 467.72 l 204.09 467.72 l 226.77 462.05 l 226.77 422.36 l 204.09 416.69 l 255.12 416.69 l 255.12 357.17 l 204.09 357.17 l 226.77 351.50 l 226.77 311.81 l 204.09 306.14 l 90.71 306.14 l 68.03 311.81 l 68.03 351.50 l 90.71 357.17 l 39.69 357.17 l 39.69 416.69 l 90.71 416.69 l 68.03 422.36 l h S
+0.88 g [] 0 d 0.6 w 68.03 462.05 m 90.71 467.72 l 90.71 416.69 l 68.03 422.36 l h B 0 g
+0.88 g [] 0 d 0.6 w 204.09 467.72 m 226.77 462.05 l 226.77 422.36 l 204.09 416.69 l h B 0 g
+0.88 g [] 0 d 0.6 w 204.09 357.17 m 226.77 351.50 l 226.77 311.81 l 204.09 306.14 l h B 0 g
+0.88 g [] 0 d 0.6 w 90.71 357.17 m 68.03 351.50 l 68.03 311.81 l 90.71 306.14 l h B 0 g
+[4 3] 0 d 0.6 w 90.71 416.69 m 204.09 416.69 l S
+[4 3] 0 d 0.6 w 90.71 357.17 m 204.09 357.17 l S
+[4 3] 0 d 0.6 w 90.71 416.69 m 90.71 357.17 l S
+[4 3] 0 d 0.6 w 204.09 416.69 m 204.09 357.17 l S
+[4 3] 0 d 0.6 w 90.71 467.72 m 90.71 416.69 l S
+[4 3] 0 d 0.6 w 204.09 467.72 m 204.09 416.69 l S
+[4 3] 0 d 0.6 w 90.71 357.17 m 90.71 306.14 l S
+[4 3] 0 d 0.6 w 204.09 357.17 m 204.09 306.14 l S
+BT /F1 8 Tf 39.69 481.89 Td (2. ESP RISER  -  fold the same way, stand it UPSIDE DOWN \(open side on the tray floor\)) Tj ET
+BT /F1 7 Tf 102.05 399.69 Td (top: ESP32 lies here) Tj ET
+BT /F1 7 Tf 102.05 385.51 Td (pins + jumper plugs hang) Tj ET
+BT /F1 7 Tf 102.05 374.17 Td (down each side of it) Tj ET
+[] 0 d 0.6 w 340.16 445.04 m 430.87 445.04 l 430.87 360.00 l 340.16 360.00 l h S
+[4 3] 0 d 0.6 w 340.16 422.36 m 430.87 422.36 l S
+BT /F1 6 Tf 345.83 430.87 Td (glue on floor) Tj ET
+BT /F1 7 Tf 345.83 388.35 Td (end stop 1) Tj ET
+[] 0 d 0.6 w 453.54 445.04 m 544.25 445.04 l 544.25 360.00 l 453.54 360.00 l h S
+[4 3] 0 d 0.6 w 453.54 422.36 m 544.25 422.36 l S
+BT /F1 6 Tf 459.21 430.87 Td (glue on floor) Tj ET
+BT /F1 7 Tf 459.21 388.35 Td (end stop 2) Tj ET
+BT /F1 8 Tf 340.16 459.21 Td (3. END STOPS  -  fold, glue at each ESP end) Tj ET
+BT /F1 7 Tf 340.16 337.32 Td (Stop 2 \(USB end\): cut a 13 mm notch for the cable) Tj ET
+[] 0 d 1.2 w 39.69 260.79 m 181.42 260.79 l S
+[] 0 d 1.2 w 39.69 266.46 m 39.69 255.12 l S
+[] 0 d 1.2 w 181.42 266.46 m 181.42 255.12 l S
+BT /F1 8 Tf 192.76 256.54 Td (<- must measure exactly 50 mm. Print at 100% / Actual size, NOT 'fit to page'.) Tj ET
+BT /F1 8 Tf 39.69 229.61 Td (Use thin card: cereal box, 250-300 gsm. Score folds with an empty pen + ruler first.) Tj ET
+BT /F1 8 Tf 39.69 212.60 Td (Glue: Fevicol / glue stick / double tape. Tape the breadboard's sticky back onto the floor.) Tj ET
+BT /F1 8 Tf 39.69 195.59 Td (ESP32 sits on the riser, chip side up, pins pointing down. The riser lifts it 18 mm so) Tj ET
+BT /F1 8 Tf 39.69 178.58 Td (the jumper plugs on its pins fit underneath. Wires leave sideways between the end stops.) Tj ET
+BT /F1 8 Tf 39.69 161.57 Td (Same layout as the 3D printed sled \(cad/sled.scad\): test fit and strap position on paper first.) Tj ET
+BT /F1 7 Tf 39.69 19.84 Td (WristTap paper sled  -  A4, true size) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000247 00000 n 
+0000005153 00000 n 
+trailer << /Size 6 /Root 1 0 R >>
+startxref
+5223
+%%EOF
