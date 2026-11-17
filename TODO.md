@@ -1,6 +1,6 @@
 # WristTap: one mini breadboard (no solder)
 
-Deadline: demo tomorrow (18 Nov). Guide: minibb.html (10 rows of one half breadboard).
+Deadline: demo tomorrow (18 Nov). Guide: setup.html (click-through, live checks). Reference: minibb.html.
 
 - [ ] **1. Tell your friend: skip the big box + lid** · who: you · needs: nothing → gives: pods + hand shell
 - [ ] **2. Baseline test** (./check.sh, tap every disc, press every FSR) · who: you → gives: proof all sensors work before rewiring
