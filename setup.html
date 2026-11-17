@@ -61,7 +61,7 @@ button:disabled{opacity:.35;cursor:default}
 /* live check */
 .live{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px;display:none}
 .live.show{display:block}
-.live h4{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:8px}
+.live h2{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:8px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--bad);display:inline-block}
 .dot.on{background:var(--ok)}
 .crit{display:grid;gap:6px;font-size:14px}
@@ -102,7 +102,7 @@ kbd{font:12px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
         <p class="why" id="why"></p>
         <div class="where" id="where"></div>
         <div class="live" id="live">
-          <h4><span class="dot" id="ldot"></span><span id="lstat">Waiting for the band…</span></h4>
+          <h2><span class="dot" id="ldot"></span><span id="lstat">Waiting for the band…</span></h2>
           <div class="crit" id="crit"></div>
           <div class="cmd"><code id="cmdtxt">cd ~/Projects/WristTap && ./demo.sh --no-open</code><button id="copy">Copy</button></div>
           <div class="honest">Run that in Terminal once (with USB plugged in) and leave it running. The boxes turn green on their own.</div>
