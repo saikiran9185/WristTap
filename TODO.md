@@ -1,4 +1,4 @@
-# WristTap: one mini breadboard (no solder)
+# WristTap: one half breadboard, 30 rows (no solder)
 
 Deadline: demo tomorrow (18 Nov). Guide: setup.html (click-through, live checks). Reference: minibb.html.
 
@@ -11,7 +11,7 @@ Deadline: demo tomorrow (18 Nov). Guide: setup.html (click-through, live checks)
 - [ ] **7. Piezo 0** · check: tap → hundreds
 - [ ] **8. Piezos 1–3** · check: taptest_all.py diagonal
 - [ ] **9. FSRs** · check: 1000–4000 pressed
-- [ ] **10. (optional) Cut the board after row 10** · cut-off: skip if no saw
+- [x] **10. Cut the board**: dropped, using all 30 rows (18 Nov)
 - [ ] **11. (optional) Me: shrink the printed box to fit ESP32 + mini board** · needs: 10 decided
 - [ ] **12. Demo over Bluetooth** (./demo.sh --ble)
 

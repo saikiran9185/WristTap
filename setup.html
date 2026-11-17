@@ -83,12 +83,12 @@ kbd{font:12px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
 <div class="wrap">
   <div class="top">
     <h1>WristTap setup</h1>
-    <span class="sub">One small breadboard, one wire per step. Press <kbd>→</kbd> for the next wire. Keep USB unplugged until a check step asks for it.</span>
+    <span class="sub">One half breadboard (30 rows), one wire per step. Press <kbd>→</kbd> for the next wire. Keep USB unplugged until a check step asks for it.</span>
   </div>
   <div class="chips" id="chips"></div>
   <div class="main">
     <div class="stage">
-      <svg id="svg" viewBox="0 0 1000 640" aria-label="Breadboard with the ESP32 on the left and the sensors on the right"></svg>
+      <svg id="svg" viewBox="0 0 1000 880" aria-label="Breadboard with the ESP32 on the left and the sensors on the right"></svg>
       <div class="legend">
         <span><i style="background:var(--red)"></i>3V3 power</span><span><i style="background:var(--gnd)"></i>GND</span>
         <span><i style="background:var(--sda)"></i>SDA</span><span><i style="background:var(--scl)"></i>SCL</span>
@@ -122,30 +122,29 @@ const NS="http://www.w3.org/2000/svg", svg=document.getElementById("svg");
 const E=(t,a,p=svg)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
 const T=(x,y,s,o={},p=svg)=>{const e=E("text",{x,y,"font-size":o.fs||12,fill:o.fill||"#4a4f55","text-anchor":o.a||"middle","font-weight":o.w||400},p);e.textContent=s;return e;};
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const RY=r=>118+(r-1)*44;
+const RY=r=>118+(r-1)*24;
 const CX={"T+":282,"T-":312,a:362,b:392,c:422,d:452,e:482,f:542,g:572,h:602,i:632,j:662,"B+":712,"B-":742};
 const railHas=r=>r%6!==0;
 const P=h=>{const m=h.match(/^([TB][+-]|[a-j])(\d+)$/);return {x:CX[m[1]],y:RY(+m[2]),col:m[1],row:+m[2]};};
 
 /* board */
-E("rect",{x:258,y:72,width:510,height:470,rx:12,fill:"var(--board)",stroke:"#cfcfcb"});
-E("rect",{x:502,y:84,width:20,height:446,rx:3,fill:"#e2e2de"});
+E("rect",{x:258,y:72,width:510,height:770,rx:12,fill:"var(--board)",stroke:"#cfcfcb"});
+E("rect",{x:502,y:84,width:20,height:746,rx:3,fill:"#e2e2de"});
 T(512,66,"centre gap",{fs:11,fill:"#8a8f95"});
 const strips={};
 const stripRect=(key,x,y,w,h)=>{strips[key]=E("rect",{x,y,width:w,height:h,rx:6,class:"strip"});};
-["T+","T-","B+","B-"].forEach(k=>stripRect(k,CX[k]-10,96,20,430));
-for(let r=1;r<=10;r++){stripRect("L"+r,CX.a-12,RY(r)-12,CX.e-CX.a+24,24);stripRect("R"+r,CX.f-12,RY(r)-12,CX.j-CX.f+24,24);}
-[["T+","--red"],["T-","--sda"],["B+","--red"],["B-","--sda"]].forEach(([k,c])=>E("line",{x1:CX[k]-14,y1:92,x2:CX[k]-14,y2:530,stroke:`var(${c})`,"stroke-width":2,opacity:.6}));
+["T+","T-","B+","B-"].forEach(k=>stripRect(k,CX[k]-10,96,20,730));
+for(let r=1;r<=30;r++){stripRect("L"+r,CX.a-12,RY(r)-9,CX.e-CX.a+24,18);stripRect("R"+r,CX.f-12,RY(r)-9,CX.j-CX.f+24,18);}
+[["T+","--red"],["T-","--sda"],["B+","--red"],["B-","--sda"]].forEach(([k,c])=>E("line",{x1:CX[k]-14,y1:92,x2:CX[k]-14,y2:830,stroke:`var(${c})`,"stroke-width":2,opacity:.6}));
 T(CX["T+"],90,"+",{fs:13,fill:"var(--red)",w:700});T(CX["T-"],90,"−",{fs:15,fill:"var(--sda)",w:700});
 T(CX["B+"],90,"+",{fs:13,fill:"var(--red)",w:700});T(CX["B-"],90,"−",{fs:15,fill:"var(--sda)",w:700});
 for(const k of "abcdefghij")T(CX[k],90,k,{fs:12,fill:"#5d6369",w:600});
 const holes={};
-for(let r=1;r<=10;r++){
+for(let r=1;r<=30;r++){
   T(244,RY(r)+4,r,{fs:12,fill:"#5d6369",w:600});
   for(const k in CX){ if(k.length===2&&!railHas(r))continue; holes[k+r]=E("rect",{x:CX[k]-5,y:RY(r)-5,width:10,height:10,rx:2,class:"hole"}); }
 }
-T(512,566,"✂ optional: cut the board here, after row 10",{fs:12,fill:"var(--bad)",w:600});
-E("line",{x1:258,y1:552,x2:768,y2:552,stroke:"var(--bad)","stroke-width":1.5,"stroke-dasharray":"7 5"});
+T(512,862,"rows 29–30 stay free (for the button later)",{fs:12,fill:"#8a8f95"});
 
 /* ESP32 (left) */
 const ESP_L=["EN","VP 36","VN 39","D34","D35","D32","D33","D25","D26","D27","D14","D12","D13","GND","VIN"];
@@ -168,10 +167,10 @@ function sensor(id,x,y,w,h,fill,label,sub,pins){
   else {E("rect",{x,y,width:w,height:h,rx:6,fill},g);T(x+w/2,y+h/2-2,label,{fs:12.5,fill:"#fff",w:700},g);T(x+w/2,y+h/2+13,sub,{fs:10,fill:"#e6e9ef"},g);}
   pins.forEach(([name,dx,dy])=>{SRC[id+":"+name]={x:x+dx,y:y+dy};});
 }
-sensor("mpu1",830,40,140,56,"#2b6cb0","MPU #1","forearm",[["VCC",0,8],["GND",0,18],["AD0",0,28],["SDA",0,38],["SCL",0,48]]);
-sensor("mpu2",830,116,140,56,"#6b4fb8","MPU #2","back of hand",[["VCC",0,8],["GND",0,18],["AD0",0,28],["SDA",0,38],["SCL",0,48]]);
-[0,1,2,3].forEach(k=>sensor("pz"+k,830,200+k*68,44,44,"","Piezo "+k,["little-finger bone","inner wrist","thumb bone","top of wrist"][k],[["red",4,14],["black",4,30]]));
-[0,1].forEach(k=>sensor("fsr"+k,830,480+k*62,36,36,"","FSR "+k,"inner forearm",[["A",2,10],["B",2,26]]));
+sensor("mpu1",830,150,140,56,"#2b6cb0","MPU #1","forearm",[["VCC",0,8],["GND",0,18],["AD0",0,28],["SDA",0,38],["SCL",0,48]]);
+sensor("mpu2",830,222,140,56,"#6b4fb8","MPU #2","back of hand",[["VCC",0,8],["GND",0,18],["AD0",0,28],["SDA",0,38],["SCL",0,48]]);
+[0,1,2,3].forEach(k=>sensor("pz"+k,830,RY([14,17,20,23][k])-22,44,44,"","Piezo "+k,["little-finger bone","inner wrist","thumb bone","top of wrist"][k],[["red",4,14],["black",4,30]]));
+[0,1].forEach(k=>sensor("fsr"+k,830,RY([26,28][k])-18,36,36,"","FSR "+k,"inner forearm",[["A",2,10],["B",2,26]]));
 
 /* ============ the build, one item per frame ============ */
 const S=[ // stages
@@ -184,44 +183,44 @@ const C=(st,check,cap,why)=>F.push({st,kind:"check",check,cap,why});
 F.push({st:"start",kind:"intro",cap:"Each sensor needs only one row.",why:"Under every row of 5 holes there's a hidden metal strip. Anything you push into the same strip is connected, like plugs on one extension board. Watch the strips light up as you go."});
 F.push({st:"start",kind:"intro2",cap:"Pull every wire off both old boards first.",why:"Keep the sensors, the ESP32 and the 10 resistors (6× 10 kΩ brown-black-orange, 4× 1 MΩ brown-black-green). USB stays unplugged while you wire."});
 W("pow","esp:R:3V3","T+1","--red","ESP32 3V3 → left red line, hole T+1","Now the whole left red line carries 3.3 V. Every sensor takes its power from here.");
-W("pow","esp:R:GND","T-8","--gnd","ESP32 GND (right side) → left blue line, T-8","The left blue line is now ground (GND).");
-W("pow","esp:L:GND","B-8","--gnd","ESP32 GND (left side) → right blue line, B-8","The right blue line is ground too. The right red line is never used.");
+W("pow","esp:R:GND","T-2","--gnd","ESP32 GND (right side) → left blue line, T-2","The left blue line is now ground (GND).");
+W("pow","esp:L:GND","B-2","--gnd","ESP32 GND (left side) → right blue line, B-2","The right blue line is ground too. The right red line is never used.");
 C("pow","power","Check: plug in USB.","The ESP32's red LED should light, and the reader sees about 500 packets a second.");
-W("m1","mpu1:VCC","T+2","--red","MPU #1 VCC → T+2","Power for the first sensor, from the red line.");
-W("m1","mpu1:GND","B-5","--gnd","MPU #1 GND → B-5","Ground from the right blue line.");
-W("m1","mpu1:AD0","B-10","--gnd","MPU #1 AD0 → B-10 (ground)","AD0 on ground gives this sensor the name 0x68, so the ESP32 can tell the two MPUs apart.");
-W("m1","mpu1:SDA","b5","--sda","MPU #1 SDA → b5","Row 5, left half, is the SDA strip: the data wire both MPUs share.");
-W("m1","mpu1:SCL","i5","--scl","MPU #1 SCL → i5","Row 5, right half, is the SCL strip: the clock wire both MPUs share.");
-W("m1","esp:R:D21","a5","--sda","ESP32 D21 → a5","D21 joins the SDA strip. The ESP32 now talks to MPU #1's data line.");
-W("m1","esp:R:D22","j5","--scl","ESP32 D22 → j5","D22 joins the SCL strip.");
+W("m1","mpu1:VCC","T+4","--red","MPU #1 VCC → T+4","Power for the first sensor, from the red line.");
+W("m1","mpu1:GND","B-4","--gnd","MPU #1 GND → B-4","Ground from the right blue line.");
+W("m1","mpu1:AD0","B-5","--gnd","MPU #1 AD0 → B-5 (ground)","AD0 on ground gives this sensor the name 0x68, so the ESP32 can tell the two MPUs apart.");
+W("m1","mpu1:SDA","c8","--sda","MPU #1 SDA → c8","Row 8, left half, is the SDA strip: the data wire both MPUs share.");
+W("m1","mpu1:SCL","h8","--scl","MPU #1 SCL → h8","Row 8, right half, is the SCL strip: the clock wire both MPUs share.");
+W("m1","esp:R:D21","a8","--sda","ESP32 D21 → a8","D21 joins the SDA strip. One empty hole between each plug, so they're easy to push in.");
+W("m1","esp:R:D22","j8","--scl","ESP32 D22 → j8","D22 joins the SCL strip.");
 C("m1","imu1","Check MPU #1.","Plug in USB. IMU 1 should appear and move when you tilt it.");
-W("m2","mpu2:VCC","T+3","--red","MPU #2 VCC → T+3","Power for the hand sensor.");
-W("m2","mpu2:AD0","T+4","--red","MPU #2 AD0 → T+4 (3V3)","AD0 on 3V3 gives this one the name 0x69. Different from MPU #1, so both can share the same two wires.");
+W("m2","mpu2:VCC","T+9","--red","MPU #2 VCC → T+9","Power for the hand sensor.");
+W("m2","mpu2:AD0","T+10","--red","MPU #2 AD0 → T+10 (3V3)","AD0 on 3V3 gives this one the name 0x69. Different from MPU #1, so both can share the same two wires.");
 W("m2","mpu2:GND","B-9","--gnd","MPU #2 GND → B-9","Ground.");
-W("m2","mpu2:SDA","c5","--sda","MPU #2 SDA → c5","Same strip as MPU #1's SDA and D21. Three plugs, one strip, one connection.");
-W("m2","mpu2:SCL","h5","--scl","MPU #2 SCL → h5","Same strip as the other SCL wires.");
+W("m2","mpu2:SDA","e8","--sda","MPU #2 SDA → e8","Same strip as MPU #1's SDA and D21. Three plugs, one strip, one connection.");
+W("m2","mpu2:SCL","f8","--scl","MPU #2 SCL → f8","Same strip as the other SCL wires.");
 C("m2","imu2","Check both MPUs.","Both IMU 1 and IMU 2 should be live.");
-const PZ=[["D32",1],["D33",2],["D34",3],["D35",4]];
+const PZ=[["D32",14],["D33",17],["D34",20],["D35",23]];
 PZ.forEach(([pin,r],k)=>{
   const st=k===0?"p0":"p13", pre=k===0?"":`Disc ${k}: `;
-  W(st,`pz${k}:red`,`a${r}`,"--red",`${pre}Piezo ${k} red wire → a${r}`,k===0?`Row ${r} belongs to piezo ${k}. Its red wire goes in the left half.`:`Same pattern as piezo 0, one row down.`);
-  R(st,`b${r}`,`T-${r}`,"1M",`${pre}1 MΩ: b${r} → T-${r}`,k===0?"The 1 MΩ (brown-black-green) drains the disc back to zero after each tap, so the next tap reads clearly.":"Drain resistor to ground.");
+  W(st,`pz${k}:red`,`a${r}`,"--red",`${pre}Piezo ${k} red wire → a${r}`,k===0?`Row ${r} belongs to piezo ${k}. Two empty rows above and below, so nothing touches.`:`Same pattern as piezo 0, three rows down.`);
+  R(st,`c${r}`,`T-${r}`,"1M",`${pre}1 MΩ: c${r} → T-${r}`,k===0?"The 1 MΩ (brown-black-green) drains the disc back to zero after each tap. Without it the number never returns to 0.":"Drain resistor to ground. Push both legs fully in.");
   R(st,`e${r}`,`f${r}`,"10k",`${pre}10 kΩ across the gap: e${r} → f${r}`,k===0?"The 10 kΩ (brown-black-orange) jumps the centre gap. It's a speed bump that protects the ESP32 pin from the disc's spike.":"Bridge the centre gap.");
   W(st,`esp:L:${pin}`,`j${r}`,"--sig",`${pre}ESP32 ${pin} → j${r}`,k===0?`The right half of row ${r} is the piezo's signal. ${pin} reads it.`:`${pin} reads disc ${k}.`);
   W(st,`pz${k}:black`,`B-${r}`,"--gnd",`${pre}Piezo ${k} black wire → B-${r}`,"Disc ground to the right blue line.");
-  if(k===0) C("p0","pz0","Check piezo 0: tap the disc.","Its number jumps to hundreds when you tap and sits near 0 at rest.");
+  if(k===0) C("p0","pz0","Check piezo 0: tap the disc.","It sits near 0 at rest and jumps to hundreds on a tap, then falls back to 0.");
 });
-C("p13","pz13","Check discs 1, 2, 3: tap each one.","Each disc should light up on its own.");
-W("fsr","fsr0:A","T+5","--red","FSR 0 leg A → T+5","One leg of the squeeze sensor takes 3.3 V.");
-W("fsr","fsr0:B","a7","--fsr","FSR 0 leg B → a7","Row 7 left is FSR 0. (Row 6 is skipped: your side lines have no hole there.)");
-W("fsr","esp:L:VP","b7","--sig","ESP32 VP → b7","VP (pin 36) measures FSR 0.");
-R("fsr","c7","T-7","10k","10 kΩ: c7 → T-7","This 10 kΩ turns 'how hard you press' into a voltage the ESP32 can read.");
-W("fsr","fsr1:A","T+7","--red","FSR 1 leg A → T+7","Second squeeze sensor, power.");
-W("fsr","fsr1:B","j7","--fsr","FSR 1 leg B → j7","Row 7 right is FSR 1.");
-W("fsr","esp:L:VN","i7","--sig","ESP32 VN → i7","VN (pin 39) measures FSR 1.");
-R("fsr","h7","B-7","10k","10 kΩ: h7 → B-7","Same job as the other one, on the right side.");
+C("p13","pz13","Check discs 1, 2, 3: tap each one.","Each disc lights up on its own and falls back to 0. If one wanders at rest, push its 1 MΩ in again.");
+W("fsr","fsr0:A","T+26","--red","FSR 0 leg A → T+26","One leg of the squeeze sensor takes 3.3 V.");
+W("fsr","fsr0:B","a26","--fsr","FSR 0 leg B → a26","Row 26, left half, is FSR 0.");
+R("fsr","c26","T-26","10k","10 kΩ: c26 → T-26","This 10 kΩ turns 'how hard you press' into a voltage the ESP32 can read.");
+W("fsr","esp:L:VP","e26","--sig","ESP32 VP → e26","VP (pin 36) measures FSR 0.");
+W("fsr","fsr1:A","T+28","--red","FSR 1 leg A → T+28","Second squeeze sensor, power.");
+W("fsr","fsr1:B","a28","--fsr","FSR 1 leg B → a28","Row 28 is FSR 1. Same pattern, two rows down.");
+R("fsr","c28","T-28","10k","10 kΩ: c28 → T-28","Same job as the other one.");
+W("fsr","esp:L:VN","e28","--sig","ESP32 VN → e28","VN (pin 39) measures FSR 1.");
 C("fsr","fsr","Check: squeeze each FSR.","About 0 at rest, over 1000 when pressed.");
-F.push({st:"end",kind:"done",cap:"Done. 43 plugs, one small board.",why:"Optional: cut the board after row 10 with a fine saw. Then run ./demo.sh --ble with the power bank and show the demo."});
+F.push({st:"end",kind:"done",cap:"Done. Every part has its own row.",why:"Rows 29–30 are free for the button. Run ./demo.sh --ble with the power bank and show the demo."});
 
 /* ============ drawing items ============ */
 const layer=E("g",{});
@@ -255,13 +254,13 @@ function stripOf(h){const p=P(h); if(p.col.length===2) return p.col; return ("ab
 
 /* ============ stepper ============ */
 let cur=0, playing=null;
-try{ const s=+localStorage.getItem("wt-setup-step"); if(s>0&&s<F.length) cur=s; }catch(e){}
+try{ const s=+localStorage.getItem("wt-setup-step-30"); if(s>0&&s<F.length) cur=s; }catch(e){}
 const chipsEl=document.getElementById("chips");
 S.forEach(s=>{const b=document.createElement("button");b.className="chip";b.textContent=s.name;b.dataset.st=s.id;
   b.onclick=()=>{const i=F.findIndex(f=>f.st===s.id);if(i>=0)go(i);};chipsEl.appendChild(b);});
 function go(i){
   cur=Math.max(0,Math.min(F.length-1,i));
-  try{localStorage.setItem("wt-setup-step",cur);}catch(e){}
+  try{localStorage.setItem("wt-setup-step-30",cur);}catch(e){}
   const f=F[cur];
   F.forEach((g,k)=>{ const n=nodes[k]; if(!n) return;
     const show=k<=cur;
