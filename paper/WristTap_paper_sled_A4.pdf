@@ -9,7 +9,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 4854 >>
+<< /Length 9427 >>
 stream
 [] 0 d 0.6 w 48.19 785.20 m 68.03 790.87 l 470.55 790.87 l 490.39 785.20 l 490.39 768.19 l 470.55 762.52 l 498.90 762.52 l 498.90 592.44 l 470.55 592.44 l 490.39 586.77 l 490.39 569.76 l 470.55 564.09 l 68.03 564.09 l 48.19 569.76 l 48.19 586.77 l 68.03 592.44 l 39.69 592.44 l 39.69 762.52 l 68.03 762.52 l 48.19 768.19 l h S
 0.88 g [] 0 d 0.6 w 48.19 785.20 m 68.03 790.87 l 68.03 762.52 l 48.19 768.19 l h B 0 g
@@ -60,16 +60,132 @@ BT /F1 7 Tf 345.83 388.35 Td (end stop 1) Tj ET
 BT /F1 6 Tf 459.21 430.87 Td (glue on floor) Tj ET
 BT /F1 7 Tf 459.21 388.35 Td (end stop 2) Tj ET
 BT /F1 8 Tf 340.16 459.21 Td (3. END STOPS  -  fold, glue at each ESP end) Tj ET
-BT /F1 7 Tf 340.16 337.32 Td (Stop 2 \(USB end\): cut a 13 mm notch for the cable) Tj ET
-[] 0 d 1.2 w 39.69 260.79 m 181.42 260.79 l S
-[] 0 d 1.2 w 39.69 266.46 m 39.69 255.12 l S
-[] 0 d 1.2 w 181.42 266.46 m 181.42 255.12 l S
-BT /F1 8 Tf 192.76 256.54 Td (<- must measure exactly 50 mm. Print at 100% / Actual size, NOT 'fit to page'.) Tj ET
-BT /F1 8 Tf 39.69 229.61 Td (Use thin card: cereal box, 250-300 gsm. Score folds with an empty pen + ruler first.) Tj ET
-BT /F1 8 Tf 39.69 212.60 Td (Glue: Fevicol / glue stick / double tape. Tape the breadboard's sticky back onto the floor.) Tj ET
-BT /F1 8 Tf 39.69 195.59 Td (ESP32 sits on the riser, chip side up, pins pointing down. The riser lifts it 18 mm so) Tj ET
-BT /F1 8 Tf 39.69 178.58 Td (the jumper plugs on its pins fit underneath. Wires leave sideways between the end stops.) Tj ET
-BT /F1 8 Tf 39.69 161.57 Td (Same layout as the 3D printed sled \(cad/sled.scad\): test fit and strap position on paper first.) Tj ET
+BT /F1 7 Tf 340.16 314.65 Td (Stop 2 \(USB end\): cut a 13 mm notch for the cable) Tj ET
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 68.03 547.09 m 470.55 547.09 l S
+[] 0 d 0.4 w 68.03 551.62 m 68.03 542.55 l S
+[] 0 d 0.4 w 470.55 551.62 m 470.55 542.55 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 253.54 550.49 Td (floor 142) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 39.69 527.24 m 498.90 527.24 l S
+[] 0 d 0.4 w 39.69 531.78 m 39.69 522.71 l S
+[] 0 d 0.4 w 498.90 531.78 m 498.90 522.71 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 232.54 530.65 Td (whole sheet piece 162) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 521.57 762.52 m 521.57 592.44 l S
+[] 0 d 0.4 w 517.04 762.52 m 526.11 762.52 l S
+[] 0 d 0.4 w 517.04 592.44 m 526.11 592.44 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 0 1 -1 0 518.17 663.48 Tm (floor 60) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 521.57 790.87 m 521.57 762.52 l S
+[] 0 d 0.4 w 517.04 790.87 m 526.11 790.87 l S
+[] 0 d 0.4 w 517.04 762.52 m 526.11 762.52 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 0 1 -1 0 518.17 773.19 Tm (10) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 521.57 592.44 m 521.57 564.09 l S
+[] 0 d 0.4 w 517.04 592.44 m 526.11 592.44 l S
+[] 0 d 0.4 w 517.04 564.09 m 526.11 564.09 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 0 1 -1 0 518.17 574.77 Tm (10) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 549.92 790.87 m 549.92 564.09 l S
+[] 0 d 0.4 w 545.39 790.87 m 554.46 790.87 l S
+[] 0 d 0.4 w 545.39 564.09 m 554.46 564.09 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 0 1 -1 0 546.52 663.48 Tm (whole 80) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 48.19 795.12 m 68.03 795.12 l S
+[] 0 d 0.4 w 48.19 799.65 m 48.19 790.58 l S
+[] 0 d 0.4 w 68.03 799.65 m 68.03 790.58 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 49.36 798.52 Td (tab 9) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 68.03 711.50 m 153.07 711.50 l S
+[] 0 d 0.4 w 68.03 716.03 m 68.03 706.96 l S
+[] 0 d 0.4 w 153.07 716.03 m 153.07 706.96 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 107.05 714.90 Td (30) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 153.07 711.50 m 348.66 711.50 l S
+[] 0 d 0.4 w 153.07 716.03 m 153.07 706.96 l S
+[] 0 d 0.4 w 348.66 716.03 m 348.66 706.96 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 222.87 714.90 Td (41 between slits) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 348.66 711.50 m 428.03 711.50 l S
+[] 0 d 0.4 w 348.66 716.03 m 348.66 706.96 l S
+[] 0 d 0.4 w 428.03 716.03 m 428.03 706.96 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 384.85 714.90 Td (28) Tj ET 0 g
+0 G
+0.75 0.2 0.1 rg BT /F1 7 Tf 171.29 626.46 Td (slits 28 long x 3 wide, 4 mm in from each long fold line) Tj ET 0 g
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 90.71 289.13 m 204.09 289.13 l S
+[] 0 d 0.4 w 90.71 293.67 m 90.71 284.60 l S
+[] 0 d 0.4 w 204.09 293.67 m 204.09 284.60 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 136.90 292.54 Td (top 40) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 39.69 272.13 m 255.12 272.13 l S
+[] 0 d 0.4 w 39.69 276.66 m 39.69 267.59 l S
+[] 0 d 0.4 w 255.12 276.66 m 255.12 267.59 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 133.40 275.53 Td (whole 76) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 272.13 416.69 m 272.13 357.17 l S
+[] 0 d 0.4 w 267.59 416.69 m 276.66 416.69 l S
+[] 0 d 0.4 w 267.59 357.17 m 276.66 357.17 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 0 1 -1 0 268.72 383.43 Tm (21) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 272.13 467.72 m 272.13 416.69 l S
+[] 0 d 0.4 w 267.59 467.72 m 276.66 467.72 l S
+[] 0 d 0.4 w 267.59 416.69 m 276.66 416.69 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 0 1 -1 0 268.72 438.70 Tm (18) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 272.13 357.17 m 272.13 306.14 l S
+[] 0 d 0.4 w 267.59 357.17 m 276.66 357.17 l S
+[] 0 d 0.4 w 267.59 306.14 m 276.66 306.14 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 0 1 -1 0 268.72 328.15 Tm (18) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 294.80 467.72 m 294.80 306.14 l S
+[] 0 d 0.4 w 290.27 467.72 m 299.34 467.72 l S
+[] 0 d 0.4 w 290.27 306.14 m 299.34 306.14 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 0 1 -1 0 291.40 372.93 Tm (whole 57) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 340.16 348.66 m 430.87 348.66 l S
+[] 0 d 0.4 w 340.16 353.20 m 340.16 344.13 l S
+[] 0 d 0.4 w 430.87 353.20 m 430.87 344.13 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 382.01 352.06 Td (32) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 561.26 445.04 m 561.26 360.00 l S
+[] 0 d 0.4 w 556.72 445.04 m 565.80 445.04 l S
+[] 0 d 0.4 w 556.72 360.00 m 565.80 360.00 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 0 1 -1 0 557.86 399.02 Tm (30) Tj ET 0 g
+0 G
+0.75 0.2 0.1 RG
+[] 0 d 0.4 w 328.82 445.04 m 328.82 422.36 l S
+[] 0 d 0.4 w 324.28 445.04 m 333.35 445.04 l S
+[] 0 d 0.4 w 324.28 422.36 m 333.35 422.36 l S
+0.75 0.2 0.1 rg BT /F1 7 Tf 0 1 -1 0 325.42 431.95 Tm (8) Tj ET 0 g
+0 G
+[] 0 d 1.2 w 39.69 223.94 m 181.42 223.94 l S
+[] 0 d 1.2 w 39.69 229.61 m 39.69 218.27 l S
+[] 0 d 1.2 w 181.42 229.61 m 181.42 218.27 l S
+BT /F1 8 Tf 192.76 219.69 Td (<- must measure exactly 50 mm. Print at 100% / Actual size, NOT 'fit to page'.) Tj ET
+BT /F1 8 Tf 39.69 192.76 Td (All measurements in mm \(red\). Floor = inside size; card adds about 0.5 mm per wall.) Tj ET
+BT /F1 8 Tf 39.69 175.75 Td (Use thin card: cereal box, 250-300 gsm. Score folds with an empty pen + ruler first.) Tj ET
+BT /F1 8 Tf 39.69 158.74 Td (Glue: Fevicol / glue stick / double tape. Tape the breadboard's sticky back onto the floor.) Tj ET
+BT /F1 8 Tf 39.69 141.73 Td (ESP32 sits on the riser, chip side up, pins pointing down. The riser lifts it 18 mm so) Tj ET
+BT /F1 8 Tf 39.69 124.72 Td (the jumper plugs on its pins fit underneath. Wires leave sideways between the end stops.) Tj ET
+BT /F1 8 Tf 39.69 107.72 Td (Same layout as the 3D printed sled \(cad/sled.scad\): test fit and strap position on paper first.) Tj ET
 BT /F1 7 Tf 39.69 19.84 Td (WristTap paper sled  -  A4, true size) Tj ET
 endstream
 endobj
@@ -83,8 +199,8 @@ xref
 0000000058 00000 n 
 0000000115 00000 n 
 0000000247 00000 n 
-0000005153 00000 n 
+0000009726 00000 n 
 trailer << /Size 6 /Root 1 0 R >>
 startxref
-5223
+9796
 %%EOF

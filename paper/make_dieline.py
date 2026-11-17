@@ -11,6 +11,20 @@ def text(x,y,s,size=8):
     s = s.replace("(", "\\(").replace(")", "\\)")
     ops.append(f"BT /F1 {size} Tf {x*MM:.2f} {(297-y)*MM:.2f} Td ({s}) Tj ET")
 def rect(x,y,w,h): poly([(x,y),(x+w,y),(x+w,y+h),(x,y+h)])
+def tc(x,y,s,size=7,rot=False):
+    s2 = s.replace("(", "\\(").replace(")", "\\)")
+    wpt = len(s)*size*0.5
+    if rot: ops.append(f"0.75 0.2 0.1 rg BT /F1 {size} Tf 0 1 -1 0 {x*MM:.2f} {(297-y)*MM - wpt/2:.2f} Tm ({s2}) Tj ET 0 g")
+    else:   ops.append(f"0.75 0.2 0.1 rg BT /F1 {size} Tf {x*MM - wpt/2:.2f} {(297-y)*MM:.2f} Td ({s2}) Tj ET 0 g")
+def dim(x1,y1,x2,y2,label):
+    """measurement line with end ticks; horizontal if y1==y2 else vertical"""
+    ops.append("0.75 0.2 0.1 RG")
+    line(x1,y1,x2,y2,w=0.4)
+    if y1==y2:
+        line(x1,y1-1.6,x1,y1+1.6,w=0.4); line(x2,y2-1.6,x2,y2+1.6,w=0.4); tc((x1+x2)/2, y1-1.2, label)
+    else:
+        line(x1-1.6,y1,x1+1.6,y1,w=0.4); line(x2-1.6,y2,x2+1.6,y2,w=0.4); tc(x1-1.2, (y1+y2)/2, label, rot=True)
+    ops.append("0 G")
 
 def tray(ox, oy, L, W, h, tab=9, slits=()):
     """open box: base L x W, walls h. Long walls carry glue tabs that tuck inside the short walls."""
@@ -61,18 +75,32 @@ for k in range(2):
     rect(x, oy3, 32, 30); line(x, oy3+8, x+32, oy3+8, dash=True)
     text(x+2, oy3+5, "glue on floor", 6); text(x+2, oy3+20, f"end stop {k+1}", 7)
 text(ox3, oy3-5, "3. END STOPS  -  fold, glue at each ESP end", 8)
-text(ox3, oy3+38, "Stop 2 (USB end): cut a 13 mm notch for the cable", 7)
+text(ox3, oy3+46, "Stop 2 (USB end): cut a 13 mm notch for the cable", 7)
+
+
+# ---- measurements (mm) ----
+# tray: bx=24 by=28, floor 142 x 60, walls 10, tabs 9
+dim(24,104,166,104,"floor 142"); dim(14,111,176,111,"whole sheet piece 162")
+dim(184,28,184,88,"floor 60"); dim(184,18,184,28,"10"); dim(184,88,184,98,"10"); dim(194,18,194,98,"whole 80")
+dim(17,16.5,24,16.5,"tab 9")
+dim(24,46,54,46,"30"); dim(54,46,123,46,"41 between slits"); dim(123,46,151,46,"28")
+tc(95,76,"slits 28 long x 3 wide, 4 mm in from each long fold line")
+# riser: bx=32 by=150, top 40 x 21, sides 18
+dim(32,195,72,195,"top 40"); dim(14,201,90,201,"whole 76")
+dim(96,150,96,171,"21"); dim(96,132,96,150,"18"); dim(96,171,96,189,"18"); dim(104,132,104,189,"whole 57")
+# end stops 32 x 30, fold 8 from the top
+dim(120,174,152,174,"32"); dim(198,140,198,170,"30"); dim(116,140,116,148,"8")
 
 # ---- scale check + notes ----
-y = 205
+y = 218
 line(14, y, 64, y, w=1.2); line(14, y-2, 14, y+2, w=1.2); line(64, y-2, 64, y+2, w=1.2)
 text(68, y+1.5, "<- must measure exactly 50 mm. Print at 100% / Actual size, NOT 'fit to page'.", 8)
-notes = ["Use thin card: cereal box, 250-300 gsm. Score folds with an empty pen + ruler first.",
+notes = ["All measurements in mm (red). Floor = inside size; card adds about 0.5 mm per wall.", "Use thin card: cereal box, 250-300 gsm. Score folds with an empty pen + ruler first.",
          "Glue: Fevicol / glue stick / double tape. Tape the breadboard's sticky back onto the floor.",
          "ESP32 sits on the riser, chip side up, pins pointing down. The riser lifts it 18 mm so",
          "the jumper plugs on its pins fit underneath. Wires leave sideways between the end stops.",
          "Same layout as the 3D printed sled (cad/sled.scad): test fit and strap position on paper first."]
-for i, n in enumerate(notes): text(14, 216 + i*6, n, 8)
+for i, n in enumerate(notes): text(14, 229 + i*6, n, 8)
 text(14, 290, "WristTap paper sled  -  A4, true size", 7)
 
 content = "\n".join(ops).encode()
