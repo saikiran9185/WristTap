@@ -47,12 +47,11 @@ svg text{font-family:-apple-system,system-ui,sans-serif}
 <table>
 <tr><th>Component</th><th>Qty</th><th>Goes in</th><th>Notes</th></tr>
 <tr><td>ESP32 DevKit (30 pin)</td><td class="n">1</td><td>Forearm box, elbow end, raised on two rests</td><td>Pins point down, jumper plugs hang under it. USB port faces the side hole (power-bank cable).</td></tr>
-<tr><td>Half breadboard (400 point)</td><td class="n">1</td><td>Forearm box, wrist end (pocket on the floor)</td><td>Stick it down with its own adhesive back or foam tape. All 10 resistors stay on it.</td></tr>
-<tr><td>Second breadboard</td><td class="n">0</td><td><b>Not used any more</b></td><td>Its wires move to board 1 (section 4). Keep it as a spare.</td></tr>
-<tr><td>MPU6050 #1</td><td class="n">1</td><td>Forearm box, standing on edge in the side channel next to the ESP32</td><td>Foam tape on its back, onto the wall. Plugs point towards the wrist. Measures the forearm.</td></tr>
+<tr><td>Breadboard, 17 × 6 cm (your two joined boards)</td><td class="n">1</td><td>Forearm box, floor pocket, wrist end to middle</td><td><b>Keep all the wiring exactly as it is.</b> Lift the whole board out and drop it in. Foam tape under it; if there's play, a strip of foam along one side.</td></tr>
+<tr><td>MPU6050 #1</td><td class="n">1</td><td>Forearm box, standing on edge in the side channel at the <b>wrist end</b></td><td>Foam tape on its back, onto the wall, plugs pointing to the wrist. Closest to the hand, so it also feels finger taps.</td></tr>
 <tr><td>MPU6050 #2</td><td class="n">1</td><td>Hand shell, back of the hand</td><td>Lies flat on the two rails, tape underneath, ribbon out the wrist end. Measures the hand. MPU #2 minus MPU #1 = wrist bend.</td></tr>
-<tr><td>Piezo discs</td><td class="n">4</td><td>4 piezo pods on the <b>wrist strap</b>: top, thumb side, inside, little-finger side</td><td>Brass side faces the skin. A small loop of tape on the rim holds each disc in its seat. Wires run along the groove.</td></tr>
-<tr><td>FSR 402</td><td class="n">2</td><td>2 FSR pods on the <b>forearm strap</b>, inner forearm (palm side)</td><td>Pad faces the skin, tail runs out of the channel. Gripping or pinching bulges the forearm muscles = squeeze signal.</td></tr>
+<tr><td>Piezo discs</td><td class="n">4</td><td>4 piezo pods on the <b>wrist strap</b> (exact spots in section 3)</td><td>Brass side faces the skin. A small loop of tape on the rim holds each disc in its seat. Wires run along the groove.</td></tr>
+<tr><td>FSR 402</td><td class="n">2</td><td>2 FSR pods on the <b>elbow-end box strap</b>, inner forearm</td><td>Pad faces the skin, tail runs out of the channel. Gripping or pinching bulges the forearm muscles = squeeze signal.</td></tr>
 <tr><td>Resistors 10 kΩ ×6, 1 MΩ ×4</td><td class="n">10</td><td>On the breadboard, exactly where they are now</td><td>Nothing changes.</td></tr>
 <tr><td>Power bank (small, USB)</td><td class="n">1</td><td>On top of the box lid, held by a strap through the 2 tunnels</td><td>Short micro-USB cable into the side hole. Or keep it in a pocket with a longer cable.</td></tr>
 <tr><td>Velcro / elastic straps 25 mm</td><td class="n">4</td><td>Wrist (pods) · forearm (box + FSR pods) · hand (shell) · power bank</td><td>You have 2. For the other 2, use velcro cable ties, elastic + safety pin, or hair ties for the power bank.</td></tr>
@@ -61,43 +60,31 @@ svg text{font-family:-apple-system,system-ui,sans-serif}
 
 <h3>Inside the forearm box (top view)</h3>
 <div class="svgwrap">
-<svg viewBox="0 0 640 330" width="100%" role="img" aria-label="Top view of the forearm box layout">
-  <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#888"/></marker></defs>
-  <!-- scale 4.6 px/mm; inner box 115.4 (x) by 64.1 (y), origin at x=40,y=40 -->
-  <rect x="34.5" y="34.5" width="542" height="306" rx="10" fill="none" stroke="#3d4a5c" stroke-width="11"/>
-  <rect x="40" y="40" width="531" height="295" fill="none" stroke="#3d4a5c" stroke-width="1"/>
-  <!-- channel + fence -->
-  <rect x="40" y="40" width="531" height="35" fill="#2b6cb0" opacity=".10"/>
-  <rect x="40" y="75" width="531" height="5.5" fill="#3d4a5c"/>
-  <!-- breadboard -->
-  <rect x="42" y="82" width="379" height="251" rx="4" fill="#f4f4f4" stroke="#bbb"/>
-  <text x="231" y="205" text-anchor="middle" font-size="16" fill="#333">BREADBOARD</text>
-  <text x="231" y="226" text-anchor="middle" font-size="12" fill="#666">resistors + 3V3/GND lines</text>
-  <!-- MPU1 on edge -->
-  <rect x="428" y="41" width="76" height="26" fill="#2b6cb0"/>
-  <rect x="350" y="45" width="78" height="18" fill="#1a3f6b"/>
-  <text x="466" y="58" text-anchor="middle" font-size="11" fill="#fff">MPU #1</text>
-  <text x="389" y="58" text-anchor="middle" font-size="10" fill="#fff">plugs</text>
-  <!-- ESP32 -->
-  <rect x="438" y="94" width="130" height="237" rx="3" fill="#222"/>
-  <rect x="443" y="96" width="120" height="83" fill="#555"/>
-  <text x="503" y="230" text-anchor="middle" font-size="14" fill="#fff">ESP32</text>
-  <text x="503" y="248" text-anchor="middle" font-size="11" fill="#bbb">pins down</text>
-  <rect x="487" y="327" width="32" height="12" fill="#999"/>
-  <!-- labels -->
-  <text x="40" y="22" font-size="12" fill="#888">◀ WRIST END: wires come in through the notch</text>
-  <text x="571" y="22" text-anchor="end" font-size="12" fill="#888">ELBOW END: lid slides in here ▶</text>
-  <text x="503" y="318" text-anchor="middle" font-size="11" fill="#bbb">USB</text>
-  <text x="590" y="340" text-anchor="end" font-size="11" fill="#888">USB hole in side wall ↓</text>
-  <path d="M6 150 L36 150" stroke="#888" stroke-width="2" marker-end="url(#ar)"/>
-  <text x="4" y="140" font-size="10" fill="#888">wires</text>
+<svg viewBox="0 0 640 260" width="100%" role="img" aria-label="Top view of the forearm box layout">
+  <!-- scale 2.7 px/mm; inner box 203 (x) by 70 (y), origin x=46 y=46 -->
+  <rect x="41" y="41" width="558" height="199" rx="9" fill="none" stroke="#3d4a5c" stroke-width="10"/>
+  <rect x="46" y="46" width="548" height="189" fill="none" stroke="#3d4a5c" stroke-width="1"/>
+  <rect x="46" y="46" width="548" height="21" fill="#2b6cb0" opacity=".10"/>
+  <rect x="46" y="67" width="548" height="3.2" fill="#3d4a5c"/>
+  <rect x="47" y="72" width="460" height="162" rx="4" fill="#f4f4f4" stroke="#bbb"/>
+  <line x1="277" y1="72" x2="277" y2="234" stroke="#ccc" stroke-dasharray="4 3"/>
+  <text x="277" y="150" text-anchor="middle" font-size="15" fill="#333">BREADBOARD 17 × 6 cm</text>
+  <text x="277" y="170" text-anchor="middle" font-size="12" fill="#666">wiring stays exactly as it is now</text>
+  <rect x="100" y="47" width="44" height="15" fill="#2b6cb0"/><rect x="54" y="50" width="46" height="10" fill="#1a3f6b"/>
+  <text x="122" y="59" text-anchor="middle" font-size="10" fill="#fff">MPU #1</text>
+  <rect x="515" y="78" width="77" height="139" rx="3" fill="#222"/><rect x="518" y="80" width="71" height="49" fill="#555"/>
+  <text x="553" y="170" text-anchor="middle" font-size="13" fill="#fff">ESP32</text>
+  <rect x="544" y="214" width="18" height="10" fill="#999"/>
+  <text x="46" y="28" font-size="12" fill="#888">◀ WRIST END: wires in through the notch</text>
+  <text x="594" y="28" text-anchor="end" font-size="12" fill="#888">ELBOW END: lid slides in ▶</text>
+  <text x="594" y="256" text-anchor="end" font-size="11" fill="#888">USB hole (power bank) in the side wall ↑</text>
 </svg>
 </div>
 
 <h3>Sizes</h3>
 <table>
 <tr><th>Part</th><th>Outside size (mm)</th><th>Print</th></tr>
-<tr><td>Forearm box + lid</td><td class="n">69 × 120 × 38 (with tunnels)</td><td rowspan="5">All on one plate: <b>3 h 40 min, 118 g PLA, no supports</b><br><code>cad/print/v2_all_parts.3mf</code></td></tr>
+<tr><td>Forearm box + lid</td><td class="n">75 × 208 × 38 (with tunnels)</td><td rowspan="5">All on one plate: <b>4 h 43 min, 171 g PLA, no supports</b><br><code>cad/print/v2_all_parts.3mf</code><br>Box + lid only: 3 h 26 min, <code>v2_box_and_lid_17cm.3mf</code></td></tr>
 <tr><td>Hand shell + lid</td><td class="n">27 × 40 × 13</td></tr>
 <tr><td>Piezo pod ×4</td><td class="n">31 × 31 × 9.5</td></tr>
 <tr><td>FSR pod ×2</td><td class="n">23 × 31 × 8</td></tr>
@@ -110,33 +97,36 @@ svg text{font-family:-apple-system,system-ui,sans-serif}
 <li>Open <code>cad/print/v2_all_parts.3mf</code> → Print. All 10 parts, no supports.</li>
 <li>While it prints: do section 4 (one breadboard) and test with <code>./check.sh</code>.</li>
 </ol>
-<div class="box">Measurements I assumed (all marked "measure" in <code>cad/config.scad</code>): breadboard 82.5 × 54.5 mm, ESP32 51.5 × 28.3 mm, MPU 21.2 × 16.4 mm, disc 27 mm, FSR pad 18.5 mm, strap 25 mm. If one of yours is different, send me the number and I'll re-slice.</div>
+<div class="box">Measurements used (in <code>cad/config.scad</code>): breadboard 170 × 60 mm (yours), ESP32 51.5 × 28.3 mm, MPU 21.2 × 16.4 mm, disc 27 mm, FSR pad 18.5 mm, strap 25 mm. If one of yours is different, send me the number and I'll re-slice.</div>
 
-<h2>3. How it goes on your arm</h2>
-<figure style="max-width:620px"><img src="cad/png/v2/assembly.png" alt="Everything on the arm"><figcaption>Box on the forearm (power bank on top) · piezo pods round the wrist · hand shell on the back of the hand · FSR pods under the forearm strap.</figcaption></figure>
-<ol class="steps">
-<li><b>Box:</b> forearm strap goes <i>under</i> the box through the 4 side slots, about 2 cm behind the wrist bone. Thread the 2 FSR pods onto the same strap so they sit on the inner forearm.</li>
-<li><b>Wrist strap:</b> thread the 4 piezo pods on (strap goes through the tunnel on each pod's back). Discs face the skin: top, thumb side, inside, little-finger side.</li>
-<li><b>Hand shell:</b> strap round the palm through the two side slots, shell on the back of the hand, ribbon pointing to the wrist.</li>
-<li>Route all wires to the box's wrist-end notch, zip-tie the bundle to the lug, slide the lid on from the elbow end until it <b>clicks</b>. To open: lift the little tongue at the elbow end and slide.</li>
-</ol>
-
-<h2>4. One breadboard instead of two (no solder)</h2>
-<p>Board 1 keeps its piezo, FSR and resistor wiring as it is. Only the MPU wires and their 3V3/GND/SDA/SCL links move onto board 1, into the rows the build guide always planned for them. Unplug USB before moving any wire.</p>
+<h2>3. Where everything sits on your arm (and why)</h2>
+<div class="pics">
+<figure><img src="cad/png/v2/assembly.png" alt="Band on the arm, top"><figcaption>Top: box on the forearm with the power bank, piezo pods round the wrist, hand shell behind the knuckles.</figcaption></figure>
+<figure><img src="cad/png/v2/assembly_under.png" alt="Band on the arm, underside"><figcaption>Underside: two FSR pods on the inner forearm, piezo pods on the wrist.</figcaption></figure>
+</div>
 <table>
-<tr><th>Wire</th><th>Breadboard hole</th><th>Then (already in the guide)</th></tr>
-<tr><td>MPU #1 AD0</td><td class="n">a4</td><td>b4 → blue line 13</td></tr>
-<tr><td>MPU #1 SDA</td><td class="n">a7</td><td>ESP32 D21 → c7</td></tr>
-<tr><td>MPU #1 SCL</td><td class="n">a8</td><td>ESP32 D22 → c8</td></tr>
-<tr><td>MPU #1 GND</td><td class="n">a9</td><td>b9 → blue line 11</td></tr>
-<tr><td>MPU #1 VCC</td><td class="n">a10</td><td>b10 → red line 11</td></tr>
-<tr><td>MPU #2 AD0</td><td class="n">a15</td><td>b15 → <b>red</b> line 13</td></tr>
-<tr><td>MPU #2 SDA</td><td class="n">a18</td><td>b18 → d7</td></tr>
-<tr><td>MPU #2 SCL</td><td class="n">a19</td><td>b19 → e8</td></tr>
-<tr><td>MPU #2 GND</td><td class="n">a20</td><td>b20 → blue line 22</td></tr>
-<tr><td>MPU #2 VCC</td><td class="n">a21</td><td>b21 → red line 22</td></tr>
+<tr><th>Part</th><th>Exact spot</th><th>Why it's the best spot</th></tr>
+<tr><td>Hand shell (MPU #2)</td><td>Back of the hand, in the middle, about 2 cm behind the knuckles. Strap round the palm.</td><td>The back of the hand moves with where you point, so this drives the <b>air mouse</b>. Behind the knuckles it doesn't block a fist.</td></tr>
+<tr><td>Piezo 0</td><td>On the little-finger <b>wrist bone</b> (the bump on the outside of the wrist)</td><td>Bone carries vibration best: <b>finger taps on a table or wall</b> show up here most strongly.</td></tr>
+<tr><td>Piezo 1</td><td><b>Inner wrist</b>, centre, over the tendons (where you'd check a pulse, but in the middle)</td><td>The finger tendons run under it: <b>pinches</b> and tapping your fingers together twitch here.</td></tr>
+<tr><td>Piezo 2</td><td>On the <b>thumb-side wrist bone</b></td><td>Picks up <b>thumb taps</b>. With piezo 0 it tells thumb-side taps from little-finger-side taps.</td></tr>
+<tr><td>Piezo 3</td><td><b>Top of the wrist</b>, centre</td><td>Feels the back-of-hand tendons: <b>finger lifts and flicks</b>, and taps on the back of the hand.</td></tr>
+<tr><td>Wrist strap</td><td>Just <b>below the wrist bones</b>, towards the hand, firm but comfortable</td><td>Discs must press on skin and bone. Loose = weak taps.</td></tr>
+<tr><td>Forearm box (MPU #1 inside)</td><td>Top of the forearm, wrist end 1.5 cm behind the wrist strap</td><td>MPU #1 sits at the box's wrist end: steady forearm angle for the 3D view and the wrist-bend angle, and close enough to feel taps.</td></tr>
+<tr><td>FSR 0 + FSR 1</td><td>Inner forearm, on the <b>elbow-end</b> box strap, side by side about 3 cm apart</td><td>That's the thick part of the finger muscles. Gripping or pinching bulges them = <b>squeeze</b>. Two pads tell a strong grip from a light pinch.</td></tr>
+<tr><td>Power bank</td><td>On the lid, strap through both tunnels</td><td>Keeps the cable short and nothing hanging. A pocket with a longer cable also works.</td></tr>
 </table>
-<div class="box">INT, XDA and XCL are not used: leave those ribbon wires unplugged and tape their ends. Check after moving: <code>./check.sh</code> should show <b>IMU1 ≈ 1 g and IMU2 ≈ 1 g</b>.</div>
+<h3>Putting it on</h3>
+<ol class="steps">
+<li><b>Box:</b> two straps go <i>under</i> the box through the 4 side slots. Thread the 2 FSR pods onto the <b>elbow-end</b> strap so they sit on the inner forearm.</li>
+<li><b>Wrist strap:</b> thread the 4 piezo pods on (strap goes through the tunnel on each pod's back) in the order little-finger bone → inner wrist → thumb bone → top. Brass faces the skin.</li>
+<li><b>Hand shell:</b> strap round the palm through the two side slots, ribbon pointing to the wrist.</li>
+<li>Route all wires to the box's wrist-end notch, zip-tie them to the lug, slide the lid in from the elbow end until it <b>clicks</b>. To open: lift the little tongue and slide.</li>
+</ol>
+<div class="box">The box is 21 cm long, a forearm guard. If its elbow end hits your elbow when you bend your arm, slide the whole box 1–2 cm towards the wrist.</div>
+
+<h2>4. Breadboard: no rewiring</h2>
+<p>Your board is 17 × 6 cm, and the box is now built for that size, so <b>the wiring stays exactly as it is</b>. Unplug USB, lift the board out with all its wires, drop it into the pocket, and put MPU #1 in the side channel at the wrist end. Then plug USB back in and run <code>./check.sh</code>: both IMUs should read about 1 g and every disc should respond to a tap.</p>
 
 <h2>5. Wireless</h2>
 <h3>Bluetooth <span class="tag">tested: 100 packets/s, 0 dropped</span></h3>

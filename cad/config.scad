@@ -34,8 +34,8 @@ esp_pin_span = 38.1; // length of each pin row (15 pins x 2.54)
 esp_lift   = 18.0;   // board underside above the bottom of the carrier: floor 2.4 + jumper plugs 14 + 1.6 spare
 
 /* [Breadboard, 400 point half size] */
-bb_l       = 82.5;   // (measure)
-bb_w       = 54.5;   // (measure)
+bb_l       = 170.0;  // your board as measured: 17 cm (two half boards joined / full size)
+bb_w       = 60.0;   // 6 cm
 bb_h       = 8.5;
 
 /* [Print] */

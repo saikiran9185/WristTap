@@ -87,7 +87,7 @@ module slide_lid_final(iw, il, zg) {
 }
 
 // ── CORE BOX (forearm) ──────────────────────────────────────
-bb_px  = bb_w + 0.8;  bb_py = bb_l + 0.8;     // breadboard pocket
+bb_px  = bb_w + 1.0;  bb_py = bb_l + 1.0;     // breadboard pocket
 ch_w   = 7.6;                                // side channel for MPU #1 (stands on edge)
 fence_t = 1.2;
 zone_gap = 3;
@@ -103,7 +103,7 @@ esp_yc = bb_py + zone_gap + esp_py/2;
 esp_x1 = c_iw/2 - 1.0;                       // USB end of the ESP32 (1 mm from the wall)
 esp_x0 = esp_x1 - esp_l;
 bb_x0  = -c_iw/2 + ch_w + fence_t;           // breadboard pocket, -X edge
-mpu1_y = bb_py + zone_gap - 2;               // MPU #1 board edge with the pins (plugs point to -Y)
+mpu1_y = 20;                                 // MPU #1 at the WRIST end of the box: closest to the hand, feels finger taps best (plugs point to -Y)
 
 module core_base() {
     ow = c_iw + 2*c_wall;
@@ -259,7 +259,7 @@ module bb_gauge() {
 }
 
 // ── Dummy parts (virtual fit checks + pictures) ─────────────
-module dummy_bb() { translate([bb_x0 + 0.4, 0.4, c_zf + 0.05]) cube([bb_w, bb_l, bb_h]); }
+module dummy_bb() { translate([bb_x0 + 0.5, 0.5, c_zf + 0.05]) cube([bb_w, bb_l, bb_h]); }
 module dummy_esp() {
     translate([esp_x0, esp_yc - esp_w/2, esp_z + 0.05]) cube([esp_l, esp_w, esp_pcb_t]);
     translate([esp_x0 + 1, esp_yc - 9, esp_z + esp_pcb_t]) cube([18, 18, 3.2]);          // WROOM module (antenna end)
@@ -308,14 +308,15 @@ module core_assembled(show_lid=true) {
 module assembly() {
     arm();
     // core box on the forearm, wrist end 22 mm behind the wrist, box +Y towards the elbow
-    translate([0, -22, wrist_rz + 3]) mirror([0,1,0]) {
+    translate([0, -15, wrist_rz + 5]) mirror([0,1,0]) {
         core_assembled();
         color("#555") translate([0, c_il/2 - 4, c_zg + lid_gap + lid_t + slot_t + 1.8]) rbox([26, 95, 24], 4);   // power bank
     }
-    // 4 piezo pods on the wrist strap
-    for (a = [0, 90, 180, 270]) color("#d69e2e") place_on_wrist(a, 4) pod_piezo();
-    // 2 FSR pods on the forearm strap (inner forearm, under the box strap)
-    for (a = [160, 200]) color("#c05621") translate([0, -45, 2]) scale([1.18, 1, 1.2]) place_on_wrist(a, 0) pod_fsr();
+    // 4 piezo pods on the wrist strap: 0 = little-finger wrist bone (ulnar styloid), 1 = inner wrist over
+    // the flexor tendons, 2 = thumb-side wrist bone (radial styloid), 3 = top of the wrist
+    for (a = [-80, 180, 80, 0]) color("#d69e2e") place_on_wrist(a, 2) pod_piezo();
+    // 2 FSR pods on the ELBOW-end box strap: inner forearm over the finger-flexor muscle belly
+    for (a = [160, 200]) color("#c05621") translate([0, -(15 + c_il - 24), 3]) scale([1.33, 1, 1.38]) place_on_wrist(a, 0) pod_fsr();
     // hand shell on the back of the hand
     color("#805ad5") translate([0, 38, 14]) hand_base();
     color("#b794f4", 0.85) translate([0, 38, 14]) hand_lid();
