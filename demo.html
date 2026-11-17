@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WristTap Live</title>
+<style>
+:root{
+  --bg:#0f1113; --panel:#171a1d; --line:#272b30; --ink:#e9e7e3; --muted:#8d949c;
+  --accent:#f2b134; --arm:#5b6b80; --hand:#8a76c9; --ok:#5cc38a; --bad:#e46a5e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
+header{display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid var(--line)}
+header h1{font-size:18px;margin:0;letter-spacing:.2px}
+#status{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+#status b{color:var(--ink);font-weight:600}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:6px;vertical-align:1px}
+.dot.on{background:var(--ok)}
+main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:1px;background:var(--line);min-height:calc(100vh - 58px)}
+section{background:var(--bg);padding:20px 24px}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin:0 0 14px;font-weight:600}
+/* 3D stage */
+#stage{height:420px;perspective:900px;display:grid;place-items:center;overflow:hidden}
+#world{transform-style:preserve-3d;transform:rotateX(-22deg) rotateY(-30deg)}
+.g{transform-style:preserve-3d;position:absolute}
+.face{position:absolute;border:1px solid rgba(255,255,255,.18);backface-visibility:visible}
+#readout{display:flex;gap:28px;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;margin-top:6px}
+#readout b{color:var(--ink);font-weight:600}
+/* gesture */
+#gesture{font-size:44px;font-weight:700;letter-spacing:-.5px;min-height:62px;transition:color .3s}
+#gesture.fresh{color:var(--accent)}
+#log{list-style:none;margin:8px 0 0;padding:0;color:var(--muted);font-size:13px;max-height:150px;overflow:hidden;font-variant-numeric:tabular-nums}
+#log li{padding:3px 0;border-top:1px solid var(--line)}
+/* wrist ring */
+.ring{position:relative;width:220px;height:220px;margin:6px auto 4px}
+.ring .wrist{position:absolute;inset:40px;border-radius:50%;border:2px dashed var(--line)}
+.ring .lbl{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:12px}
+.disc{position:absolute;width:56px;height:56px;margin:-28px;border-radius:50%;background:#2a2620;border:2px solid #4a4130;display:grid;place-items:center;font-size:12px;color:var(--muted);transition:background .25s, transform .25s}
+.disc.hit{background:var(--accent);color:#111;transform:scale(1.18);transition:none}
+.bars{display:grid;gap:10px;margin-top:18px}
+.bar{display:grid;grid-template-columns:62px 1fr 48px;align-items:center;gap:10px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.track{height:10px;background:#22262a;border-radius:6px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--accent);border-radius:6px;transition:width .08s linear}
+/* controls */
+.controls{display:grid;gap:12px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
+button,select{font:inherit;color:var(--ink);background:#22262a;border:1px solid #333940;border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover{border-color:#4a525b}
+#mouseBtn.on{background:var(--accent);color:#111;border-color:var(--accent);font-weight:600}
+input[type=range]{accent-color:var(--accent);width:130px}
+small{color:var(--muted)}
+@media (max-width:860px){main{grid-template-columns:1fr}#stage{height:300px}#gesture{font-size:34px}section{padding:16px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>WristTap</h1>
+  <span id="status"><span class="dot" id="dot"></span><b id="src">connecting…</b> · <span id="rate">0</span> packets/s</span>
+</header>
+<main>
+  <section>
+    <h2>Arm, live</h2>
+    <div id="stage"><div id="world"></div></div>
+    <div id="readout">
+      <span>Forearm <b id="r1">–</b></span>
+      <span>Hand <b id="r2">–</b></span>
+      <span>Wrist bend <b id="bend">–</b></span>
+    </div>
+    <div class="controls">
+      <div class="row">
+        <button id="mouseBtn">Air mouse: off</button>
+        <label>Speed <input type="range" id="sens" min="3" max="40" step="1"></label>
+        <button id="recenter">Re-centre</button>
+      </div>
+      <div class="row">
+        <label>Left/right from <select id="mx"><option>gx</option><option>gy</option><option>gz</option></select></label>
+        <button id="flipx">flip</button>
+        <label>Up/down from <select id="my"><option>gx</option><option>gy</option><option>gz</option></select></label>
+        <button id="flipy">flip</button>
+        <label>Sensor <select id="imu"><option value="2">hand</option><option value="1">forearm</option></select></label>
+      </div>
+      <small>Tap any disc = click. Your trackpad still works the whole time. If the cursor goes the wrong way, change the axis or press flip.</small>
+    </div>
+  </section>
+  <section>
+    <h2>Last gesture</h2>
+    <div id="gesture">—</div>
+    <ul id="log"></ul>
+    <h2 style="margin-top:22px">Taps (4 discs around the wrist)</h2>
+    <div class="ring" id="ring"><div class="wrist"></div><div class="lbl">wrist</div></div>
+    <h2 style="margin-top:14px">Squeeze (forearm FSRs)</h2>
+    <div class="bars">
+      <div class="bar"><span>FSR 0</span><div class="track"><div class="fill" id="f0"></div></div><span id="v0">0</span></div>
+      <div class="bar"><span>FSR 1</span><div class="track"><div class="fill" id="f1"></div></div><span id="v1">0</span></div>
+    </div>
+    <div class="row" style="margin-top:16px">
+      <label>Tap threshold <input type="range" id="tap_thr" min="40" max="1500" step="10"></label><span id="tapv"></span>
+    </div>
+  </section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let S = {};
+function post(upd){ fetch("/", {method:"POST", body:JSON.stringify(upd)}).then(r=>r.json()).then(s=>{S=s; syncUI();}); }
+
+/* ---- CSS cuboids ---- */
+function cuboid(w,h,d,color){
+  const g = document.createElement("div"); g.className="g";
+  const F = (fw,fh,t,shade)=>{ const f=document.createElement("div"); f.className="face";
+    f.style.width=fw+"px"; f.style.height=fh+"px"; f.style.left=-fw/2+"px"; f.style.top=-fh/2+"px";
+    f.style.transform=t; f.style.background=`color-mix(in srgb, ${color} ${shade}%, black)`; g.appendChild(f); };
+  F(w,h,`translateZ(${d/2}px)`,100);  F(w,h,`rotateY(180deg) translateZ(${d/2}px)`,70);
+  F(d,h,`rotateY(90deg) translateZ(${w/2}px)`,80); F(d,h,`rotateY(-90deg) translateZ(${w/2}px)`,80);
+  F(w,d,`rotateX(90deg) translateZ(${h/2}px)`,115); F(w,d,`rotateX(-90deg) translateZ(${h/2}px)`,55);
+  return g;
+}
+const css = getComputedStyle(document.documentElement);
+const arm = document.createElement("div"); arm.className="g";
+const armBox = cuboid(260,46,62,css.getPropertyValue("--arm")); armBox.style.transform="translateX(-130px)"; arm.appendChild(armBox);
+const unit = cuboid(120,22,50,"#2f3a48"); unit.style.transform="translate3d(-110px,-34px,0)"; arm.appendChild(unit);
+const hand = document.createElement("div"); hand.className="g";
+const handBox = cuboid(150,26,80,css.getPropertyValue("--hand")); handBox.style.transform="translateX(75px)"; hand.appendChild(handBox);
+arm.appendChild(hand); $("world").appendChild(arm);
+let yaw0 = [0,0];
+
+/* ---- wrist ring discs ---- */
+const discs = [0,1,2,3].map(k=>{ const a = k*Math.PI/2 - Math.PI/2, d=document.createElement("div");
+  d.className="disc"; d.style.left = (110+90*Math.cos(a))+"px"; d.style.top=(110+90*Math.sin(a))+"px";
+  d.textContent = "disc "+k; $("ring").appendChild(d); return d; });
+
+/* ---- live stream ---- */
+const names = {"tap":"Tap", "double tap":"Double tap", "squeeze":"Squeeze"};
+let gTimer;
+function gesture(txt){ const g=$("gesture"); g.textContent=txt; g.classList.add("fresh"); clearTimeout(gTimer); gTimer=setTimeout(()=>g.classList.remove("fresh"),900);
+  const li=document.createElement("li"); li.textContent = new Date().toLocaleTimeString()+"  "+txt; $("log").prepend(li); while($("log").children.length>8) $("log").lastChild.remove(); }
+const es = new EventSource("/stream");
+es.onmessage = e => {
+  const m = JSON.parse(e.data);
+  if (m.settings){ S=m.settings; syncUI(); return; }
+  $("src").textContent = m.status; $("rate").textContent = m.rate; $("dot").classList.toggle("on", m.rate>20);
+  if (m.imu){
+    const [a,h] = m.imu;
+    if (a.ok) arm.style.transform = `rotateY(${-(a.yaw-yaw0[0])}deg) rotateZ(${a.pitch}deg) rotateX(${a.roll}deg)`;
+    if (h.ok) hand.style.transform = `rotateY(${-((h.yaw-yaw0[1])-(a.yaw-yaw0[0]))}deg) rotateZ(${h.pitch-a.pitch}deg) rotateX(${h.roll-a.roll}deg)`;
+    $("r1").textContent = a.ok ? `${a.roll.toFixed(0)}° / ${a.pitch.toFixed(0)}°` : "missing";
+    $("r2").textContent = h.ok ? `${h.roll.toFixed(0)}° / ${h.pitch.toFixed(0)}°` : "missing";
+    $("bend").textContent = m.bend==null ? "–" : `${m.bend.toFixed(0)}°`;
+    window._yaw = [a.yaw, h.yaw];
+  }
+  if (m.fsr) m.fsr.forEach((v,k)=>{ $("f"+k).style.width = Math.min(100, v/40.95)+"%"; $("v"+k).textContent=v; });
+  for (const ev of m.events||[]){
+    if (ev.disc!=null){ const d=discs[ev.disc]; d.classList.add("hit"); setTimeout(()=>d.classList.remove("hit"),180); }
+    const label = (names[ev.kind]||ev.kind.replace(/^./,c=>c.toUpperCase())) + (ev.disc!=null?` · disc ${ev.disc}`:"") + (ev.fsr!=null?` · FSR ${ev.fsr}`:"");
+    gesture(label);
+  }
+  if (m.mouse !== S.mouse){ S.mouse=m.mouse; syncUI(); }
+};
+es.onerror = () => { $("src").textContent="demo server stopped"; $("dot").classList.remove("on"); };
+
+/* ---- controls ---- */
+function syncUI(){
+  $("mouseBtn").textContent = "Air mouse: " + (S.mouse ? "ON" : "off"); $("mouseBtn").classList.toggle("on", !!S.mouse);
+  $("sens").value=S.sens; $("mx").value=S.mx; $("my").value=S.my; $("imu").value=S.imu; $("tap_thr").value=S.tap_thr; $("tapv").textContent=S.tap_thr;
+}
+$("mouseBtn").onclick = ()=> post({mouse: !S.mouse});
+$("sens").oninput = e => post({sens: +e.target.value});
+$("tap_thr").oninput = e => post({tap_thr: +e.target.value});
+$("mx").onchange = e => post({mx: e.target.value});
+$("my").onchange = e => post({my: e.target.value});
+$("imu").onchange = e => post({imu: +e.target.value});
+$("flipx").onclick = ()=> post({mx_sign: -S.mx_sign});
+$("flipy").onclick = ()=> post({my_sign: -S.my_sign});
+$("recenter").onclick = ()=> { if (window._yaw) yaw0 = window._yaw.slice(); };
+</script>
+</body>
+</html>

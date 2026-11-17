@@ -48,3 +48,10 @@ ESP32 + 2× MPU6050 (motion) + 4 piezo discs (taps) + 2 FSRs (pressure), sent ov
 | ![](photos/05-mpu1-on-breadboard.jpg) MPU #1 on the breadboard | ![](photos/06-mpu1-wired.jpg) MPU #1 wired to the ESP32 |
 | ![](photos/07-piezo-disc.jpg) Piezo disc | ![](photos/08-piezo-slot-resistors.jpg) Piezo slot with 10 kΩ + 1 MΩ |
 | ![](photos/09-piezo-wires.jpg) Disc wiring (red = centre) | ![](photos/10-new-esp32.jpg) Replacement ESP32 |
+
+## v2: wearable shells + wireless (17 Nov 2026)
+
+- `band.html`: build guide (every component and where it goes, print, assembly, one-breadboard wiring, wireless, demo).
+- `cad/band.scad` + `cad/build_v2.sh`: closed forearm box (breadboard + ESP32 + MPU #1, slide lid that clicks, power-bank tunnels), hand shell (MPU #2), 4 piezo pods, 2 FSR pods. Sliced plate: `cad/print/v2_all_parts.3mf` (3 h 40 min, 118 g, no supports).
+- Firmware streams the same 44-byte packet over USB (500/s), Wi-Fi UDP 4210 (500/s) and Bluetooth LE "WristTap" (100/s). Wi-Fi: own network "WristTap" unless `firmware/wristtap/secrets.h` exists.
+- `./check.sh [--ble|--wifi]`, `./demo.sh [--ble|--wifi]`: live demo page (3D arm, taps, squeezes, flicks, air mouse) on localhost:8791.

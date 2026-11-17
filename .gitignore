@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 *_last.csv
 .DS_Store
+firmware/wristtap/secrets.h
+sessions/

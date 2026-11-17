@@ -9,6 +9,6 @@ if [ -z "$PORT" ]; then
   echo "Ports seen:"; ls /dev/cu.*; exit 1
 fi
 echo "ESP32 on $PORT"
-~/.local/bin/arduino-cli compile --fqbn esp32:esp32:esp32 firmware/wristtap || exit 1
+~/.local/bin/arduino-cli compile --fqbn esp32:esp32:esp32:PartitionScheme=huge_app firmware/wristtap || exit 1
 echo "Uploading... if it stalls at 'Connecting....', HOLD the BOOT button on the ESP32 until it starts writing."
-~/.local/bin/arduino-cli upload -p "$PORT" --fqbn esp32:esp32:esp32 firmware/wristtap && echo "DONE. Now run: ./check.sh"
+~/.local/bin/arduino-cli upload -p "$PORT" --fqbn esp32:esp32:esp32:PartitionScheme=huge_app firmware/wristtap && echo "DONE. Now run: ./check.sh"

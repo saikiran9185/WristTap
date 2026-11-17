@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WristTap v2 Build</title>
+<style>
+:root{--bg:#fbfaf8;--ink:#1d1f22;--muted:#666d75;--line:#e4e1dc;--card:#fff;--accent:#c98a10;--warn:#b3412f;--ok:#2f7d4f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121416;--ink:#ebe9e5;--muted:#9aa1a8;--line:#2a2e33;--card:#181b1e;--accent:#f2b134;--warn:#e98371;--ok:#69c48f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:32px 20px 80px}
+h1{font-size:32px;line-height:1.15;margin:0 0 8px;letter-spacing:-.4px}
+.lede{color:var(--muted);margin:0 0 28px;max-width:62ch}
+h2{font-size:22px;margin:44px 0 12px;padding-top:20px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:22px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+th{background:color-mix(in srgb,var(--line) 45%,var(--card));font-weight:600;border-top:none}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pics{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+figure{margin:0;background:#f4f3f1;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+figure img{width:100%;display:block}
+figcaption{font-size:13px;color:#555;padding:8px 12px;background:#fff;border-top:1px solid #e6e3de}
+.box{border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--card);border-radius:8px;padding:12px 14px;margin:14px 0;font-size:15px}
+.box.warn{border-left-color:var(--warn)} .box.ok{border-left-color:var(--ok)}
+ol.steps{padding-left:22px} ol.steps li{margin:8px 0}
+code{font:13.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:color-mix(in srgb,var(--line) 55%,transparent);padding:1px 6px;border-radius:5px}
+pre{font:13.5px ui-monospace,Menlo,monospace;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto}
+svg text{font-family:-apple-system,system-ui,sans-serif}
+.svgwrap{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;overflow-x:auto}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);margin-left:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>WristTap v2: the band you can wear</h1>
+<p class="lede">Every part now lives inside a printed shell. Nothing dangles, the lids slide open for fixes, and with a power bank on top the band talks to the Mac over Bluetooth or Wi-Fi. No soldering needed.</p>
+
+<div class="pics">
+  <figure><img src="cad/png/v2/core_open.png" alt="Forearm box with the lid slid out"><figcaption>Forearm box, lid pulled out. White = breadboard, black = ESP32, blue = MPU #1.</figcaption></figure>
+  <figure><img src="cad/png/v2/hand_open.png" alt="Hand shell with MPU 2"><figcaption>Hand shell for MPU #2 (back of the hand). Ribbon leaves towards the wrist.</figcaption></figure>
+</div>
+
+<h2>1. Every component and where it goes</h2>
+<table>
+<tr><th>Component</th><th>Qty</th><th>Goes in</th><th>Notes</th></tr>
+<tr><td>ESP32 DevKit (30 pin)</td><td class="n">1</td><td>Forearm box, elbow end, raised on two rests</td><td>Pins point down, jumper plugs hang under it. USB port faces the side hole (power-bank cable).</td></tr>
+<tr><td>Half breadboard (400 point)</td><td class="n">1</td><td>Forearm box, wrist end (pocket on the floor)</td><td>Stick it down with its own adhesive back or foam tape. All 10 resistors stay on it.</td></tr>
+<tr><td>Second breadboard</td><td class="n">0</td><td><b>Not used any more</b></td><td>Its wires move to board 1 (section 4). Keep it as a spare.</td></tr>
+<tr><td>MPU6050 #1</td><td class="n">1</td><td>Forearm box, standing on edge in the side channel next to the ESP32</td><td>Foam tape on its back, onto the wall. Plugs point towards the wrist. Measures the forearm.</td></tr>
+<tr><td>MPU6050 #2</td><td class="n">1</td><td>Hand shell, back of the hand</td><td>Lies flat on the two rails, tape underneath, ribbon out the wrist end. Measures the hand. MPU #2 minus MPU #1 = wrist bend.</td></tr>
+<tr><td>Piezo discs</td><td class="n">4</td><td>4 piezo pods on the <b>wrist strap</b>: top, thumb side, inside, little-finger side</td><td>Brass side faces the skin. A small loop of tape on the rim holds each disc in its seat. Wires run along the groove.</td></tr>
+<tr><td>FSR 402</td><td class="n">2</td><td>2 FSR pods on the <b>forearm strap</b>, inner forearm (palm side)</td><td>Pad faces the skin, tail runs out of the channel. Gripping or pinching bulges the forearm muscles = squeeze signal.</td></tr>
+<tr><td>Resistors 10 kΩ ×6, 1 MΩ ×4</td><td class="n">10</td><td>On the breadboard, exactly where they are now</td><td>Nothing changes.</td></tr>
+<tr><td>Power bank (small, USB)</td><td class="n">1</td><td>On top of the box lid, held by a strap through the 2 tunnels</td><td>Short micro-USB cable into the side hole. Or keep it in a pocket with a longer cable.</td></tr>
+<tr><td>Velcro / elastic straps 25 mm</td><td class="n">4</td><td>Wrist (pods) · forearm (box + FSR pods) · hand (shell) · power bank</td><td>You have 2. For the other 2, use velcro cable ties, elastic + safety pin, or hair ties for the power bank.</td></tr>
+<tr><td>Small zip ties</td><td class="n">2–3</td><td>Lug outside the wrist end of the box</td><td>Tie the wire bundle to the lug so a tug never pulls a wire out of the breadboard.</td></tr>
+</table>
+
+<h3>Inside the forearm box (top view)</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 640 330" width="100%" role="img" aria-label="Top view of the forearm box layout">
+  <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#888"/></marker></defs>
+  <!-- scale 4.6 px/mm; inner box 115.4 (x) by 64.1 (y), origin at x=40,y=40 -->
+  <rect x="34.5" y="34.5" width="542" height="306" rx="10" fill="none" stroke="#3d4a5c" stroke-width="11"/>
+  <rect x="40" y="40" width="531" height="295" fill="none" stroke="#3d4a5c" stroke-width="1"/>
+  <!-- channel + fence -->
+  <rect x="40" y="40" width="531" height="35" fill="#2b6cb0" opacity=".10"/>
+  <rect x="40" y="75" width="531" height="5.5" fill="#3d4a5c"/>
+  <!-- breadboard -->
+  <rect x="42" y="82" width="379" height="251" rx="4" fill="#f4f4f4" stroke="#bbb"/>
+  <text x="231" y="205" text-anchor="middle" font-size="16" fill="#333">BREADBOARD</text>
+  <text x="231" y="226" text-anchor="middle" font-size="12" fill="#666">resistors + 3V3/GND lines</text>
+  <!-- MPU1 on edge -->
+  <rect x="428" y="41" width="76" height="26" fill="#2b6cb0"/>
+  <rect x="350" y="45" width="78" height="18" fill="#1a3f6b"/>
+  <text x="466" y="58" text-anchor="middle" font-size="11" fill="#fff">MPU #1</text>
+  <text x="389" y="58" text-anchor="middle" font-size="10" fill="#fff">plugs</text>
+  <!-- ESP32 -->
+  <rect x="438" y="94" width="130" height="237" rx="3" fill="#222"/>
+  <rect x="443" y="96" width="120" height="83" fill="#555"/>
+  <text x="503" y="230" text-anchor="middle" font-size="14" fill="#fff">ESP32</text>
+  <text x="503" y="248" text-anchor="middle" font-size="11" fill="#bbb">pins down</text>
+  <rect x="487" y="327" width="32" height="12" fill="#999"/>
+  <!-- labels -->
+  <text x="40" y="22" font-size="12" fill="#888">◀ WRIST END: wires come in through the notch</text>
+  <text x="571" y="22" text-anchor="end" font-size="12" fill="#888">ELBOW END: lid slides in here ▶</text>
+  <text x="503" y="318" text-anchor="middle" font-size="11" fill="#bbb">USB</text>
+  <text x="590" y="340" text-anchor="end" font-size="11" fill="#888">USB hole in side wall ↓</text>
+  <path d="M6 150 L36 150" stroke="#888" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="4" y="140" font-size="10" fill="#888">wires</text>
+</svg>
+</div>
+
+<h3>Sizes</h3>
+<table>
+<tr><th>Part</th><th>Outside size (mm)</th><th>Print</th></tr>
+<tr><td>Forearm box + lid</td><td class="n">69 × 120 × 38 (with tunnels)</td><td rowspan="5">All on one plate: <b>3 h 40 min, 118 g PLA, no supports</b><br><code>cad/print/v2_all_parts.3mf</code></td></tr>
+<tr><td>Hand shell + lid</td><td class="n">27 × 40 × 13</td></tr>
+<tr><td>Piezo pod ×4</td><td class="n">31 × 31 × 9.5</td></tr>
+<tr><td>FSR pod ×2</td><td class="n">23 × 31 × 8</td></tr>
+<tr><td>Fit test (optional, first)</td><td class="n">118 × 70</td></tr>
+</table>
+
+<h2>2. Print</h2>
+<ol class="steps">
+<li><b>Optional, 28 min:</b> open <code>cad/print/v2_fit_test.3mf</code> in Bambu Studio → Print. Check: disc drops in, FSR pad drops in, MPU drops in, strap slides through the slot, ESP32 drops between the two posts. If anything is tight, tell me and I'll raise the tolerance (1 minute).</li>
+<li>Open <code>cad/print/v2_all_parts.3mf</code> → Print. All 10 parts, no supports.</li>
+<li>While it prints: do section 4 (one breadboard) and test with <code>./check.sh</code>.</li>
+</ol>
+<div class="box">Measurements I assumed (all marked "measure" in <code>cad/config.scad</code>): breadboard 82.5 × 54.5 mm, ESP32 51.5 × 28.3 mm, MPU 21.2 × 16.4 mm, disc 27 mm, FSR pad 18.5 mm, strap 25 mm. If one of yours is different, send me the number and I'll re-slice.</div>
+
+<h2>3. How it goes on your arm</h2>
+<figure style="max-width:620px"><img src="cad/png/v2/assembly.png" alt="Everything on the arm"><figcaption>Box on the forearm (power bank on top) · piezo pods round the wrist · hand shell on the back of the hand · FSR pods under the forearm strap.</figcaption></figure>
+<ol class="steps">
+<li><b>Box:</b> forearm strap goes <i>under</i> the box through the 4 side slots, about 2 cm behind the wrist bone. Thread the 2 FSR pods onto the same strap so they sit on the inner forearm.</li>
+<li><b>Wrist strap:</b> thread the 4 piezo pods on (strap goes through the tunnel on each pod's back). Discs face the skin: top, thumb side, inside, little-finger side.</li>
+<li><b>Hand shell:</b> strap round the palm through the two side slots, shell on the back of the hand, ribbon pointing to the wrist.</li>
+<li>Route all wires to the box's wrist-end notch, zip-tie the bundle to the lug, slide the lid on from the elbow end until it <b>clicks</b>. To open: lift the little tongue at the elbow end and slide.</li>
+</ol>
+
+<h2>4. One breadboard instead of two (no solder)</h2>
+<p>Board 1 keeps its piezo, FSR and resistor wiring as it is. Only the MPU wires and their 3V3/GND/SDA/SCL links move onto board 1, into the rows the build guide always planned for them. Unplug USB before moving any wire.</p>
+<table>
+<tr><th>Wire</th><th>Breadboard hole</th><th>Then (already in the guide)</th></tr>
+<tr><td>MPU #1 AD0</td><td class="n">a4</td><td>b4 → blue line 13</td></tr>
+<tr><td>MPU #1 SDA</td><td class="n">a7</td><td>ESP32 D21 → c7</td></tr>
+<tr><td>MPU #1 SCL</td><td class="n">a8</td><td>ESP32 D22 → c8</td></tr>
+<tr><td>MPU #1 GND</td><td class="n">a9</td><td>b9 → blue line 11</td></tr>
+<tr><td>MPU #1 VCC</td><td class="n">a10</td><td>b10 → red line 11</td></tr>
+<tr><td>MPU #2 AD0</td><td class="n">a15</td><td>b15 → <b>red</b> line 13</td></tr>
+<tr><td>MPU #2 SDA</td><td class="n">a18</td><td>b18 → d7</td></tr>
+<tr><td>MPU #2 SCL</td><td class="n">a19</td><td>b19 → e8</td></tr>
+<tr><td>MPU #2 GND</td><td class="n">a20</td><td>b20 → blue line 22</td></tr>
+<tr><td>MPU #2 VCC</td><td class="n">a21</td><td>b21 → red line 22</td></tr>
+</table>
+<div class="box">INT, XDA and XCL are not used: leave those ribbon wires unplugged and tape their ends. Check after moving: <code>./check.sh</code> should show <b>IMU1 ≈ 1 g and IMU2 ≈ 1 g</b>.</div>
+
+<h2>5. Wireless</h2>
+<h3>Bluetooth <span class="tag">tested: 100 packets/s, 0 dropped</span></h3>
+<pre>./check.sh --ble        # live numbers
+./demo.sh --ble         # the demo</pre>
+<p>Plug the power bank into the ESP32, wait 5 s, run it. The Mac finds the band named "WristTap" by itself.</p>
+<h3>Wi-Fi <span class="tag">flashed, not tested yet</span></h3>
+<p>Right now the band makes its own network: <b>WristTap</b>, password <b>wristtap1</b>. Join it from the Mac's Wi-Fi menu (no internet while joined), then:</p>
+<pre>./check.sh --wifi       # expect about 500 packets/s
+./demo.sh --wifi</pre>
+<p>To use your home or college Wi-Fi instead (keeps the Mac's internet): copy <code>firmware/wristtap/secrets.example.h</code> to <code>secrets.h</code>, type the network name and password, then run <code>./flash.sh</code>. Campus networks with a login page won't work; a phone hotspot will.</p>
+<div class="box warn">Pick one of USB, Bluetooth or Wi-Fi at a time on the Mac. The band sends on all three at once, so any of them works.</div>
+
+<h2>6. The demo</h2>
+<pre>./demo.sh --ble</pre>
+<p>Safari opens <b>localhost:8791</b> and shows:</p>
+<ul>
+<li><b>Arm, live:</b> 3D forearm and hand that copy yours, plus the wrist-bend angle.</li>
+<li><b>Gestures:</b> tap and double tap (shows which disc), squeeze (FSRs), flick up/down/left/right, roll left/right.</li>
+<li><b>Air mouse:</b> press the button and point your hand to move the cursor. Tapping a disc clicks. Your trackpad keeps working the whole time. If the cursor moves the wrong way, use the axis menus or the flip buttons. The first time, macOS asks to allow your terminal under Accessibility.</li>
+</ul>
+<h3>Demo-day checklist</h3>
+<ol class="steps">
+<li>Charge the power bank tonight.</li>
+<li>Rehearse: put the band on, run <code>./demo.sh --ble</code>, set the air-mouse axes, and set the tap threshold so ordinary hand movement doesn't count as a tap.</li>
+<li>Pack a spare: the USB cable. If Bluetooth acts up, plug in and run <code>./demo.sh</code>. Same demo.</li>
+<li>Keep the demo order short: arm copies you → tap each disc → squeeze → flick → air mouse opening a file.</li>
+</ol>
+</div>
+</body>
+</html>

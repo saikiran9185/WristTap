@@ -1,6 +1,7 @@
 """WristTap: camera-labelled mid-air pinch/tap dataset from a sensor wristband.
 
-  python wristtap.py check            # is the band streaming? live numbers per sensor
+  python wristtap.py check            # is the band streaming? live numbers per sensor (USB)
+  python wristtap.py check --wifi     # same, over Wi-Fi     python wristtap.py check --ble  # over Bluetooth
   python wristtap.py record --reps 20 # cued session: the Mac camera labels pinches, the band records
 
 Each recording goes to sessions/<date_time>/:
@@ -27,6 +28,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 HAND_MODEL = os.path.expanduser("~/Projects/PhoneStereo/hand_landmarker.task")
 PKT = struct.Struct("<HI6h6h4H2HH")      # 44 bytes, see firmware
 MAGIC = b"\xaa\x55"
+UDP_PORT = 4210
+BLE_DATA = "7a1e0002-5752-4954-5441-500000000001"
 GESTURES = ["REST", "PINCH INDEX", "PINCH MIDDLE", "PINCH PINKY", "AIR TAP"]
 TIPS = {"index": 8, "middle": 12, "ring": 16, "pinky": 20}
 
@@ -41,12 +44,15 @@ def find_port():
 
 
 class Band:
-    """Reads packets in a thread; stamps each with Mac time via the ESP32 clock + best offset."""
+    """Reads packets in a thread; stamps each with Mac time via the ESP32 clock + best offset.
 
-    def __init__(self, port):
-        import serial
-        self.ser = serial.Serial(port, 921600, timeout=0.05)
-        self.rows = []            # (t_mac, micros, seq, imu1*6, imu2*6, piezo*4, fsr*2)
+    source: a serial port path, "wifi" (UDP port 4210) or "ble" (Bluetooth LE device "WristTap").
+    All three carry the same 44-byte packet, so everything downstream is identical.
+    """
+
+    def __init__(self, source):
+        self.source = source
+        self.rows = []            # (t_esp, imu1*6, imu2*6, piezo*4, fsr*2, seq)
         self.lock = threading.Lock()
         self.offset = None        # min(recv_time - esp_time): the least-delayed packet sets the clock
         self.drops = 0
@@ -54,35 +60,89 @@ class Band:
         self.running = True
         self.wrap = 0
         self.last_us = 0
-        threading.Thread(target=self._run, daemon=True).start()
+        self.buf = b""
+        self.status = "starting"
+        target = {"wifi": self._run_udp, "ble": self._run_ble}.get(source, self._run_serial)
+        threading.Thread(target=target, daemon=True).start()
 
-    def _run(self):
-        buf = b""
+    # ── transports ──
+    def _run_serial(self):
+        import serial
+        self.ser = serial.Serial(self.source, 921600, timeout=0.05)
+        self.status = f"USB {self.source}"
         while self.running:
-            buf += self.ser.read(4096)
-            now = time.time()
-            while True:
-                i = buf.find(MAGIC)
-                if i < 0 or len(buf) - i < PKT.size:
-                    buf = buf[i:] if i >= 0 else buf[-1:]
-                    break
-                f = PKT.unpack_from(buf, i)
-                buf = buf[i + PKT.size:]
-                us, seq = f[1], f[-1]
-                if us < self.last_us:
-                    self.wrap += 1 << 32
-                self.last_us = us
-                esp_t = (us + self.wrap) / 1e6
-                off = now - esp_t
-                if self.offset is None or off < self.offset:
-                    self.offset = off
-                if self.last_seq is not None:
-                    gap = (seq - self.last_seq) & 0xFFFF
-                    if 1 < gap < 1000:
-                        self.drops += gap - 1
-                self.last_seq = seq
-                with self.lock:
-                    self.rows.append((esp_t,) + f[2:-1] + (seq,))
+            self._feed(self.ser.read(4096))
+        self.ser.close()
+
+    def _run_udp(self):
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        s.bind(("", UDP_PORT))
+        s.settimeout(0.2)
+        self.status = f"Wi-Fi, listening on UDP {UDP_PORT}"
+        while self.running:
+            try:
+                data, addr = s.recvfrom(2048)
+            except OSError:
+                continue
+            self.status = f"Wi-Fi from {addr[0]}"
+            self._feed(data)
+        s.close()
+
+    def _run_ble(self):
+        import asyncio
+        from bleak import BleakClient, BleakScanner
+
+        async def main():
+            while self.running:
+                self.status = "Bluetooth: looking for WristTap..."
+                dev = await BleakScanner.find_device_by_name("WristTap", timeout=8)
+                if not dev:
+                    continue
+                try:
+                    async with BleakClient(dev) as c:
+                        self.status = "Bluetooth: connected"
+                        self.last_seq = None
+                        await c.start_notify(BLE_DATA, lambda _h, d: self._feed(bytes(d)))
+                        while self.running and c.is_connected:
+                            await asyncio.sleep(0.2)
+                except Exception as e:          # dropped link: scan again
+                    self.status = f"Bluetooth: lost ({e.__class__.__name__}), reconnecting"
+        asyncio.run(main())
+
+    # ── packet parser (shared) ──
+    def _feed(self, data):
+        if not data:
+            return
+        now = time.time()
+        buf = self.buf + data
+        while True:
+            i = buf.find(MAGIC)
+            if i < 0 or len(buf) - i < PKT.size:
+                buf = buf[i:] if i >= 0 else buf[-1:]
+                break
+            f = PKT.unpack_from(buf, i)
+            buf = buf[i + PKT.size:]
+            us, seq = f[1], f[-1]
+            if us < self.last_us and self.last_us - us > 1 << 31:
+                self.wrap += 1 << 32
+            self.last_us = us
+            esp_t = (us + self.wrap) / 1e6
+            off = now - esp_t
+            if self.offset is None or off < self.offset:
+                self.offset = off
+            if self.last_seq is not None:
+                gap = (seq - self.last_seq) & 0xFFFF
+                if 1 < gap < 1000:
+                    self.drops += gap - 1
+            self.last_seq = seq
+            with self.lock:
+                self.rows.append((esp_t,) + f[2:-1] + (seq,))
+                if len(self.rows) > 200000:
+                    del self.rows[:100000]
+        self.buf = buf
 
     def snapshot(self, n=None):
         with self.lock:
@@ -90,12 +150,19 @@ class Band:
 
     def close(self):
         self.running = False
-        time.sleep(0.1)
-        self.ser.close()
+        time.sleep(0.3)
+
+
+def open_band(a):
+    if a.wifi:
+        return Band("wifi")
+    if a.ble:
+        return Band("ble")
+    return Band(a.port or find_port())
 
 
 def check(a):
-    band = Band(a.port or find_port())
+    band = open_band(a)
     print("Reading... Ctrl+C to stop. Tap the band, press the FSRs, move your wrist.\n")
     t0 = time.time()
     try:
@@ -104,7 +171,7 @@ def check(a):
             rows = band.snapshot()
             recent = [r for r in rows if r[0] >= rows[-1][0] - 1.0] if rows else []
             if not recent:
-                print("no packets yet (wrong port? firmware not flashed? reset button?)")
+                print(f"no packets yet [{band.status}] (Wi-Fi: is the Mac on the same network? USB: reset button?)")
                 continue
             arr = np.array([r[1:-1] for r in recent], float)
             imu1, imu2, pz, fsr = arr[:, 0:6], arr[:, 6:12], arr[:, 12:16], arr[:, 16:18]
@@ -113,7 +180,7 @@ def check(a):
                 if not m.any():
                     return "MISSING (check wiring / AD0)"
                 return f"|a| {accel_g(m).mean():.2f} g (peak {accel_g(m).max():.2f})"
-            print(f"[{time.time()-t0:5.0f}s] {len(recent)} pkt/s  drops {band.drops}  "
+            print(f"[{time.time()-t0:5.0f}s] {band.status}: {len(recent)} pkt/s  drops {band.drops}  "
                   f"IMU1 {imu_txt(imu1)}  IMU2 {imu_txt(imu2)}")
             print("        piezo peak " + "  ".join(f"{int(v):4d}" for v in pz.max(0))
                   + "   FSR " + "  ".join(f"{int(v):4d}" for v in fsr.mean(0)))
@@ -139,7 +206,7 @@ def record(a):
     import cv2
     import mediapipe as mp
 
-    band = Band(a.port or find_port())
+    band = open_band(a)
     cap = cv2.VideoCapture(a.cam, cv2.CAP_AVFOUNDATION)
     for _ in range(20):
         if cap.isOpened():
@@ -231,6 +298,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=["check", "record"])
     ap.add_argument("--port")
+    ap.add_argument("--wifi", action="store_true", help="read over Wi-Fi (UDP 4210) instead of USB")
+    ap.add_argument("--ble", action="store_true", help="read over Bluetooth LE instead of USB")
     ap.add_argument("--cam", type=int, default=0)
     ap.add_argument("--reps", type=int, default=20, help="repetitions per gesture")
     ap.add_argument("--note", default="", help="e.g. 'band on left wrist, sitting'")
