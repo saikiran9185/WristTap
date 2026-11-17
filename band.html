@@ -22,8 +22,9 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 figure{margin:0;background:#f4f3f1;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 figure img{width:100%;display:block}
 figcaption{font-size:13px;color:#555;padding:8px 12px;background:#fff;border-top:1px solid #e6e3de}
-.box{border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--card);border-radius:8px;padding:12px 14px;margin:14px 0;font-size:15px}
-.box.warn{border-left-color:var(--warn)} .box.ok{border-left-color:var(--ok)}
+.box{border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));background:color-mix(in srgb,var(--accent) 7%,var(--card));border-radius:8px;padding:12px 14px;margin:14px 0;font-size:15px}
+.box.warn{border-color:color-mix(in srgb,var(--warn) 40%,var(--line));background:color-mix(in srgb,var(--warn) 7%,var(--card))}
+.box.ok{border-color:color-mix(in srgb,var(--ok) 40%,var(--line));background:color-mix(in srgb,var(--ok) 7%,var(--card))}
 ol.steps{padding-left:22px} ol.steps li{margin:8px 0}
 code{font:13.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:color-mix(in srgb,var(--line) 55%,transparent);padding:1px 6px;border-radius:5px}
 pre{font:13.5px ui-monospace,Menlo,monospace;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto}
