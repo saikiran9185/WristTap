@@ -19,6 +19,8 @@
 - [ ] **5. Fit the breadboard + sensors into the printed parts** (placement.html)
 - [ ] **6. Demo over Bluetooth** (./demo.sh --ble)
 - [ ] **7. Record a test with camera labels** (./record.sh)
+- [ ] **8. Try the 3D mouse on the real band** (./space.sh): set arm lengths, check up = +y, set 000, test drift
+- [ ] **9. (later) MPU #3 on the upper arm** → shoulder becomes the anchor, bigger 3D space
 
 ## LATER: soldered version
 Saved in solder.html (header-pin hubs, resistors in the wires, tape). Do it after the demo.

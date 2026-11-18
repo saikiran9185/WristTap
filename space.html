@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WristTap 3D Mouse</title>
+<style>
+:root{
+  --bg:#0f1113; --panel:#171a1d; --line:#272b30; --ink:#e9e7e3; --muted:#8d949c;
+  --accent:#f2b134; --arm:#5b6b80; --hand:#8a76c9; --ok:#5cc38a; --bad:#e46a5e;
+  --x:#e46a5e; --y:#5cc38a; --z:#5aa0e6;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid var(--line)}
+header h1{font-size:18px;margin:0}
+#status{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+#status b{color:var(--ink);font-weight:600}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:6px;vertical-align:1px}
+.dot.on{background:var(--ok)}
+main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:1px;background:var(--line);min-height:calc(100vh - 58px)}
+section{background:var(--bg);padding:20px 24px;min-width:0}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin:0 0 14px;font-weight:600}
+#view{width:100%;height:480px;display:block;background:#121518;border-radius:10px;cursor:grab;touch-action:none}
+#view:active{cursor:grabbing}
+.xyz{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.xyz div{background:var(--panel);border-radius:10px;padding:10px 14px}
+.xyz small{display:block;font-size:12px;color:var(--muted)}
+.xyz b{font-size:30px;font-variant-numeric:tabular-nums;font-weight:700}
+#bx{color:var(--x)} #by{color:var(--y)} #bz{color:var(--z)}
+#msg{min-height:22px;margin-top:10px;color:var(--accent);font-weight:600}
+.controls{display:grid;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
+button{font:inherit;color:var(--ink);background:#22262a;border:1px solid #333940;border-radius:8px;padding:8px 12px;cursor:pointer}
+button:hover{border-color:#4a525b}
+button.big{background:var(--accent);color:#111;border-color:var(--accent);font-weight:700;padding:12px 16px;font-size:16px}
+button.on{background:var(--accent);color:#111;border-color:var(--accent);font-weight:600}
+input[type=range]{accent-color:var(--accent);width:140px}
+.val{color:var(--ink);font-variant-numeric:tabular-nums;min-width:52px}
+ol{margin:0;padding-left:20px;color:var(--muted);font-size:14px;display:grid;gap:6px}
+ol b{color:var(--ink)}
+hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+@media (max-width:900px){main{grid-template-columns:1fr}#view{height:340px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>WristTap 3D Mouse</h1>
+  <span id="status"><span class="dot" id="dot"></span><b id="src">connecting…</b> · <span id="rate">0</span> packets/s · <span id="imus">–</span></span>
+</header>
+<main>
+  <section>
+    <h2>Hand position (drag to look around)</h2>
+    <canvas id="view"></canvas>
+    <div class="xyz">
+      <div><small>x · right</small><b id="bx">–</b> <small>cm</small></div>
+      <div><small>y · up</small><b id="by">–</b> <small>cm</small></div>
+      <div><small>z · forward</small><b id="bz">–</b> <small>cm</small></div>
+    </div>
+    <div id="msg"></div>
+  </section>
+  <section>
+    <div class="controls">
+      <h2>000 point</h2>
+      <button class="big" id="recenter">Set 000 here</button>
+      <small style="color:var(--muted)">Or squeeze and hold either pressure pad for 1 second.</small>
+      <ol>
+        <li><b>Rest your elbow</b> on the same spot every time (desk edge or armrest). The elbow is the anchor.</li>
+        <li><b>Keep still for 2 s</b> after starting. The band learns its gyro offset.</li>
+        <li>Put your hand <b>flat, straight in line with the forearm</b>, on your home mark (a sticker on the desk works).</li>
+        <li><b>Set 000 here.</b> Now move: the dot follows your hand.</li>
+        <li>If x drifts slowly, go back to the home mark and set 000 again.</li>
+      </ol>
+      <hr>
+      <h2>Your arm</h2>
+      <div class="row">Forearm (elbow → wrist) <input type="range" id="forearm_cm" min="15" max="35" step="0.5"><span class="val" id="v_forearm_cm"></span></div>
+      <div class="row">Hand (wrist → knuckles) <input type="range" id="hand_cm" min="4" max="15" step="0.5"><span class="val" id="v_hand_cm"></span></div>
+      <div class="row">If lifting your arm moves the dot down: <button id="dir1">flip forearm sensor</button><button id="dir2">flip hand sensor</button></div>
+      <hr>
+      <h2>Use it as a mouse</h2>
+      <div class="row"><button id="abs_mouse">Absolute mouse: off</button></div>
+      <div class="row">Hand position = cursor position. 000 = screen centre. Tap any disc = click.</div>
+      <div class="row">Cursor reach <input type="range" id="px_per_cm" min="10" max="100" step="1"><span class="val" id="v_px_per_cm"></span> px per cm</div>
+      <hr>
+      <div class="row"><button id="clear">Clear trail</button> Live position also goes to UDP 127.0.0.1:4211 (JSON, cm) for Blender, Unity or TouchDesigner.</div>
+    </div>
+  </section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let S = {};
+function post(upd){ return fetch("/", {method:"POST", body:JSON.stringify(upd)}).then(r=>r.json()).then(s=>{S=s; syncUI();}); }
+function syncUI(){
+  for (const k of ["forearm_cm","hand_cm","px_per_cm"]){ $(k).value=S[k]; $("v_"+k).textContent = S[k] + (k==="px_per_cm"?"":" cm"); }
+  $("abs_mouse").textContent = "Absolute mouse: " + (S.abs_mouse ? "ON" : "off"); $("abs_mouse").classList.toggle("on", !!S.abs_mouse);
+}
+for (const k of ["forearm_cm","hand_cm","px_per_cm"]) $(k).oninput = e => post({[k]: +e.target.value});
+$("dir1").onclick = () => post({dir1: -S.dir1});
+$("dir2").onclick = () => post({dir2: -S.dir2});
+$("abs_mouse").onclick = () => post({abs_mouse: !S.abs_mouse});
+$("recenter").onclick = () => post({recenter: true});
+$("clear").onclick = () => { trail.length = 0; };
+
+/* ---- 3D view (plain canvas) ---- */
+const cv = $("view"), ctx = cv.getContext("2d");
+let camYaw = -0.6, camPitch = 0.45, zoom = 1;
+let pos = null, arm = null; const trail = [];
+function resize(){ const r = cv.getBoundingClientRect(), d = devicePixelRatio||1; cv.width = r.width*d; cv.height = r.height*d; ctx.setTransform(d,0,0,d,0,0); }
+addEventListener("resize", resize); resize();
+let drag = null;
+cv.onpointerdown = e => { drag = [e.clientX, e.clientY, camYaw, camPitch]; cv.setPointerCapture(e.pointerId); };
+cv.onpointermove = e => { if (!drag) return; camYaw = drag[2] + (e.clientX-drag[0])*0.008; camPitch = Math.max(-0.1, Math.min(1.4, drag[3] + (e.clientY-drag[1])*0.006)); };
+cv.onpointerup = () => drag = null;
+cv.onwheel = e => { e.preventDefault(); zoom = Math.max(0.4, Math.min(3, zoom * (e.deltaY>0 ? 0.92 : 1.08))); };
+
+// world: x right, y up, z forward (cm). Camera looks from in front-right, above.
+function project(p){
+  const w = cv.clientWidth, h = cv.clientHeight, s = Math.min(w,h)/70*zoom;
+  const cy = Math.cos(camYaw), sy = Math.sin(camYaw), cp = Math.cos(camPitch), sp = Math.sin(camPitch);
+  let x = p[0]*cy - p[2]*sy, z = p[0]*sy + p[2]*cy;      // turn around y
+  let y = p[1]*cp - z*sp; z = p[1]*sp + z*cp;            // tilt
+  const f = 220/(220 + z*1.2);                           // light perspective
+  return [w/2 + x*s*f, h*0.58 - y*s*f, f];
+}
+function line(a,b,color,width=1){ const p=project(a), q=project(b); ctx.strokeStyle=color; ctx.lineWidth=width; ctx.beginPath(); ctx.moveTo(p[0],p[1]); ctx.lineTo(q[0],q[1]); ctx.stroke(); }
+function label(p,text,color){ const q=project(p); ctx.fillStyle=color; ctx.font="12px -apple-system,system-ui"; ctx.fillText(text,q[0]+4,q[1]-4); }
+const css = getComputedStyle(document.documentElement), C = n => css.getPropertyValue(n).trim();
+const FLOOR = -25;
+function draw(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  ctx.clearRect(0,0,w,h);
+  for (let i=-30;i<=30;i+=5){ line([i,FLOOR,-30],[i,FLOOR,30],"#22272c"); line([-30,FLOOR,i],[30,FLOOR,i],"#22272c"); }
+  line([0,0,0],[10,0,0],C("--x"),2); line([0,0,0],[0,10,0],C("--y"),2); line([0,0,0],[0,0,10],C("--z"),2);
+  label([10,0,0],"x",C("--x")); label([0,10,0],"y",C("--y")); label([0,0,10],"z",C("--z"));
+  const o = project([0,0,0]); ctx.fillStyle = C("--muted"); ctx.beginPath(); ctx.arc(o[0],o[1],4,0,7); ctx.fill(); label([0,0,0],"000",C("--muted"));
+  if (arm){
+    line(arm[0],arm[1],C("--arm"),10); line(arm[1],arm[2],C("--hand"),8);
+    const e = project(arm[0]); ctx.fillStyle=C("--arm"); ctx.beginPath(); ctx.arc(e[0],e[1],7,0,7); ctx.fill(); label(arm[0],"elbow",C("--muted"));
+  }
+  for (let i=1;i<trail.length;i++){ ctx.globalAlpha = i/trail.length; line(trail[i-1],trail[i],C("--accent"),2); }
+  ctx.globalAlpha = 1;
+  if (pos){
+    line(pos,[pos[0],FLOOR,pos[2]],"#4a4130",1);
+    const sh = project([pos[0],FLOOR,pos[2]]); ctx.fillStyle="#2a2620"; ctx.beginPath(); ctx.ellipse(sh[0],sh[1],9*sh[2],4*sh[2],0,0,7); ctx.fill();
+    const p = project(pos); ctx.fillStyle=C("--accent"); ctx.beginPath(); ctx.arc(p[0],p[1],8*p[2],0,7); ctx.fill();
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ---- live stream ---- */
+let msgTimer;
+function say(t){ $("msg").textContent=t; clearTimeout(msgTimer); msgTimer=setTimeout(()=>$("msg").textContent="",2500); }
+const es = new EventSource("/stream");
+es.onmessage = e => {
+  const m = JSON.parse(e.data);
+  if (m.settings){ S=m.settings; syncUI(); return; }
+  $("src").textContent = m.status; $("rate").textContent = m.rate; $("dot").classList.toggle("on", m.rate>20);
+  if (m.imu_ok) $("imus").textContent = `forearm ${m.imu_ok[0]?"ok":"MISSING"} · hand ${m.imu_ok[1]?"ok":"MISSING"}`;
+  if (m.calibrating) $("msg").textContent = "Keep your arm still… learning the gyro offset";
+  if (m.pos){
+    pos = m.pos; arm = m.arm;
+    $("bx").textContent = pos[0].toFixed(1); $("by").textContent = pos[1].toFixed(1); $("bz").textContent = pos[2].toFixed(1);
+    trail.push(pos); if (trail.length > 240) trail.shift();
+  }
+  for (const ev of m.events||[]){
+    if (ev.kind==="recenter"){ trail.length=0; say("000 set here"); }
+    else if (ev.kind==="tap") say(`Tap · disc ${ev.disc}` + (S.abs_mouse ? " → click" : ""));
+    else if (ev.kind==="mouse error") say("Mouse blocked: allow Terminal in System Settings → Privacy → Accessibility");
+  }
+};
+es.onerror = () => { $("src").textContent="3D mouse server stopped"; $("dot").classList.remove("on"); };
+</script>
+</body>
+</html>
