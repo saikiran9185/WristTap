@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WristTap Placement</title>
+<style>
+:root{--bg:#f6f5f2;--panel:#fff;--ink:#1b1d20;--muted:#5b626a;--line:#e2dfd9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111315;--panel:#191c1f;--ink:#ebe9e5;--muted:#a2a9b0;--line:#2b2f34}}
+:root[data-theme="dark"]{--bg:#111315;--panel:#191c1f;--ink:#ebe9e5;--muted:#a2a9b0;--line:#2b2f34}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 48px}h1{font-size:26px;margin:0 0 4px}.sub{color:var(--muted);margin:0 0 18px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{font:600 14px -apple-system,system-ui,sans-serif;padding:8px 12px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.view{background:#f8f8f8;border:1px solid var(--line);border-radius:14px;overflow:hidden}.view img{display:block;width:100%;height:auto}
+.cap{color:var(--muted);font-size:14px;margin:8px 2px 22px}
+.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}@media(max-width:900px){.grid{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:14.5px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:12.5px;color:var(--muted);font-weight:600}
+td b{white-space:nowrap}.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.ring{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}.ring svg{width:100%;height:auto;display:block}
+.ring h2{font-size:15px;margin:0 0 6px}.note{font-size:13.5px;color:var(--muted);margin-top:8px}
+</style></head><body><div class="wrap">
+<h1>Where every part goes</h1>
+<p class="sub">Left arm, palm down. Each printed part has its name engraved on it. Colours match the table.</p>
+<div class="tabs" role="group" aria-label="View">
+ <button data-v="top" aria-pressed="true">Back of arm</button><button data-v="thumb">Thumb side</button>
+ <button data-v="pinky">Little-finger side</button><button data-v="palm">Palm side</button></div>
+<div class="view"><img id="img" src="cad/png/body/top.png" alt="Arm with the tray, straps and sensor holders"></div>
+<p class="cap" id="cap">Tray on top of the forearm. MPU #1 end towards the wrist, ESP32 + USB towards the elbow.</p>
+<div class="grid">
+<table>
+<tr><th>Part (engraved)</th><th>Holds</th><th>Where on you</th></tr>
+<tr><td><span class="sw" style="background:#f2b134"></span><b>Tray</b></td><td>half breadboard 83×55, ESP32 51×28, MPU #1 21×16</td><td>top of forearm, 2 straps. MPU #1 end at the wrist</td></tr>
+<tr><td><span class="sw" style="background:#e4572e"></span><b>P0</b> PINKY BONE</td><td>piezo disc 27 mm</td><td>wrist strap, bump on the little-finger side</td></tr>
+<tr><td><span class="sw" style="background:#f3a712"></span><b>P1</b> INNER WRIST</td><td>piezo disc</td><td>wrist strap, palm side of the wrist</td></tr>
+<tr><td><span class="sw" style="background:#29bf12"></span><b>P2</b> THUMB BONE</td><td>piezo disc</td><td>wrist strap, bump on the thumb side</td></tr>
+<tr><td><span class="sw" style="background:#00a5cf"></span><b>P3</b> WRIST TOP</td><td>piezo disc</td><td>wrist strap, back of the wrist</td></tr>
+<tr><td><span class="sw" style="background:#8e44ad"></span><b>F0 / F1</b> INNER FOREARM</td><td>FSR 402, 18.5 mm pad</td><td>elbow-end tray strap, side by side on the soft inner forearm</td></tr>
+<tr><td><span class="sw" style="background:#6b4fb8"></span><b>MPU #2</b> HAND</td><td>MPU board 21×16</td><td>back of the hand, strap around the palm</td></tr>
+</table>
+<div class="ring"><h2>Wrist strap, seen from the hand</h2>
+<svg viewBox="0 0 320 260" role="img" aria-label="Cross-section of the wrist with the four piezo holders">
+ <ellipse cx="160" cy="130" rx="92" ry="64" fill="#e8b892"/><ellipse cx="160" cy="130" rx="100" ry="72" fill="none" stroke="#2a2a2a" stroke-width="8"/>
+ <g font-family="-apple-system,system-ui,sans-serif" font-size="12" font-weight="700" text-anchor="middle">
+ <rect x="138" y="40" width="44" height="18" rx="4" fill="#00a5cf"/><text x="160" y="53" fill="#fff">P3</text><text x="160" y="30" fill="currentColor">top of wrist</text>
+ <rect x="138" y="202" width="44" height="18" rx="4" fill="#f3a712"/><text x="160" y="215" fill="#fff">P1</text><text x="160" y="240" fill="currentColor">inner wrist (palm side)</text>
+ <rect x="252" y="108" width="18" height="44" rx="4" fill="#e4572e"/><text x="261" y="134" fill="#fff">P0</text><text x="292" y="174" fill="currentColor">little</text><text x="292" y="188" fill="currentColor">finger</text>
+ <rect x="50" y="108" width="18" height="44" rx="4" fill="#29bf12"/><text x="59" y="134" fill="#fff">P2</text><text x="28" y="174" fill="currentColor">thumb</text>
+ <text x="160" y="134" fill="#8a5a3a" font-weight="600">wrist</text></g></svg>
+<p class="note">Disc side of each holder touches the skin. Wires leave along the strap towards the tray.</p></div>
+</div>
+<p class="note">Simplified arm, average adult size. Slide the holders along the strap until each sits on its bone.</p>
+</div>
+<script>
+const C={top:"Tray on top of the forearm. MPU #1 end towards the wrist, ESP32 + USB towards the elbow.",
+thumb:"Thumb side: P2 on the thumb-side wrist bone. P3 on top, P1 underneath.",
+pinky:"Little-finger side: P0 on the wrist bone below the little finger.",
+palm:"Palm side: P1 under the wrist. F0 and F1 side by side on the inner forearm, under the elbow-end strap."};
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+document.getElementById("img").src="cad/png/body/"+b.dataset.v+".png";document.getElementById("cap").textContent=C[b.dataset.v];});
+</script></body></html>
