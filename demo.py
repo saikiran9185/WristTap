@@ -30,7 +30,17 @@ settings = {      # changed live from the page
     "mouse": False, "sens": 14.0, "dead": 4.0,
     "mx": "gz", "my": "gy", "mx_sign": -1, "my_sign": -1, "imu": 2,
     "tap_thr": 150, "fsr_thr": 900, "flick_dps": 260,
+    "present": False,      # presentation mode: gestures press slide keys
+    "swap_lr": False,      # flip which flick is "right" (depends on how the hand sensor sits)
 }
+# Presentation mode: gesture -> (macOS key code, what it does). Works in Keynote, PowerPoint, Google Slides, PDF viewers.
+SLIDE_KEYS = {
+    "flick right": (124, "next slide"),        # right arrow
+    "flick left": (123, "previous slide"),     # left arrow
+    "double tap": (124, "next slide"),
+    "squeeze": (11, "black screen on / off"),  # B
+}
+FLICK_LOCK_S = 0.8   # in presentation mode: ignore flicks this long after one (the hand swinging back looks like the opposite flick)
 clients = []
 clients_lock = threading.Lock()
 
@@ -79,6 +89,12 @@ def mouse_click():
     for t in (Quartz.kCGEventLeftMouseDown, Quartz.kCGEventLeftMouseUp):
         Quartz.CGEventPost(Quartz.kCGHIDEventTap,
                            Quartz.CGEventCreateMouseEvent(None, t, pos, Quartz.kCGMouseButtonLeft))
+
+
+def press_key(code):
+    import Quartz
+    for down in (True, False):
+        Quartz.CGEventPost(Quartz.kCGHIDEventTap, Quartz.CGEventCreateKeyboardEvent(None, code, down))
 
 
 def broadcast(obj):
@@ -144,7 +160,7 @@ def engine(band):
             fsr_on[k] = on
         # flick (fast hand rotation)
         g = g2 if imus[1].ok else g1
-        if g is not None and now - last_flick > 0.5:
+        if g is not None and now - last_flick > (FLICK_LOCK_S if settings["present"] else 0.5):
             peak = (arr[:, 9:12] if imus[1].ok else arr[:, 3:6]) / GYR
             ax = int(np.argmax(np.abs(peak).max(0)))
             v = peak[np.argmax(np.abs(peak[:, ax])), ax]
@@ -152,6 +168,18 @@ def engine(band):
                 last_flick = now
                 names = [("roll right", "roll left"), ("flick down", "flick up"), ("flick left", "flick right")]
                 frame["events"].append({"kind": names[ax][0 if v > 0 else 1], "dps": int(abs(v))})
+        # presentation mode: gestures -> slide keys
+        if settings["present"]:
+            for ev in frame["events"]:
+                if settings["swap_lr"] and ev["kind"] in ("flick left", "flick right"):
+                    ev["kind"] = "flick right" if ev["kind"] == "flick left" else "flick left"
+                if ev["kind"] in SLIDE_KEYS:
+                    code, action = SLIDE_KEYS[ev["kind"]]
+                    try:
+                        press_key(code)
+                        ev["action"] = action
+                    except Exception as e:
+                        ev["action"] = "key blocked: allow Terminal in Accessibility (" + e.__class__.__name__ + ")"
         # air mouse
         src = g2 if settings["imu"] == 2 else g1
         if settings["mouse"] and src is not None:
