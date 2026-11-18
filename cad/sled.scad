@@ -40,7 +40,12 @@ fsr_tail_w = 8.0; // FSR tail width
 engrave = 0.6;    // label depth
 font    = "Liberation Sans:style=Bold";
 
-part = "sled";    // sled | pod_p0..pod_p3 | pod_f0 | pod_f1 | hand | view
+/* [One-piece band] */
+band_t   = 1.2;   // flexible band thickness (PLA: shape it warm with a hair dryer; PETG/TPU bends better)
+wrist_c  = 165;   // wrist circumference (measure with a tape or string)
+arm_c    = 250;   // forearm circumference at the elbow-end strap (measure)
+
+part = "sled";    // sled | onepiece | onepiece_plate | pod_p0..pod_p3 | pod_f0 | pod_f1 | hand | view
 
 /* [Hidden] */
 $fn = 40;
@@ -89,7 +94,7 @@ module sled() {
                 translate([rib, rib, floor_t]) cube([Le - 12 - 2*rib, rib_w - 2*rib, 50]);
             }
             strap_wings(xb + Lb/2);
-            strap_wings(xe + Le/2);
+            if (!one) strap_wings(xe + Le/2);          // the forearm band replaces this strap in the one-piece version
             // MPU #1 bay at the WRIST end (the breadboard end): board lies flat, pins + plugs point sideways
             translate([-ext, 0, 0]) rbox([ext + 3, W, floor_t], 3);
             translate([mx0 - wall, my0 - wall, 0]) difference() {
@@ -177,5 +182,52 @@ for (k = [0:3]) if (part == str("pod_p", k)) strap_pod(str("P", k), PZ_NAME[k]) 
 if (part == "pod_f0") strap_pod("F0", "INNER FOREARM", 2.2) fsr_pocket();
 if (part == "pod_f1") strap_pod("F1", "INNER FOREARM", 2.2) fsr_pocket();
 if (part == "hand") hand_holder();
+
+// ================= ONE-PIECE: tray + wrist band (4 discs) + forearm band (2 FSRs), printed flat =================
+one = (part == "onepiece" || part == "onepiece_plate");
+wb_x = -ext - 20;                         // wrist band centre (over the wrist bones)
+fb_x = xe + Le/2;                         // forearm band centre (elbow end)
+bw   = strap_w;                           // band width
+q    = wrist_c/4;                         // quarter of the wrist = distance top -> side
+module band_y(x, y1, y2) translate([x - bw/2, min(y1,y2), 0]) rbox([bw, abs(y2 - y1), band_t], 3);
+module end_tab(x, y) translate([x - (slot_l + 6)/2, y - 6, 0]) difference() {   // velcro strap closes the band here
+    rbox([slot_l + 6, 12, band_t + 0.8], 3);
+    translate([3, 6 - slot_t/2, -1]) cube([slot_l, slot_t, 5]);
+}
+module disc_pad(x, y, tag) translate([x, y, 0]) difference() {
+    cylinder(d = disc_d + 4, h = 3.2);
+    translate([0, 0, -1]) cylinder(d = disc_d + 0.6, h = 1.8);                   // brass disc, flush with the skin side
+    translate([0, 0, -1]) cylinder(d = ceramic_d + 1, h = 3.4);                   // ceramic + solder blobs
+    translate([0, disc_d/2 - 5, -1]) cylinder(d = 3.4, h = 6);                    // wire hole up to the top
+    translate([0, -3, 3.2 - engrave]) linear_extrude(2) text(tag, size = 7, font = font, halign = "center");
+}
+module fsr_pad_m(x, y, tag, dir) translate([x, y, 0]) difference() {
+    cylinder(d = fsr_pad_d + 5, h = 2.4);
+    translate([0, 0, -1]) cylinder(d = fsr_pad_d + 0.6, h = 1.7);
+    translate([-(fsr_tail_w + 0.6)/2, dir < 0 ? -40 : 0, -1]) cube([fsr_tail_w + 0.6, 40, 1.7]);   // tail runs towards the tray
+    translate([0, -3, 2.4 - engrave]) linear_extrude(2) text(tag, size = 6, font = font, halign = "center");
+}
+module onepiece() {
+    sled();
+    // spine from the MPU #1 end to the wrist band
+    translate([wb_x, W/2 - bw/2, 0]) rbox([-wb_x - ext + 4, bw, floor_t], 3);
+    // WRIST BAND (lies across the arm). Flat distances = distances around the wrist.
+    yA = W/2 - (2*q - 10);  yB = W/2 + (2*q - 4);
+    band_y(wb_x, yA, yB);
+    end_tab(wb_x, yA); end_tab(wb_x, yB);
+    disc_pad(wb_x, W/2,          "P3");  // top of wrist
+    disc_pad(wb_x, W/2 + q,      "P0");  // little-finger bone
+    disc_pad(wb_x, W/2 - q,      "P2");  // thumb bone
+    disc_pad(wb_x, W/2 + 2*q-22, "P1");  // inner wrist (under), at the band end
+    // FOREARM BAND under the ESP end: leaves both tray sides, FSRs sit on the inner forearm
+    hs = arm_c/2 - W/2;                  // flat length each side, tray edge -> under the arm
+    band_y(fb_x, -hs + 6, 0.5); band_y(fb_x, W - 0.5, W + hs - 6);
+    end_tab(fb_x, -hs + 6); end_tab(fb_x, W + hs - 6);
+    fsr_pad_m(fb_x, -hs + 26,    "F0", 1);
+    fsr_pad_m(fb_x, W + hs - 26, "F1", -1);
+}
+if (part == "onepiece") onepiece();
+if (part == "onepiece_plate") { onepiece(); translate([L - 40, W + 30, 0]) hand_holder(); }
+if (one) echo(str("ONE-PIECE span: x ", wb_x - bw/2, " .. ", L, "   y ", -(arm_c/2 - W/2), " .. ", W + arm_c/2 - W/2));
 if (part == "view") { color("#f2b134") sled(); dummies(); }
 echo(str("SLED size: ", L, " x ", W + 2*wing - 2, " x ", end_h, " mm"));
