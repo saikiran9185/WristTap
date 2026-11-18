@@ -20,24 +20,24 @@ td b{white-space:nowrap}.sw{display:inline-block;width:12px;height:12px;border-r
 .ring h2{font-size:15px;margin:0 0 6px}.note{font-size:13.5px;color:var(--muted);margin-top:8px}
 </style></head><body><div class="wrap">
 <h1>Where every part goes</h1>
-<p class="sub">Left arm, palm down. Each printed part has its name engraved on it. Colours match the table.</p>
+<p class="sub">One-piece band, left arm, palm down. The block, the band and all six sensor pads are one print; only MPU #2 is a loose piece. Each spot is engraved.</p>
 <div class="tabs" role="group" aria-label="View">
  <button data-v="top" aria-pressed="true">Back of arm</button><button data-v="thumb">Thumb side</button>
- <button data-v="pinky">Little-finger side</button><button data-v="palm">Palm side</button></div>
-<div class="view"><img id="img" src="cad/png/body/top.png" alt="Arm with the tray, straps and sensor holders"></div>
-<p class="cap" id="cap">Tray on top of the forearm. MPU #1 end towards the wrist, ESP32 + USB towards the elbow.</p>
+ <button data-v="pinky">Little-finger side</button><button data-v="palm">Palm side</button><button data-v="hand">From the hand</button></div>
+<div class="view"><img id="img" src="cad/png/watch/top.png" alt="Arm with the tray, straps and sensor holders"></div>
+<p class="cap" id="cap">Block just behind the wrist: breadboard on top, ESP32 + MPU #1 inside, USB towards the elbow. The band wraps the wrist.</p>
 <div class="grid">
 <table>
 <tr><th>Part (engraved)</th><th>Holds</th><th>Where on you</th></tr>
-<tr><td><span class="sw" style="background:#f2b134"></span><b>Tray</b></td><td>half breadboard 83×55, ESP32 51×28, MPU #1 21×16</td><td>top of forearm, 2 straps. MPU #1 end at the wrist</td></tr>
-<tr><td><span class="sw" style="background:#e4572e"></span><b>P0</b> PINKY BONE</td><td>piezo disc 27 mm</td><td>wrist strap, bump on the little-finger side</td></tr>
-<tr><td><span class="sw" style="background:#f3a712"></span><b>P1</b> INNER WRIST</td><td>piezo disc</td><td>wrist strap, palm side of the wrist</td></tr>
-<tr><td><span class="sw" style="background:#29bf12"></span><b>P2</b> THUMB BONE</td><td>piezo disc</td><td>wrist strap, bump on the thumb side</td></tr>
-<tr><td><span class="sw" style="background:#00a5cf"></span><b>P3</b> WRIST TOP</td><td>piezo disc</td><td>wrist strap, back of the wrist</td></tr>
-<tr><td><span class="sw" style="background:#8e44ad"></span><b>F0 / F1</b> INNER FOREARM</td><td>FSR 402, 18.5 mm pad</td><td>elbow-end tray strap, side by side on the soft inner forearm</td></tr>
+<tr><td><span class="sw" style="background:#f2b134"></span><b>Block + band</b> (one piece)</td><td>breadboard on top, ESP32 under it, MPU #1 inside. Block 87×59×33</td><td>top of the forearm, right behind the wrist</td></tr>
+<tr><td><span class="sw" style="background:#e4572e"></span><b>P0</b> PINKY BONE</td><td>piezo disc 27 mm</td><td>band, bump on the little-finger side</td></tr>
+<tr><td><span class="sw" style="background:#f3a712"></span><b>P1</b> INNER WRIST</td><td>piezo disc</td><td>band paddle, palm side of the wrist</td></tr>
+<tr><td><span class="sw" style="background:#29bf12"></span><b>P2</b> THUMB BONE</td><td>piezo disc</td><td>band, bump on the thumb side</td></tr>
+<tr><td><span class="sw" style="background:#00a5cf"></span><b>P3</b> WRIST TOP</td><td>piezo disc</td><td>band, back of the wrist</td></tr>
+<tr><td><span class="sw" style="background:#8e44ad"></span><b>F0 / F1</b> INNER FOREARM</td><td>FSR 402, 18.5 mm pad</td><td>band paddle, side by side just above P1 (inner wrist, over the tendons)</td></tr>
 <tr><td><span class="sw" style="background:#6b4fb8"></span><b>MPU #2</b> HAND</td><td>MPU board 21×16</td><td>back of the hand, strap around the palm</td></tr>
 </table>
-<div class="ring"><h2>Wrist strap, seen from the hand</h2>
+<div class="ring"><h2>The band, seen from the hand</h2>
 <svg viewBox="0 0 320 260" role="img" aria-label="Cross-section of the wrist with the four piezo holders">
  <ellipse cx="160" cy="130" rx="92" ry="64" fill="#e8b892"/><ellipse cx="160" cy="130" rx="100" ry="72" fill="none" stroke="#2a2a2a" stroke-width="8"/>
  <g font-family="-apple-system,system-ui,sans-serif" font-size="12" font-weight="700" text-anchor="middle">
@@ -51,10 +51,11 @@ td b{white-space:nowrap}.sw{display:inline-block;width:12px;height:12px;border-r
 <p class="note">Simplified arm, average adult size. Slide the holders along the strap until each sits on its bone.</p>
 </div>
 <script>
-const C={top:"Tray on top of the forearm. MPU #1 end towards the wrist, ESP32 + USB towards the elbow.",
+const C={top:"Block just behind the wrist: breadboard on top, ESP32 + MPU #1 inside, USB towards the elbow. The band wraps the wrist.",
 thumb:"Thumb side: P2 on the thumb-side wrist bone. P3 on top, P1 underneath.",
 pinky:"Little-finger side: P0 on the wrist bone below the little finger.",
-palm:"Palm side: P1 under the wrist. F0 and F1 side by side on the inner forearm, under the elbow-end strap."};
+palm:"Palm side: the paddle under the inner wrist carries P1, with F0 and F1 just above it towards the elbow. The band ends overlap here and close with velcro.",
+hand:"From the hand: the band around the wrist, MPU #2 on the back of the hand on its own strap."};
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-pressed",x===b));
-document.getElementById("img").src="cad/png/body/"+b.dataset.v+".png";document.getElementById("cap").textContent=C[b.dataset.v];});
+document.getElementById("img").src="cad/png/watch/"+b.dataset.v+".png";document.getElementById("cap").textContent=C[b.dataset.v];});
 </script></body></html>
