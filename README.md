@@ -71,3 +71,11 @@ Known open problem: F1 (FSR on VN) reads 0 on the band; wiring fault in row 5.
 - `cad/band.scad` + `cad/build_v2.sh`: closed forearm box (breadboard + ESP32 + MPU #1, slide lid that clicks, power-bank tunnels), hand shell (MPU #2), 4 piezo pods, 2 FSR pods. Sliced plate: `cad/print/v2_all_parts.3mf` (3 h 40 min, 118 g, no supports).
 - Firmware streams the same 44-byte packet over USB (500/s), Wi-Fi UDP 4210 (500/s) and Bluetooth LE "WristTap" (100/s). Wi-Fi: own network "WristTap" unless `firmware/wristtap/secrets.h` exists.
 - `./check.sh [--ble|--wifi]`, `./demo.sh [--ble|--wifi]`: live demo page (3D arm, taps, squeezes, flicks, air mouse) on localhost:8791.
+
+## 3D mouse: hand position in space (18 Nov 2026)
+
+- `./space.sh [--ble|--wifi]` opens http://localhost:8792: a live 3D view of where your hand is (x right, y up, z forward, in cm).
+- No camera: the elbow rests in one spot, MPU #1 gives the forearm direction, MPU #2 the hand direction, and the arm lengths turn that into a position (`space.py`).
+- **000 point:** hand flat and in line with the forearm on a home mark, then press "Set 000 here" or hold a pressure pad for 1 s. Do it again whenever left/right drifts (up/down doesn't drift).
+- Absolute mouse mode: hand position = cursor position, tap = click. Position also goes out as JSON on UDP 4211 for Blender / Unity / TouchDesigner.
+- Limit: the elbow must stay put. Next step: the spare MPU on the upper arm so the shoulder becomes the anchor.
