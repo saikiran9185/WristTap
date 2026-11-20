@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WristTap Rewire</title>
+<style>
+:root{
+  --bg:#f4f1ea; --panel:#fbf9f4; --line:#dcd5c7; --ink:#1b1e22; --muted:#575e67;
+  --accent:#a86f00; --accent-ink:#fff; --ok:#1f7a4a; --ok-bg:#dff1e6; --wait-bg:#ece7dc;
+  --tray:#d9d6cf; --bb:#fbfaf6; --hole:#3b3b3b; --holebg:#e9e6de; --esp:#1d2430; --esp-ink:#e8eef5;
+  --red:#d2382b; --gnd:#2f66c9; --sda:#12857a; --scl:#8d4cb3; --fsr:#3f9a30; --sig:#c25f00; --ghost:#8a8f96; --mpu:#2c7f8f;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1113; --panel:#171a1d; --line:#2a2f35; --ink:#ece9e3; --muted:#a3aab2;
+  --accent:#f2b134; --accent-ink:#14171a; --ok:#5cc38a; --ok-bg:#16261c; --wait-bg:#1f2327;
+  --tray:#2a2e33; --bb:#f1efe8; --hole:#3b3b3b; --holebg:#e2dfd6; --esp:#101722; --esp-ink:#d7e1ec;
+  --red:#e0483b; --gnd:#3f7ae0; --sda:#1a9d90; --scl:#a463cc; --fsr:#4caf3c; --sig:#de7412; --ghost:#8d949c; --mpu:#2c8f9f;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f1113; --panel:#171a1d; --line:#2a2f35; --ink:#ece9e3; --muted:#a3aab2;
+  --accent:#f2b134; --accent-ink:#14171a; --ok:#5cc38a; --ok-bg:#16261c; --wait-bg:#1f2327;
+  --tray:#2a2e33; --bb:#f1efe8; --hole:#3b3b3b; --holebg:#e2dfd6; --esp:#101722; --esp-ink:#d7e1ec;
+  --red:#e0483b; --gnd:#3f7ae0; --sda:#1a9d90; --scl:#a463cc; --fsr:#4caf3c; --sig:#de7412; --ghost:#8d949c; --mpu:#2c8f9f;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 16px 40px}
+/* live strip */
+.live{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.live .src{font-size:14px;color:var(--muted);margin-right:6px;font-variant-numeric:tabular-nums}
+.live .src b{color:var(--ink)}
+.chip{font-size:14px;padding:4px 10px;border-radius:999px;background:var(--wait-bg);color:var(--muted);font-variant-numeric:tabular-nums}
+.chip.on{background:var(--ok);color:var(--bg);font-weight:700}
+.chip.seen{box-shadow:inset 0 0 0 2px var(--ok);color:var(--ink)}
+/* layout */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,470px);gap:28px;margin-top:16px;align-items:start}
+.top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.grp{font-size:13px;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent);font-weight:800}
+.count{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:5px;background:var(--wait-bg);border-radius:3px;overflow:hidden;margin:8px 0 18px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+h1{font-size:32px;line-height:1.15;margin:0 0 16px;letter-spacing:-.4px;display:flex;gap:14px;align-items:center}
+h1 svg{flex:none}
+/* take / push cards */
+.do{display:grid;gap:12px}
+.card{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card .n{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:20px;background:var(--wait-bg)}
+.card.push .n{background:var(--accent);color:var(--accent-ink)}
+.card .lab{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 2px}
+.card .big{font-size:22px;font-weight:700;margin:0;line-height:1.3}
+.card .big .hl{color:var(--accent)}
+.card .sm{font-size:15px;color:var(--muted);margin:4px 0 0}
+.card .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.zoom{margin-top:10px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--tray);max-width:340px}
+.zoom svg{display:block;width:100%;height:auto}
+.why{color:var(--muted);font-size:15px;margin:2px 0 0}
+.text{color:var(--muted);margin:0;font-size:18px}
+.text b{color:var(--ink)}
+.check{margin-top:14px;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;background:var(--wait-bg);font-weight:700;font-size:18px}
+.check .dot{width:14px;height:14px;border-radius:50%;background:var(--ghost);flex:none}
+.check.pass{background:var(--ok-bg);color:var(--ok)}
+.check.pass .dot{background:var(--ok)}
+.usb{display:flex;gap:10px;align-items:center;margin-top:12px;padding:10px 14px;border-radius:10px;border:1px dashed var(--line);font-size:15px;color:var(--muted)}
+.usb b{color:var(--ink)}
+nav{display:flex;gap:10px;align-items:center;margin-top:20px;flex-wrap:wrap}
+button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 18px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:800}
+button.primary.glow{box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 35%,transparent)}
+button:disabled{opacity:.35;cursor:default}
+code{font:15px ui-monospace,Menlo,monospace;background:var(--wait-bg);padding:2px 6px;border-radius:5px}
+.boardwrap{position:sticky;top:12px}
+#board{width:100%;height:auto;display:block;border-radius:16px}
+.key{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin-top:8px}
+.key i{display:inline-block;width:18px;height:4px;border-radius:2px;vertical-align:3px;margin-right:5px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}.boardwrap{position:static}h1{font-size:26px}.card .big{font-size:19px}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="live" aria-live="polite">
+    <span class="src"><b id="src">not connected</b> · <span id="rate">0</span>/s</span>
+    <span class="chip" id="c-imu0">IMU 1</span><span class="chip" id="c-imu1">IMU 2</span>
+    <span class="chip" id="c-p0">P0</span><span class="chip" id="c-p1">P1</span><span class="chip" id="c-p2">P2</span><span class="chip" id="c-p3">P3</span>
+    <span class="chip" id="c-f0">F0</span><span class="chip" id="c-f1">F1</span>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="top"><span class="grp" id="grp"></span><span class="count" id="count"></span></div>
+      <div class="bar"><i id="prog"></i></div>
+      <h1 id="title"></h1>
+      <div id="body"></div>
+      <nav>
+        <button id="prev">← Back</button>
+        <button id="replay">Show again</button>
+        <button id="next" class="primary">Next →</button>
+      </nav>
+    </div>
+    <div class="boardwrap">
+      <svg id="board" viewBox="0 0 470 1040" role="img" aria-label="Your breadboard seen from above, as it sits in the tray: ESP32 at the top (elbow end), rows 1 to 30 going down, columns a to e and f to j, a plus and minus power line on each side, MPU 1 at the bottom (wrist end). The part for this step is bright and its hole has a yellow ring."></svg>
+      <div class="key"><span><i style="background:var(--red)"></i>+ power</span><span><i style="background:var(--gnd)"></i>− ground</span><span><i style="background:var(--sda)"></i>data</span><span><i style="background:var(--scl)"></i>clock</span><span><i style="background:var(--sig)"></i>sensor signal</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+const cv=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ===== board geometry: drawn the way it sits in your tray (ESP32 on top) ===== */
+const COLX={"L+":92,"L-":114,a:152,b:172,c:192,d:212,e:232,f:280,g:300,h:320,i:340,j:360,"R+":398,"R-":420};
+const ROWY=r=>292+(r-1)*22;
+// hole names used in the steps: "c29", "L+1", "L-2", "R-30"
+function hole(h){ const m=h.match(/^([LR][+-])(\d+)$/); return m?[COLX[m[1]],ROWY(+m[2])]:[COLX[h[0]],ROWY(+h.slice(1))]; }
+function holeWords(h){
+  const m=h.match(/^([LR])([+-])(\d+)$/);
+  if(m) return {main:`${m[1]==="L"?"LEFT":"RIGHT"} ${m[2]==="+"?"+ line (red)":"− line (blue)"}`, row:m[3], short:`${m[1]==="L"?"left":"right"} ${m[2]==="+"?"+":"−"} · row ${m[3]}`};
+  return {main:`column ${h[0]}`, row:h.slice(1), short:`${h[0]} · row ${h.slice(1)}`};
+}
+/* ESP32 DevKit V1 (30 pins). Counted from the USB end. 3V3 side drawn on the right, like your photo. */
+const ESP_R=["3V3","GND","D15","D2","D4","RX2","TX2","D5","D18","D19","D21","RX0","TX0","D22","D23"];
+const ESP_L=["VIN","GND","D13","D12","D14","D27","D26","D25","D33","D32","D35","D34","VN","VP","EN"];
+const ESPY=i=>78+i*12.4;
+const A={};
+ESP_R.forEach((p,i)=>A["espR:"+p]=[352,ESPY(i)]);
+ESP_L.forEach((p,i)=>A["espL:"+p]=[138,ESPY(i)]);
+["VCC","GND","SCL","SDA","AD0"].forEach((p,i)=>A["mpu1:"+p]=[182+i*20,972]);
+["VCC","GND","SCL","SDA","AD0"].forEach((p,i)=>A["mpu2:"+p]=[352+i*16,1004]);
+[[0,14],[1,17],[2,20],[3,23]].forEach(([k,r])=>{A[`pz${k}:red`]=[40,ROWY(r)-5];A[`pz${k}:black`]=[40,ROWY(r)+5];});
+[[0,3],[1,5]].forEach(([k,r])=>{A[`fsr${k}:A`]=[40,ROWY(r)-5];A[`fsr${k}:B`]=[40,ROWY(r)+5];});
+
+function srcWords(from){
+  const [part,pin]=from.split(":");
+  if(part==="espR"||part==="espL"){ const list=part==="espR"?ESP_R:ESP_L, n=list.indexOf(pin)+1;
+    return {main:`ESP32 pin <span class="hl">${pin}</span>`, sm:`${n}${["st","nd","rd"][n-1]||"th"} pin from the USB end, on the ${part==="espR"?"3V3":"VIN"} side. The name is also printed next to the pin.`}; }
+  if(part==="mpu1") return {main:`MPU 1 pin <span class="hl">${pin}</span>`, sm:"The forearm motion sensor in the bay at the wrist end. Pin names are printed on it."};
+  if(part==="mpu2") return {main:`MPU 2 pin <span class="hl">${pin}</span>`, sm:"The hand sensor, on the rainbow ribbon. Pin names are printed on it."};
+  if(part.startsWith("pz")) return {main:`Disc ${part[2]} · <span class="hl">${pin} wire</span>`, sm:`Find the tape flag P${part[2]} on the wrist strap.`};
+  if(part.startsWith("fsr")) return {main:`FSR ${part[3]} · <span class="hl">${pin==="A"?"first":"second"} leg</span>`, sm:`The green squeeze strip on the elbow strap (flag F${part[3]}). Either leg can be first.`};
+}
+
+/* ===== steps ===== */
+const W=(id,g,from,to,c,why)=>({id,g,kind:"wire",from,to,c,why});
+const R=(id,g,to,val,why)=>({id,g,kind:"res",to,val,why});
+const C=(id,g,title,say,test,txt,fresh)=>({id,g,kind:"check",title,say,test,txt,fresh});
+const T=(id,g,title,say,zone,icon)=>({id,g,kind:"task",title,say,zone,icon});
+const STEPS=[
+ T("s0","Start","Start the live reader",`Plug USB in. In Terminal type:<br><code>cd ~/Projects/WristTap && ./demo.sh --no-open</code><br>Leave it running. It reconnects by itself every time you unplug and plug back in.`,null,"term"),
+ C("s1","Start","Is the reader running?",`The strip at the very top should show <b>USB</b> and a number of packets per second.`,L=>L.rate>20,"Packets arriving"),
+ T("s2","Start","Unplug USB. Pull every wire off",`Take <b>every jumper wire</b> and <b>all 10 resistors</b> off the breadboard.<br>Keep on the tray: the ESP32, MPU 1 in its bay, the breadboard. Keep every sensor in its pod.<br><br>Sort the resistors into two piles:<br><b>6× 10 kΩ</b> = brown · black · orange<br><b>4× 1 MΩ</b> = brown · black · green<br><br>The board should now be empty, like the drawing.`,null,"empty"),
+
+ W("p1","1 · Power","espR:3V3","L+1","--red","Now the whole left + line has power."),
+ W("p2","1 · Power","espR:GND","L-2","--gnd","The left − line is now ground."),
+ W("p3","1 · Power","espL:GND","R-2","--gnd","The right − line is ground too. The right + line stays empty."),
+ C("pc","1 · Power","Check power",`The ESP32's light is on and the top strip shows packets. Sensor lights stay grey for now, which is right.`,L=>L.rate>20,"Band is sending"),
+
+ W("a1","2 · MPU 1 (forearm)","mpu1:VCC","L+30","--red","Power for MPU 1, at the bottom end of the left + line."),
+ W("a2","2 · MPU 1 (forearm)","mpu1:GND","R-30","--gnd","Ground, from the right − line."),
+ W("a3","2 · MPU 1 (forearm)","mpu1:AD0","R-29","--gnd","AD0 on ground gives MPU 1 its own name (0x68)."),
+ W("a4","2 · MPU 1 (forearm)","mpu1:SDA","c29","--sda","Row 29, left half (a–e) is the shared data strip."),
+ W("a5","2 · MPU 1 (forearm)","mpu1:SCL","h29","--scl","Row 29, right half (f–j) is the shared clock strip."),
+ W("a6","2 · MPU 1 (forearm)","espR:D21","a29","--sda","ESP32 joins the data strip. Lay this long wire flat down the right edge."),
+ W("a7","2 · MPU 1 (forearm)","espR:D22","j29","--scl","ESP32 joins the clock strip. Also flat down the right edge."),
+ C("ac","2 · MPU 1 (forearm)","Check MPU 1",`If IMU 1 stays grey, press the <b>EN</b> button on the ESP32 once.`,L=>L.imu[0],"IMU 1 live"),
+
+ W("b1","3 · MPU 2 (hand)","mpu2:VCC","L+28","--red","Power for the hand sensor."),
+ W("b2","3 · MPU 2 (hand)","mpu2:AD0","L+27","--red","AD0 on power gives MPU 2 a different name (0x69), so both can share row 29."),
+ W("b3","3 · MPU 2 (hand)","mpu2:GND","R-28","--gnd","Ground."),
+ W("b4","3 · MPU 2 (hand)","mpu2:SDA","e29","--sda","Same data strip as MPU 1."),
+ W("b5","3 · MPU 2 (hand)","mpu2:SCL","f29","--scl","Same clock strip as MPU 1."),
+ C("bc","3 · MPU 2 (hand)","Check both MPUs",`Press <b>EN</b> once if one stays grey.`,L=>L.imu[0]&&L.imu[1],"IMU 1 and IMU 2 both live"),
+];
+[["D32",14],["D33",17],["D34",20],["D35",23]].forEach(([pin,r],k)=>{
+  const g=`${4+k} · Piezo disc ${k}`;
+  STEPS.push(
+   W(`z${k}a`,g,`pz${k}:red`,`a${r}`,"--red",`Row ${r} belongs to disc ${k}.`),
+   R(`z${k}b`,g,[`c${r}`,`L-${r}`],"1M",`It drains the disc back to 0 after each tap.`),
+   R(`z${k}c`,g,[`e${r}`,`f${r}`],"10k",`It jumps the middle gap and protects the ESP32 pin from the tap's spike.`),
+   W(`z${k}d`,g,`espL:${pin}`,`j${r}`,"--sig",`${pin} reads disc ${k}.`),
+   W(`z${k}e`,g,`pz${k}:black`,`R-${r}`,"--gnd",`Disc ${k}'s ground.`),
+   C(`z${k}k`,g,`Check disc ${k}`,`Tap disc ${k} a few times.`,L=>L.seenP[k],`P${k}: rests near 0, then jumps when tapped`,true));
+});
+[[0,3,"VP"],[1,5,"VN"]].forEach(([k,r,pin])=>{
+  const g=`${8+k} · FSR ${k}`;
+  STEPS.push(
+   W(`q${k}a`,g,`fsr${k}:A`,`L+${r}`,"--red",`One leg takes power.`),
+   W(`q${k}b`,g,`fsr${k}:B`,`a${r}`,"--fsr",`Row ${r} belongs to FSR ${k}.`),
+   R(`q${k}c`,g,[`c${r}`,`L-${r}`],"10k",`Turns “how hard you press” into a voltage the ESP32 can read.`),
+   W(`q${k}d`,g,`espL:${pin}`,`e${r}`,"--sig",`${pin} reads FSR ${k}.`),
+   C(`q${k}k`,g,`Check FSR ${k}`,`Press FSR ${k} firmly.`,L=>L.fsr[k]>900,`F${k} over 900 when pressed`));
+});
+STEPS.push(
+ C("all","Wired","All 8 together",`Tap all 4 discs and press both FSRs. <b>Keep USB plugged in from now on.</b>`,L=>L.imu[0]&&L.imu[1]&&L.seenP.every(Boolean)&&L.seenF.every(Boolean),"All 8 sensors seen",true),
+ T("t1","Make it flat","Fold MPU 1's wires short","Fold each wire's spare length into a flat S under MPU 1. Put one strip of tape over it. <b>Rule: nothing taller than the ESP32.</b>","mpu1","tape"),
+ T("t2","Make it flat","Right-side ESP32 wires: one flat bundle","3V3, GND, D21 and D22 go down the <b>right edge</b>. Fold the spare length under the ESP32 and tape every 3 cm.","right","tape"),
+ T("t3","Make it flat","Left-side ESP32 wires: one flat bundle","GND, D32–D35, VP and VN go down the <b>left edge</b>. Fold the spare under and tape it.","left","tape"),
+ T("t4","Make it flat","Tape the ESP32 pins","One strip of tape over each row of ESP32 pins, so a shake can't knock the plugs out.","esp","tape"),
+ T("t5","Make it flat","Push resistors flat","Press every resistor body down onto the board. A standing resistor snags a sleeve.","res","res"),
+ C("tk","Make it flat","Check all 8 again","Tap all 4 discs and press both FSRs.",L=>L.imu[0]&&L.imu[1]&&L.seenP.every(Boolean)&&L.seenF.every(Boolean),"All 8 sensors seen",true),
+ T("h1","Straps","Twist the piezo wires","Twist each disc's red + black wires together, about 10 turns. Put a tape flag on each: P0, P1, P2, P3. Tape the bundle along the outside of the wrist strap.","piezo","twist"),
+ T("h2","Straps","Twist the FSR wires","Twist each FSR pair and flag them F0 / F1. They plug in right by the elbow strap now, so fold the spare flat under the ESP32.","fsr","twist"),
+ T("h3","Straps","Hand ribbon: leave a loop","Tape the ribbon at the hand holder and on the tray, but <b>not on the wrist joint</b>. Leave a 3 cm loop there.","hand","twist"),
+ T("h4","Straps","Tape anchors","2 cm before each bundle reaches the board, wrap tape round the bundle <b>and</b> the tray edge. A tug then pulls the tape, not the plug.","anchors","tape"),
+ T("h5","Straps","Cover the tray","Cut card to the tray size and hold it on with two rubber bands or the tray straps.",null,"tape"),
+ T("w1","Wear","Strap it on","<b>Wrist strap</b> just below the wrist bones: P0 little-finger bump, P1 palm side, P2 thumb bump, P3 back of the wrist.<br><b>Tray</b> on top of the forearm, ESP32 end towards the elbow.<br><b>F0 + F1</b> on the soft inner forearm.<br><b>Hand holder</b> 2 cm behind the knuckles.",null,"hand"),
+ C("w2","Wear","Worn test","Make a fist 5 times, bend the wrist, turn the palm over, tap every disc. If a light flickers off, press on that plug to find it, re-push it, tape it.",L=>L.imu[0]&&L.imu[1]&&L.seenP.every(Boolean)&&L.seenF.every(Boolean),"All 8 seen while worn",true),
+ T("end","Done","Wearable. Next: demo, then record","Press Ctrl+C in Terminal. Unplug USB, turn the power bank on, run <code>./demo.sh --ble</code>, press <b>S</b> for Show mode and rehearse. Then record.",null,"done"),
+);
+const PLUGGED=new Set(["s0","s1","all","tk","w2"]);   // checks after these keep USB in
+
+/* ===== icons ===== */
+function icon(kind,c){
+  const s=(b)=>`<svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">${b}</svg>`;
+  const col=c?cv(c):cv("--accent");
+  if(kind==="wire") return s(`<path d="M6 34 C 14 34, 16 10, 26 10" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round"/><rect x="26" y="5" width="12" height="10" rx="2" fill="#333"/><rect x="37" y="8" width="5" height="4" fill="#bbb"/>`);
+  if(kind==="res") return s(resIcon("10k"));
+  if(kind==="check") return s(`<circle cx="22" cy="22" r="18" fill="${cv("--ok")}"/><path d="M13 22 l6 6 l12 -13" fill="none" stroke="${cv("--bg")}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`);
+  if(kind==="tape") return s(`<circle cx="22" cy="22" r="16" fill="none" stroke="${cv("--muted")}" stroke-width="8"/><circle cx="22" cy="22" r="7" fill="none" stroke="${cv("--muted")}" stroke-width="2"/><rect x="22" y="34" width="20" height="8" fill="${cv("--muted")}"/>`);
+  if(kind==="twist") return s(`<path d="M4 16 C 12 30, 18 30, 22 22 S 32 14, 40 28" fill="none" stroke="${cv("--red")}" stroke-width="3.5"/><path d="M4 28 C 12 14, 18 14, 22 22 S 32 30, 40 16" fill="none" stroke="#222" stroke-width="3.5"/>`);
+  if(kind==="hand") return s(`<path d="M12 40 V20 a3 3 0 0 1 6 0 V12 a3 3 0 0 1 6 0 V18 a3 3 0 0 1 6 0 v4 a3 3 0 0 1 6 0 V30 c0 6 -4 10 -10 10 Z" fill="none" stroke="${cv("--muted")}" stroke-width="2.5" stroke-linejoin="round"/>`);
+  if(kind==="term") return s(`<rect x="3" y="7" width="38" height="30" rx="4" fill="${cv("--esp")}"/><path d="M10 17 l6 5 l-6 5 M19 28 h10" fill="none" stroke="${cv("--esp-ink")}" stroke-width="2.5" stroke-linecap="round"/>`);
+  if(kind==="empty") return s(`<rect x="6" y="4" width="32" height="36" rx="3" fill="${cv("--bb")}" stroke="${cv("--line")}"/>${[0,1,2,3,4].map(r=>[0,1,2,3].map(c=>`<rect x="${11+c*7}" y="${9+r*7}" width="3" height="3" fill="#999"/>`).join("")).join("")}`);
+  return s(`<circle cx="22" cy="22" r="18" fill="${cv("--accent")}"/><path d="M15 22 h14 M23 15 l7 7 l-7 7" fill="none" stroke="${cv("--accent-ink")}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`);
+}
+const BANDS={"10k":["#7a4a1e","#1a1a1a","#e07b1a","#c9a43a"],"1M":["#7a4a1e","#1a1a1a","#2e9a3a","#c9a43a"]};
+function resIcon(v,x=2,y=17,w=40){ const b=BANDS[v]; return `<line x1="${x}" y1="${y+5}" x2="${x+w}" y2="${y+5}" stroke="#999" stroke-width="2"/><rect x="${x+w*.22}" y="${y}" width="${w*.56}" height="10" rx="5" fill="#d8c7a0"/>${b.map((c,i)=>`<rect x="${x+w*.3+i*w*.1}" y="${y}" width="${w*.05}" height="10" fill="${c}"/>`).join("")}`; }
+
+/* ===== live data ===== */
+const L={rate:0,imu:[false,false],piezo:[0,0,0,0],fsr:[0,0],seenP:[false,false,false,false],restP:[false,false,false,false],seenF:[false,false]};
+function connect(){
+  let es; try{ es=new EventSource("http://localhost:8791/stream"); }catch(e){ setTimeout(connect,3000); return; }
+  es.onmessage=e=>{ const m=JSON.parse(e.data); if(m.settings) return;
+    L.rate=m.rate||0; $("src").textContent=m.status||"connected"; $("rate").textContent=L.rate;
+    if(m.imu) L.imu=m.imu.map(i=>i.ok);
+    // a real tap = the disc rested near 0 (1 MΩ in place) and THEN spiked; unwired inputs float at 100–300 and must not count
+    if(m.piezo){ L.piezo=m.piezo; m.piezo.forEach((v,k)=>{ if(v<60) L.restP[k]=true; if(L.restP[k]&&v>300) L.seenP[k]=true; }); }
+    if(m.fsr){ L.fsr=m.fsr; m.fsr.forEach((v,k)=>{ if(v>900) L.seenF[k]=true; }); }
+    paintLive();
+  };
+  es.onerror=()=>{ $("src").textContent="not connected: run ./demo.sh --no-open"; $("rate").textContent=0; L.rate=0; L.imu=[false,false]; paintLive(); };
+}
+function paintLive(){
+  [0,1].forEach(k=>$("c-imu"+k).classList.toggle("on",L.imu[k]));
+  [0,1,2,3].forEach(k=>{ $("c-p"+k).classList.toggle("on",L.piezo[k]>150); $("c-p"+k).classList.toggle("seen",L.seenP[k]); });
+  [0,1].forEach(k=>{ $("c-f"+k).classList.toggle("on",L.fsr[k]>900); $("c-f"+k).classList.toggle("seen",L.seenF[k]); });
+  const s=STEPS[cur]; if(s.kind==="check"&&$("check")){ const ok=!!s.test(L); $("check").classList.toggle("pass",ok); $("checkTxt").textContent=(ok?"✓ Passed: ":"Waiting for: ")+s.txt; $("next").classList.toggle("glow",ok); }
+}
+
+/* ===== drawing ===== */
+function mk(svg){ const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e;};
+  const tx=(x,y,s,a={})=>{const t=el("text",{x,y,fill:cv("--muted"),"font-size":12,"font-family":"-apple-system,system-ui,sans-serif",...a});t.textContent=s;return t;}; return {el,tx}; }
+function curve([x1,y1],[x2,y2]){ const my=(y1+y2)/2; return Math.abs(x2-x1)>Math.abs(y2-y1)*1.2 ? `M${x1} ${y1} C${(x1+x2)/2} ${y1} ${(x1+x2)/2} ${y2} ${x2} ${y2}` : `M${x1} ${y1} C${x1} ${my} ${x2} ${my} ${x2} ${y2}`; }
+const ZONES={mpu1:[160,940,140,60],right:[330,60,110,880],left:[40,60,120,880],esp:[120,40,250,210],res:[140,560,240,120],
+  piezo:[20,580,60,140],fsr:[20,330,60,80],hand:[330,985,130,40],anchors:[20,930,430,30]};
+
+function draw(svg,t){
+  svg.innerHTML=""; const {el,tx}=mk(svg); const s=STEPS[cur];
+  el("rect",{x:0,y:0,width:470,height:1040,rx:16,fill:cv("--tray")});
+  tx(235,22,"▲ ELBOW END (USB)",{"text-anchor":"middle","font-weight":700,"font-size":13});
+  tx(235,1032,"▼ WRIST END → hand",{"text-anchor":"middle","font-weight":700,"font-size":13});
+  if(s.kind==="task"&&s.zone){ const [x,y,w,h]=ZONES[s.zone]; el("rect",{x,y,width:w,height:h,rx:10,fill:cv("--accent"),opacity:.25,stroke:cv("--accent"),"stroke-width":3}); }
+  // ESP32
+  el("rect",{x:200,y:32,width:90,height:16,rx:3,fill:"#9aa0a6"}); tx(245,44,"USB",{"text-anchor":"middle","font-size":10,fill:"#222","font-weight":700});
+  el("rect",{x:130,y:48,width:230,height:210,rx:10,fill:cv("--esp")});
+  tx(245,170,"ESP32",{"text-anchor":"middle","font-size":20,"font-weight":800,fill:cv("--esp-ink")});
+  tx(245,190,"pins down in the frame",{"text-anchor":"middle","font-size":11,fill:cv("--esp-ink"),opacity:.7});
+  tx(160,66,"VIN side",{"font-size":10,fill:cv("--esp-ink"),opacity:.7}); tx(330,66,"3V3 side",{"font-size":10,fill:cv("--esp-ink"),opacity:.7,"text-anchor":"end"});
+  const used=new Set(STEPS.filter(m=>m.kind==="wire").map(m=>m.from));
+  for(const [k,[x,y]] of Object.entries(A)) if(k.startsWith("esp")){ const on=used.has(k), right=k.startsWith("espR");
+    el("rect",{x:x-3,y:y-3,width:6,height:6,fill:on?"#e3c56b":"#596273"});
+    if(on) tx(right?x-8:x+8,y+4,k.split(":")[1],{"text-anchor":right?"end":"start","font-size":10.5,fill:cv("--esp-ink"),"font-weight":700}); }
+  // breadboard
+  el("rect",{x:72,y:260,width:366,height:672,rx:8,fill:cv("--bb")});
+  el("rect",{x:252,y:268,width:8,height:656,fill:cv("--holebg")});
+  [["L+","--red"],["L-","--gnd"],["R+","--red"],["R-","--gnd"]].forEach(([k,c])=>{ const x=COLX[k]+(k.endsWith("+")?-9:9);
+    el("line",{x1:x,y1:272,x2:x,y2:920,stroke:cv(c),"stroke-width":2});
+    tx(COLX[k],282-10,k.endsWith("+")?"+":"−",{"text-anchor":"middle","font-size":15,"font-weight":800,fill:cv(c)}); });
+  for(const c of "abcdefghij"){ tx(COLX[c],278,c,{"text-anchor":"middle","font-size":12,"font-weight":700,fill:"#555"}); tx(COLX[c],926,c,{"text-anchor":"middle","font-size":12,"font-weight":700,fill:"#555"}); }
+  for(let r=1;r<=30;r++){ const y=ROWY(r);
+    for(const c in COLX){ if(c==="R+"&&false) continue; el("rect",{x:COLX[c]-3,y:y-3,width:6,height:6,rx:1,fill:cv("--hole"),opacity:.55}); }
+    tx(132,y+4,String(r),{"text-anchor":"middle","font-size":10,fill:"#666"}); tx(380,y+4,String(r),{"text-anchor":"middle","font-size":10,fill:"#666"}); }
+  // MPU 1 + MPU 2 + side labels
+  el("rect",{x:170,y:948,width:110,height:46,rx:6,fill:cv("--mpu")}); tx(225,986,"MPU 1",{"text-anchor":"middle",fill:"#e6f3f5","font-weight":700});
+  ["VCC","GND","SCL","SDA","AD0"].forEach((p,i)=>{ el("rect",{x:179+i*20,y:950,width:6,height:6,fill:"#e3c56b"}); tx(182+i*20,966,p,{"text-anchor":"middle","font-size":8,fill:"#e6f3f5"}); });
+  el("rect",{x:340,y:996,width:90,height:22,rx:5,fill:"#6d5aa8"}); tx(385,1012,"MPU 2 (hand)",{"text-anchor":"middle","font-size":11,fill:"#fff","font-weight":700});
+  [[0,14],[1,17],[2,20],[3,23]].forEach(([k,r])=>tx(8,ROWY(r)+4,"P"+k,{"font-size":13,"font-weight":800,fill:cv("--sig")}));
+  [[0,3],[1,5]].forEach(([k,r])=>tx(8,ROWY(r)+4,"F"+k,{"font-size":13,"font-weight":800,fill:cv("--fsr")}));
+  // placed parts
+  STEPS.forEach((m,i)=>{ if(i>=cur) return;
+    if(m.kind==="wire") wire(el,m.from,hole(m.to),m.c,.75,2.4);
+    if(m.kind==="res") resistor(el,m.to.map(hole),m.val,.85,0);
+  });
+  // the part for this step
+  if(s.kind==="wire"){
+    const end=hole(s.to), st=A[s.from], p=[st[0]+(end[0]-st[0])*t, st[1]+(end[1]-st[1])*t];
+    el("circle",{cx:end[0],cy:end[1],r:11+5*(1-t),fill:"none",stroke:cv("--accent"),"stroke-width":3.5});
+    if(t>0.02) wire(el,s.from,p,s.c,1,5);
+    el("circle",{cx:p[0],cy:p[1],r:6,fill:cv(s.c),stroke:"#fff","stroke-width":1.5});
+    callout(el,tx,end,holeWords(s.to).short);
+    el("circle",{cx:st[0],cy:st[1],r:8,fill:"none",stroke:cv(s.c),"stroke-width":2.5});
+  } else if(s.kind==="res"){
+    const pts=s.to.map(hole); pts.forEach(p=>el("circle",{cx:p[0],cy:p[1],r:11,fill:"none",stroke:cv("--accent"),"stroke-width":3.5}));
+    resistor(el,pts,s.val,.25+.75*t,(1-t)*60);
+    callout(el,tx,pts[1][0]>pts[0][0]?pts[1]:pts[0],`${holeWords(s.to[0]).short.split(" · ")[0]} ↔ ${holeWords(s.to[1]).short}`);
+  }
+}
+function wire(el,from,b,c,op,w){ el("path",{d:curve(A[from],b),fill:"none",stroke:cv(c),"stroke-width":w,opacity:op,"stroke-linecap":"round"}); }
+function resistor(el,[a,b],v,op,lift){
+  const g=el("g",{opacity:op,transform:`translate(0 ${-lift})`});
+  el("line",{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:"#888","stroke-width":2},g);
+  const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2, ang=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI;
+  const body=el("g",{transform:`translate(${mx} ${my}) rotate(${ang})`},g);
+  el("rect",{x:-15,y:-5.5,width:30,height:11,rx:5.5,fill:"#d8c7a0"},body);
+  BANDS[v].forEach((c,i)=>el("rect",{x:-10+i*6,y:-5.5,width:3,height:11,fill:c},body));
+}
+function callout(el,tx,[x,y],text){
+  const w=text.length*7.4+18, left=x>300, bx=left?x-w-18:x+18, by=y-14;
+  el("rect",{x:bx,y:by,width:w,height:28,rx:14,fill:cv("--accent")});
+  tx(bx+w/2,by+19,text,{"text-anchor":"middle","font-size":13,"font-weight":800,fill:cv("--accent-ink")});
+}
+function zoom(target){ // close-up around the target hole(s)
+  const zs=$("zoom"); if(!zs) return; zs.innerHTML=$("board").innerHTML;
+  const pts=(Array.isArray(target)?target:[target]).map(hole), xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]);
+  const cx=(Math.min(...xs)+Math.max(...xs))/2, cy=(Math.min(...ys)+Math.max(...ys))/2;
+  const w=Math.max(150,Math.max(...xs)-Math.min(...xs)+110), h=w*0.62;
+  zs.setAttribute("viewBox",`${cx-w/2} ${cy-h/2} ${w} ${h}`);
+}
+
+/* ===== stepper ===== */
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let cur=0, anim=null; try{ cur=Math.min(STEPS.length-1,+(localStorage.getItem("wt-rewire4")||0)); }catch(e){}
+function play(){ cancelAnimationFrame(anim); const s=STEPS[cur], b=$("board");
+  const fin=()=>{ draw(b,1); if(s.kind==="wire") zoom(s.to); if(s.kind==="res") zoom(s.to); };
+  if(!(s.kind==="wire"||s.kind==="res")||reduce){ fin(); return; }
+  const t0=performance.now(), D=1000; draw(b,0); zoom(s.kind==="wire"?s.to:s.to);
+  const tick=n=>{ const k=Math.min(1,(n-t0-300)/D), e=k<0?0:1-Math.pow(1-k,3); draw(b,e); if(k<1) anim=requestAnimationFrame(tick); else fin(); };
+  anim=requestAnimationFrame(tick); }
+
+function render(enter){
+  const s=STEPS[cur];
+  if(enter&&s.fresh){ L.seenP=[false,false,false,false]; L.restP=[false,false,false,false]; L.seenF=[false,false]; }
+  $("grp").textContent=s.g; $("count").textContent=`step ${cur+1} of ${STEPS.length}`;
+  $("prog").style.width=((cur+1)/STEPS.length*100)+"%";
+  let h="", title="", ic="";
+  if(s.kind==="wire"){
+    const src=srcWords(s.from), dst=holeWords(s.to);
+    title="Plug in one wire"; ic=icon("wire",s.c);
+    h=`<div class="do">
+      <div class="card"><div class="n">1</div><div><p class="lab">Take</p><p class="big">${src.main}</p><p class="sm">${src.sm}</p></div></div>
+      <div class="card push"><div class="n">2</div><div><p class="lab">Push the other end into</p><p class="big"><span class="hl">${dst.main}</span> · row <span class="hl">${dst.row}</span></p>
+        <div class="zoom"><svg id="zoom" role="img" aria-label="Close-up of the target hole with its row number and column letter"></svg></div></div></div>
+    </div><p class="why">Why: ${s.why}</p>
+    <div class="usb">🔌 <span>USB <b>unplugged</b> while you wire.</span></div>`;
+  } else if(s.kind==="res"){
+    const a=holeWords(s.to[0]), b=holeWords(s.to[1]);
+    title=`Place one resistor`; ic=icon("res");
+    h=`<div class="do">
+      <div class="card"><div class="n">1</div><div><p class="lab">Take</p><div class="row"><svg width="120" height="34" viewBox="0 0 44 34" aria-hidden="true">${resIcon(s.val,2,12,40)}</svg>
+        <p class="big"><span class="hl">${s.val==="1M"?"1 MΩ":"10 kΩ"}</span></p></div><p class="sm">Colour bands: ${s.val==="1M"?"brown · black · <b>green</b>":"brown · black · <b>orange</b>"} (+ gold). Either way round is fine.</p></div></div>
+      <div class="card push"><div class="n">2</div><div><p class="lab">One leg into · other leg into</p><p class="big"><span class="hl">${a.main}</span> row ${a.row}<br><span class="hl">${b.main}</span> row ${b.row}</p>
+        <div class="zoom"><svg id="zoom" role="img" aria-label="Close-up of the two target holes"></svg></div></div></div>
+    </div><p class="why">Why: ${s.why}</p>
+    <div class="usb">🔌 <span>USB <b>unplugged</b> while you wire.</span></div>`;
+  } else if(s.kind==="check"){
+    title=s.title; ic=icon("check");
+    const plug=!PLUGGED.has(s.id);
+    h=`${plug?`<div class="card push" style="margin-bottom:12px"><div class="n">1</div><div><p class="lab">Plug in</p><p class="big">Plug the <span class="hl">USB cable</span> in</p></div></div>`:""}
+      <div class="card push"><div class="n">${plug?2:1}</div><div><p class="lab">Do</p><p class="big" style="font-weight:600">${s.say}</p></div></div>
+      <div class="check" id="check"><span class="dot"></span><span id="checkTxt"></span></div>
+      ${plug?`<div class="usb">🔌 <span>When it passes: <b>unplug USB</b> again, then press Next.</span></div>`:""}`;
+  } else {
+    title=s.title; ic=icon(s.icon);
+    h=`<p class="text">${s.say}</p>`;
+  }
+  $("title").innerHTML=ic+`<span>${title}</span>`;
+  $("body").innerHTML=h;
+  $("replay").hidden=!(s.kind==="wire"||s.kind==="res");
+  $("prev").disabled=cur===0; $("next").disabled=cur===STEPS.length-1;
+  $("next").textContent = s.kind==="wire"||s.kind==="res" ? "Done, next →" : "Next →";
+  $("next").classList.remove("glow");
+  try{ localStorage.setItem("wt-rewire4",cur); }catch(e){}
+  play(); paintLive();
+}
+function go(d){ const n=Math.max(0,Math.min(STEPS.length-1,cur+d)); if(n===cur) return; cur=n; render(true); window.scrollTo({top:0}); }
+$("prev").onclick=()=>go(-1); $("next").onclick=()=>go(1); $("replay").onclick=play;
+document.addEventListener("keydown",e=>{ if(e.key==="ArrowRight") go(1); if(e.key==="ArrowLeft") go(-1); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>render(false));
+render(false); connect();
+</script>
+</body>
+</html>

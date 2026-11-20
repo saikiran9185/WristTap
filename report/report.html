@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Camera-free Touch Progress</title>
+<style>
+:root{--ink:#16181d;--mute:#5f6670;--line:#d9dce1;--soft:#f3f4f6;--acc:#1f5fd1;--ok:#16704a;--bad:#c2412f;--warn:#8a5a12}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#fff}
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);font-size:11.3px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.slide{width:794px;height:1123px;padding:54px 58px 50px;position:relative;overflow:hidden;page-break-after:always;display:flex;flex-direction:column;gap:14px}
+.foot{position:absolute;left:58px;right:58px;bottom:26px;display:flex;justify-content:space-between;font-size:9px;color:var(--mute);border-top:1px solid var(--line);padding-top:7px}
+.eyebrow{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--acc);font-weight:600}
+h1{font-size:36px;line-height:1.08;letter-spacing:-.02em;font-weight:700}
+h2{font-size:21px;line-height:1.2;letter-spacing:-.01em;font-weight:700}
+h3{font-size:12.5px;font-weight:700;margin-bottom:3px}
+p{max-width:74ch}
+.lede{font-size:13.5px;color:var(--mute);line-height:1.5}
+.mute{color:var(--mute)}
+.small{font-size:9.8px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th{font-size:8.8px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:600;text-align:left;padding:5px 7px 5px 0;border-bottom:1.2px solid var(--ink)}
+td{padding:5px 7px 5px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{text-align:right;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{border-top:1.5px solid var(--ink);padding-top:7px}
+.stat b{display:block;font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.stat span{font-size:9.6px;color:var(--mute);display:block;margin-top:3px}
+.box{background:var(--soft);border-radius:6px;padding:12px 14px}
+.box.acc{background:#e9effa}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+ul{padding-left:15px}
+li{margin:2px 0}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--bad);font-weight:600}.warn{color:var(--warn);font-weight:600}
+.tag{display:inline-block;font-size:8.6px;font-weight:600;letter-spacing:.04em;padding:1px 6px;border-radius:3px;border:1px solid currentColor}
+.bar{height:9px;background:var(--soft);border-radius:2px;position:relative;min-width:120px}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--ink);border-radius:2px}
+.bar i.b{background:var(--bad)}.bar i.g{background:var(--ok)}
+img{display:block;width:100%;border-radius:4px;object-fit:cover}
+figure figcaption{font-size:9px;color:var(--mute);margin-top:4px}
+.phase{display:grid;grid-template-columns:90px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.phase .d{font-weight:700;font-variant-numeric:tabular-nums}
+code{font-family:Menlo,monospace;font-size:9.6px;background:var(--soft);padding:0 3px;border-radius:2px}
+</style></head><body>
+
+<!-- 1 COVER -->
+<section class="slide">
+  <div class="eyebrow" style="margin-top:40px">Progress report · Gesture-Based Interaction · 15 November 2026</div>
+  <h1>Making a projected wall<br>touchable without a camera</h1>
+  <p class="lede">Every day of work so far, from the phone-camera experiments (PhoneStereo, 19 Oct – 4 Nov) to the sensor wristband (WristTap, 14–15 Nov). All the numbers come from the session logs, result files and test recordings saved on the Mac.</p>
+  <div class="stats" style="margin-top:18px">
+    <div class="stat"><b>8</b><span>work days logged<br>19 Oct – 15 Nov</span></div>
+    <div class="stat"><b>39</b><span>git commits<br>(38 PhoneStereo + 1 WristTap)</span></div>
+    <div class="stat"><b>7</b><span>camera touch methods tested;<br>none passed touch vs hover</span></div>
+    <div class="stat"><b>7 / 8</b><span>WristTap build steps done;<br>all sensors read correctly</span></div>
+  </div>
+  <div class="box acc" style="margin-top:14px">
+    <h3>The story in four lines</h3>
+    <ul>
+      <li><b>Cameras find where the finger is very well</b>: screen fit 1.5 mm, wall fit 0.2–0.4% of the width.</li>
+      <li><b>Cameras can't tell touching from hovering 1–5 cm away.</b> The best camera result was 72% (AI depth), with many false touches.</li>
+      <li><b>Physics rules out sensing it from a distance</b>: radar or sonar can't separate a 1–5 cm gap from 3–4 m away.</li>
+      <li><b>So the sensor moved onto the hand.</b> WristTap feels the moment of contact. It's built, every sensor works, and it's on GitHub.</li>
+    </ul>
+  </div>
+  <h3 style="margin-top:6px">Contents</h3>
+  <table>
+    <tr><td>1</td><td>Timeline: all days</td><td class="n">2</td></tr>
+    <tr><td>2</td><td>Phone stereo cameras: mat piano and StickyBeat</td><td class="n">3</td></tr>
+    <tr><td>3</td><td>Three-camera sign study and phone touch screen study (3 Nov)</td><td class="n">4</td></tr>
+    <tr><td>4</td><td>SurfaceTouch projector test day (4 Nov)</td><td class="n">5</td></tr>
+    <tr><td>5</td><td>AI depth test and Touch Stage (4 Nov)</td><td class="n">6</td></tr>
+    <tr><td>6</td><td>Research without cameras: sonar, radar, physics limits (4–15 Nov)</td><td class="n">7</td></tr>
+    <tr><td>7</td><td>WristTap build log (14–15 Nov)</td><td class="n">8</td></tr>
+    <tr><td>8</td><td>WristTap test results and photos</td><td class="n">9</td></tr>
+    <tr><td>9</td><td>Options compared and budget (15 Nov)</td><td class="n">10</td></tr>
+    <tr><td>10</td><td>Where it stands, next steps, files and repos</td><td class="n">11</td></tr>
+  </table>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>1</span></div>
+</section>
+
+<!-- 2 TIMELINE -->
+<section class="slide">
+  <div class="eyebrow">1 · Timeline</div>
+  <h2>All days, in order</h2>
+  <p class="mute">Earlier camera-based gesture projects are listed first, because their tools (Apple Vision, MediaPipe, phone sensors) fed into this work.</p>
+  <div>
+    <div class="phase"><div class="d">9 Sep</div><div><b>TDVision</b>: an Apple Vision hand, body and face tracker as a TouchDesigner operator (replaces the MediaPipe plugin on Mac).</div></div>
+    <div class="phase"><div class="d">23 Sep</div><div><b>DualHand</b>: two-hand camera control for Blender. One meaning per gesture. Tested end to end with simulated hands.</div></div>
+    <div class="phase"><div class="d">19 Oct</div><div><b>Phone stereo cameras found.</b> The POCO M4 Pro has 5 camera IDs; ID 4 gives main + ultra-wide together (about 1.0 cm apart). Live depth viewer at 24 fps per camera. <b>Mat piano</b>: fingertip height above a desk mat plays keys. Two gesture assignments confirmed by the teacher.</div></div>
+    <div class="phase"><div class="d">20 Oct</div><div><b>StickyBeat</b>: sticky notes become sound pads (colour detection + Apple Vision text reading, touch from depth + shadow). Pushed to a private GitHub repo (commit 61e5cbf).</div></div>
+    <div class="phase"><div class="d">27 Oct</div><div><b>StickyBeat Studio</b> (sequencer, browser UI) and the native <b>PhoneStereo.app</b> for Mac with wireless adb. 6 commits.</div></div>
+    <div class="phase"><div class="d">3 Nov</div><div><b>Wireless phone app</b> (Shizuku, no cable). <b>Three-camera sign study</b> (90 cued signs). <b>Phone touch screen study</b> on a 27" monitor. <b>SurfaceTouch V1</b> built: touch from the finger's projected shadow. 8 commits, 3 reports.</div></div>
+    <div class="phase"><div class="d">4 Nov</div><div><b>Projector test day</b>, 11:12–12:15: 20 app launches, 4 accuracy-grid runs. Touch vs hover failed in every run. <b>AI depth test</b> on 867 frames (best 71.6%). <b>Touch Stage</b> built; SurfaceTouch V1 archived. Deep-research report on wall-touch methods. 22 commits, the busiest day.</div></div>
+    <div class="phase"><div class="d">12 Nov</div><div><b>SonarMap</b>: phone chirp sonar (2–8 kHz) + orientation → 3D point map on the Mac. Speaker-to-mic delay about 275 ms. Camera-free research brief written for other AIs.</div></div>
+    <div class="phase"><div class="d">14 Nov</div><div><b>WristTap built</b> on a breadboard: ESP32 + 2 IMUs + 4 piezos + 2 FSRs, 500 packets/s to the Mac. IMU1 fixed by soldering its header. ESP32 replaced in the evening. Build guide, test pages and spoken tap tests written.</div></div>
+    <div class="phase"><div class="d">15 Nov</div><div><b>All sensors verified</b> (taps and presses). WristTap pushed to a <b>private GitHub repo</b> (03:25, commit 83dda87). PhoneStereo README + phone-only research report committed (b17931e). Research round on camera-free options (radar, LiDAR, IR frame, UWB, wristband). Budget sheet made. <b>Decision: band-first touch.</b></div></div>
+  </div>
+  <div class="box small"><b>Commits per day, PhoneStereo:</b> 20 Oct 1 · 27 Oct 6 · 3 Nov 8 · 4 Nov 22 · 15 Nov 1. <b>WristTap:</b> 15 Nov 1 (the whole project in one first commit).</div>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>2</span></div>
+</section>
+
+<!-- 3 PHONE STEREO -->
+<section class="slide">
+  <div class="eyebrow">2 · PhoneStereo · 19–27 October</div>
+  <h2>Turning one phone into a depth camera</h2>
+  <p>The idea: the phone's two back lenses see the hand from two slightly different places, so the shift between them gives depth. Facts checked on the phone over USB:</p>
+  <table>
+    <tr><th>Fact</th><th>Value</th><th>What it meant</th></tr>
+    <tr><td>Camera IDs</td><td>5 (main, front, ultra-wide, macro, logical 4)</td><td>ID 4 = main + ultra-wide as one device</td></tr>
+    <tr><td>Distance between lenses</td><td>1.0 cm (factory calibration)</td><td>Good depth only within about 1–1.5 m</td></tr>
+    <tr><td>Both lenses at once</td><td>1280 × 960, about 18 fps each (24 fps in the live viewer)</td><td>Paired frames share exact timestamps</td></tr>
+    <tr><td>Depth matching (SGBM)</td><td>about 10 ms per pair at 640 px wide</td><td>Fast enough for live use</td></tr>
+    <tr><td>3 back cameras together</td><td>Impossible (each camera uses 100 of 100 resource units)</td><td>Third view = Mac camera</td></tr>
+    <tr><td>Normal apps</td><td>Xiaomi hides the extra cameras</td><td>Streamer runs as the shell user (adb, later Shizuku)</td></tr>
+  </table>
+  <div class="cols">
+    <div class="box">
+      <h3>Mat piano (19 Oct)</h3>
+      <p>Phone low at the far side of a desk mat. 4 fingertip corners map the mat. 8 white + 5 black keys. The touch line sits halfway between "on the mat" and "lifted" heights from the last 30 s.</p>
+      <table style="margin-top:6px">
+        <tr><th>Measured</th><th class="n">Rest</th><th class="n">Lift</th></tr>
+        <tr><td>Single finger (px)</td><td class="n">5–8</td><td class="n">12–19</td></tr>
+        <tr><td>Chords (px)</td><td class="n">~1</td><td class="n">~5</td></tr>
+        <tr><td>Noise (px)</td><td class="n" colspan="2">about 0.8</td></tr>
+      </table>
+      <p class="small mute" style="margin-top:6px">Chords were too close to the noise. This was the first sign that small depth gaps are hard to see with a 1 cm lens gap.</p>
+    </div>
+    <div class="box">
+      <h3>StickyBeat (20 Oct) and Studio (27 Oct)</h3>
+      <ul>
+        <li>Sticky notes found by colour; the word written on each note picks its sound (Apple Vision text reading at 4 rotations).</li>
+        <li>Touch = depth + shadow both "down", fired on the first frame for rhythm.</li>
+        <li>First real try: notes were 25–30 px slivers at a low angle, so the scan missed them. Fixed skin filter, blob splitting and a "notes look flat" warning.</li>
+        <li>Studio: sample-accurate sequencer, 4 patterns, swing, paper pattern sheet with ArUco corners.</li>
+        <li>Native PhoneStereo.app for Mac with wireless adb.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box acc small"><b>Lesson carried forward:</b> the phone places a finger very accurately, but its depth signal is tiny. Whether a finger is touching is a "last centimetre" question.</div>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>3</span></div>
+</section>
+
+<!-- 4 STUDIES 3 NOV -->
+<section class="slide">
+  <div class="eyebrow">3 · Studies · 3 November</div>
+  <h2>Sign study and touch screen study</h2>
+  <h3>Three-camera sign study: 3 sessions, 90 cued signs, about 8,000 frames per camera, 1 participant</h3>
+  <table>
+    <tr><th>Setup</th><th class="n">Cues recognised</th><th class="n">Settled frames correct</th><th class="n">Extra delay</th></tr>
+    <tr><td>Mac camera</td><td class="n">94%</td><td class="n">85%</td><td class="n">+0 ms</td></tr>
+    <tr><td>Phone back pair</td><td class="n">89%</td><td class="n">78%</td><td class="n">+80 ms</td></tr>
+    <tr><td>All three, learned fusion</td><td class="n">= Mac</td><td class="n">−0.1 pts (95% CI −0.3 to 0)</td><td class="n">+0 ms</td></tr>
+    <tr><td>Phone front camera (follow-up, dim light)</td><td class="n">100%</td><td class="n">89.4% vs Mac 76.4%</td><td class="n">+40 ms</td></tr>
+    <tr><td>Front + Mac, averaged</td><td class="n">100%</td><td class="n">89.2% (+3 to +25 pts)</td><td class="n">+40 ms</td></tr>
+  </table>
+  <ul class="small">
+    <li>The thumb causes most errors: THUMBS UP is read as FIST (Mac 57%, phone 9% correct). Every other sign was 86–98% correct.</li>
+    <li>Extra cameras only help when they see the hand from a <b>different angle</b>. An earlier run from a different angle went from 79% (Mac) to 89% (three cameras).</li>
+  </ul>
+  <h3 style="margin-top:8px">Phone touch screen study: 2 sessions, 44 targets (32 touch, 12 hover), 1,229 stereo frames, 27" monitor</h3>
+  <table>
+    <tr><th>Measure</th><th class="n">A · side, 1 lens</th><th class="n">B · front-low, 2 lenses</th></tr>
+    <tr><td>Screen mapping error</td><td class="n">5.6 mm</td><td class="n">1.5 mm</td></tr>
+    <tr><td>Touch targets registered</td><td class="n">6 / 16 (38%)</td><td class="n">16 / 16 (100%)</td></tr>
+    <tr><td>Position error, first touch (median)</td><td class="n">17 mm</td><td class="n">171 mm</td></tr>
+    <tr><td>False touches while hovering (6 hover tasks)</td><td class="n">1</td><td class="n bad">33</td></tr>
+    <tr><td>Extra touches</td><td class="n">0</td><td class="n">15</td></tr>
+    <tr><td>Frame rate · processing</td><td class="n">24 fps · 26 ms</td><td class="n">24 fps · 38 ms</td></tr>
+  </table>
+  <div class="cols">
+    <div class="box small">
+      <h3>Why stereo depth failed</h3>
+      A finger 3 cm off the glass shifted by only <b>1.4 px</b> between the lenses, but the shift wobbled by <b>3.7 px</b> frame to frame. Touch vs hover separation: <b>0.66</b> (0.5 = guessing). With one camera from the front, <b>100%</b> of hover frames looked like touches. One touch stayed "down" for 41 s.
+    </div>
+    <div class="box small">
+      <h3>What it led to</h3>
+      Mapping already works (1.5 mm). The missing piece is contact. Next idea, the same evening: <b>SurfaceTouch V1</b>. A projector casts the finger's shadow, and the shadow meets the finger only at contact. Built and passed 4 synthetic checks on 3 Nov.
+    </div>
+  </div>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>4</span></div>
+</section>
+
+<!-- 5 TEST DAY -->
+<section class="slide">
+  <div class="eyebrow">4 · SurfaceTouch · 4 November, 11:12–12:15</div>
+  <h2>Projector test day: wall mapping works, touch doesn't</h2>
+  <p class="mute">Epson projector, POCO M4 Pro (main + ultra-wide, 960 × 720, 20.6–24 fps), Mac camera for part of the day. 20 app launches.</p>
+  <div class="stats">
+    <div class="stat"><b>12</b><span>calibrations; 11 found 12+ of the 15 markers</span></div>
+    <div class="stat"><b>0.2–0.4%</b><span>of wall width: calibration fit</span></div>
+    <div class="stat"><b>0–1.3%</b><span>of frames where a finger shadow was found</span></div>
+    <div class="stat"><b>75 → 84%</b><span>still touches with the pointer on the dot (finger lock)</span></div>
+  </div>
+  <h3>Accuracy grid: 25 touches on a 5 × 5 grid + 6 hover traps. Goal: 25 found, 0 false.</h3>
+  <table>
+    <tr><th>Run</th><th>Method</th><th class="n">Found</th><th style="width:150px"></th><th class="n">False on 6 traps</th><th class="n">Median error</th></tr>
+    <tr><td>11:18</td><td>Phone, shadow rule</td><td class="n">0 / 25</td><td><div class="bar"><i style="width:0%"></i></div></td><td class="n">0</td><td class="n">—</td></tr>
+    <tr><td>11:27</td><td>Phone + Mac, two-view rule</td><td class="n">18 / 25</td><td><div class="bar"><i style="width:72%"></i></div></td><td class="n bad">16</td><td class="n">26% of width</td></tr>
+    <tr><td>11:45</td><td>Phone, trained model</td><td class="n">4 / 25</td><td><div class="bar"><i style="width:16%"></i></div></td><td class="n">3</td><td class="n">42% of width</td></tr>
+    <tr><td>12:12</td><td>Phone, trained model (recorded)</td><td class="n">5 / 25</td><td><div class="bar"><i style="width:20%"></i></div></td><td class="n">3</td><td class="n">8% of width</td></tr>
+  </table>
+  <h3 style="margin-top:4px">What each signal showed (AUC: 1.0 = always right, 0.5 = guessing)</h3>
+  <table>
+    <tr><th>Signal</th><th>Session</th><th class="n">Score</th><th>Reading</th></tr>
+    <tr><td>Finger shadow</td><td>all</td><td class="n">—</td><td>Found in 0–1.3% of frames. At 9–12 px a finger's shadow is only 3–4 px wide.</td></tr>
+    <tr><td>Two-view split (phone vs Mac)</td><td>11:27</td><td class="n">0.35</td><td>Backwards. The cameras weren't tracking the same point at the same moment.</td></tr>
+    <tr><td>Phone lens parallax</td><td>11:30</td><td class="n">0.73</td><td>Some separation, but on guessed hover heights</td></tr>
+    <tr><td>Phone lens parallax</td><td>11:42</td><td class="n">0.57</td><td>Close to guessing</td></tr>
+    <tr><td>Touch model, new positions</td><td>12:12 replay</td><td class="n">0.56</td><td>The phone alone can't tell touch from hover</td></tr>
+  </table>
+  <div class="box acc small"><b>Why:</b> the phone sits beside the projector, so it looks at the wall from almost where the light comes from. The finger's shadow hides behind the finger. The phone can give <b>position</b>; touch would need a second viewpoint. Later in the day, a side view (phone looking along the wall) scored only 0.53 on the yes/no test (Experiment Y).</div>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>5</span></div>
+</section>
+
+<!-- 6 AI DEPTH + TOUCH STAGE -->
+<section class="slide">
+  <div class="eyebrow">5 · AI depth · 4 November afternoon</div>
+  <h2>AI depth test and Touch Stage</h2>
+  <p>Three AI depth models were run on <b>867 frames</b> of a fingertip at known distances from the wall (0, 5, 10, 20 and 40 cm), on the Mac's GPU. The question: does the predicted depth of the fingertip tell touch from not-touch?</p>
+  <table>
+    <tr><th>Model</th><th class="n">Speed</th><th class="n">Rank corr.</th><th class="n">AUC touch</th><th class="n">AUC 0 vs 5 cm</th><th class="n">Accuracy (cross-val)</th><th style="width:130px"></th></tr>
+    <tr><td>Depth Anything V2, relative</td><td class="n">5.7 fps</td><td class="n">0.371</td><td class="n">0.619</td><td class="n">0.552</td><td class="n">32.2%</td><td><div class="bar"><i class="b" style="width:32.2%"></i></div></td></tr>
+    <tr><td><b>Depth Anything V2, metric indoor</b></td><td class="n">3.9 fps</td><td class="n">0.679</td><td class="n">0.882</td><td class="n">0.800</td><td class="n"><b>71.6%</b></td><td><div class="bar"><i style="width:71.6%"></i></div></td></tr>
+    <tr><td>CVPR 2026 fine-tuned (D405)</td><td class="n">4.7 fps</td><td class="n">0.124</td><td class="n">0.669</td><td class="n">0.647</td><td class="n">48.2%</td><td><div class="bar"><i class="b" style="width:48.2%"></i></div></td></tr>
+  </table>
+  <p class="small mute">The fine-tuned paper model failed because it was trained at 25–45 cm from the camera, much closer than a projector setup. Data: <code>~/Projects/DepthTouchTest/results.json</code>.</p>
+  <table>
+    <tr><th>Metric model: median predicted depth at each real distance</th><th class="n">0 cm</th><th class="n">5 cm</th><th class="n">10 cm</th><th class="n">20 cm</th><th class="n">40 cm</th></tr>
+    <tr><td>Depth Anything V2 metric (model units)</td><td class="n">612</td><td class="n">826</td><td class="n">877</td><td class="n">1113</td><td class="n">1249</td></tr>
+  </table>
+  <p class="small">The order is right (it grows with distance), but 0 and 5 cm overlap too often frame by frame, so the accuracy is 71.6%.</p>
+  <div class="box">
+    <h3>Touch Stage: the clean app built from all of this (commits bb07d33 → 8290c66)</h3>
+    <div class="cols" style="gap:20px">
+      <ul>
+        <li><b>Where:</b> phone camera + projected ArUco markers, about 0.6% of the wall width.</li>
+        <li><b>Touch:</b> Depth Anything V2 Small (metric) on hand crops from phone and Mac in one GPU batch, about 43 ms.</li>
+        <li>You set your own levels: <b>T</b> = finger on the wall, <b>H</b> = finger 5–10 cm off.</li>
+      </ul>
+      <ul>
+        <li>Dashboard: all camera feeds with hand skeletons, depth explainer, graph, calibration sliders.</li>
+        <li>One instance at a time; reconnects if the phone stream drops.</li>
+        <li>SurfaceTouch V1 kept as git tag <code>surfacetouch-v1-archive</code>, not deleted.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box acc small"><b>Verdict after 4 Nov:</b> every camera method was tried (shadow, 1 cm stereo, phone + Mac two views, side view, AI depth). The best was about 72%, far from the target of 95% correct with under 2% false touches. The room is dark, the projected image changes constantly, and the wall is uneven.</div>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>6</span></div>
+</section>
+
+<!-- 7 RESEARCH -->
+<section class="slide">
+  <div class="eyebrow">6 · Research without cameras · 4–15 November</div>
+  <h2>Can anything see the last centimetre from 3–4 m?</h2>
+  <p>Three research rounds: the wall-touch methods report (4 Nov), a research brief for other AIs (12 Nov) and the phone-only no-camera report (committed 15 Nov). They agree: <b>no</b>.</p>
+  <table>
+    <tr><th>Physics number</th><th class="n">Value</th><th>Meaning</th></tr>
+    <tr><td>Sonar range resolution, 2–8 kHz chirp (SonarMap)</td><td class="n">2.9 cm</td><td>Things closer than this blur into one echo</td></tr>
+    <tr><td>Sonar range resolution, quiet 18–22 kHz band</td><td class="n">4.3 cm</td><td>Worse than the 1–5 cm gap we need</td></tr>
+    <tr><td>Hand echo vs wall echo at 3.5 m (estimate)</td><td class="n">30–40 dB weaker</td><td>The hand is 1,000–10,000× weaker and hides in the wall echo</td></tr>
+    <tr><td>Phase tracking (LLAP / FingerIO papers)</td><td class="n">3.5–8 mm</td><td>Only within about 0.25–1 m of the phone</td></tr>
+    <tr><td>Echo loss moving the hand from 0.5 to 3.5 m</td><td class="n">about 34 dB</td><td>Phones sense fine motion only to about 1 m</td></tr>
+    <tr><td>Classroom noise (studies)</td><td class="n">48–77 dBA</td><td>A soft touch is silent at 3–4 m</td></tr>
+    <tr><td>60 GHz radar, 5 GHz bandwidth (Google Soli class)</td><td class="n">about 3 cm</td><td>Sub-mm motion, but only "how much it moved", not "where"</td></tr>
+    <tr><td>HLK-LD2450 radar (₹999)</td><td class="n">about 15 cm</td><td>Person location and big gestures only</td></tr>
+  </table>
+  <div class="cols">
+    <div class="box small">
+      <h3>SonarMap (12 Nov), built and tested</h3>
+      Phone browser page sends 2–8 kHz chirps and reads its own orientation, then shows a 3D point map on the Mac. Tested on the POCO (Android 10, Chrome): ping clearly heard, orientation OK, <b>speaker-to-mic delay about 275 ms</b>. Its best role: "someone is reaching toward the wall", not "the hand is on it".
+    </div>
+    <div class="box small">
+      <h3>Methods that do work, from papers</h3>
+      <ul>
+        <li>Body as an antenna for mains hum: 98% touch vs no-touch, 4.1 cm error (CHI 2011). Needs a skin pad.</li>
+        <li>TapID wristband (ETH 2021): tap F1 score 0.997, public dataset.</li>
+        <li>Acustico wristband (UIST 2020): taps plus 2D position on plain surfaces.</li>
+        <li>Foil or conductive paint on the wall (Wall++): touch and hover.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box acc"><b>Conclusion:</b> "touch or hover?" is about the last centimetre, and nothing at 3–4 m resolves it. The contact sensor has to live <b>at the wall</b> or <b>on the hand</b>. The rules (no camera, no LiDAR, nothing fixed to the wall, about ₹1,000) leave one option: <b>a band on the wrist</b>.</div>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>7</span></div>
+</section>
+
+<!-- 8 WRISTTAP BUILD -->
+<section class="slide">
+  <div class="eyebrow">7 · WristTap · 14–15 November</div>
+  <h2>WristTap build log</h2>
+  <p>ESP32 + 2 motion sensors (IMUs) + 4 piezo discs (taps) + 2 FSRs (pressure) on a half-size breadboard. It streams to the Mac over USB at <b>500 packets per second</b>. The IMUs read at 1 kHz with the filter off, so sharp tap edges stay sharp. Parts were bought at Lajpat Rai Market (about ₹2,000–2,600 for the full list).</p>
+  <table>
+    <tr><th>Step</th><th>Part</th><th>Pins</th><th>Result</th></tr>
+    <tr><td>1–2</td><td>ESP32 power and ground rails</td><td>3V3, GND</td><td class="ok">Done</td></tr>
+    <tr><td>3</td><td>IMU #1, wrist</td><td>I2C 0x68, D21/D22</td><td class="ok">Done: 0.97–1.10 g</td></tr>
+    <tr><td>4</td><td>IMU #2, back of hand</td><td>I2C 0x69 (AD0 high)</td><td class="ok">Done: about 1.0 g</td></tr>
+    <tr><td>5–6</td><td>4 piezo discs</td><td>D32, D33, D34, D35</td><td class="ok">Done: each lights only its own channel, 0 at rest</td></tr>
+    <tr><td>7</td><td>2 FSR pressure sensors</td><td>VP (36), VN (39)</td><td class="ok">Done: about 2200 pressed, 0 at rest</td></tr>
+    <tr><td>8</td><td>Recording with labels</td><td>—</td><td class="warn">Next</td></tr>
+  </table>
+  <h3 style="margin-top:4px">Problems found and how they were solved</h3>
+  <table>
+    <tr><th style="width:28%">Problem</th><th style="width:36%">How it was found</th><th>Fix</th></tr>
+    <tr><td>IMU1 "MISSING" for about 1.5 h, 14 Nov</td><td><code>./test.sh</code> (wire check + bus scan): both wires connected and 0x68 found only <b>while held</b></td><td>The header was pressed on without solder. Soldered it: stable 20 s at 1.10 g.</td></tr>
+    <tr><td>Chip ID read 0x70, not 0x68</td><td>Bus scan</td><td>It's an MPU6500 clone with the same registers. Firmware fine. Reads about 10% high.</td></tr>
+    <tr><td>IMU1 vanished briefly in step 4</td><td>AD0 wire check</td><td>Red line 13 and blue line 13 sit side by side; the wire was in the wrong one.</td></tr>
+    <tr><td>Replacement ESP32 (evening, 14 Nov)</td><td>Came with factory AT firmware</td><td>Reflashed with <code>./flash.sh</code></td></tr>
+    <tr><td>Piezo stuck at 4095</td><td>piezo-test.html</td><td>Right blue rail not grounded (ESP32 GND → B−1 missing)</td></tr>
+    <tr><td>Neighbour piezos echo spikes</td><td>Floating inputs</td><td>Fit each 1 MΩ resistor to ground</td></tr>
+    <tr><td>IMU1 dropping out on the new ESP32, 15 Nov</td><td>test.sh found 0x68 + 0x69; pressing MPU #1 brought it back</td><td>Reseated MPU #1: 0.96 g + 0.97 g stable</td></tr>
+    <tr><td>Garbled or frozen readings</td><td>Old reader processes held the serial port</td><td>Stop them with <code>pkill -TERM</code> (not <code>-INT</code>)</td></tr>
+  </table>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>8</span></div>
+</section>
+
+<!-- 9 WRISTTAP RESULTS -->
+<section class="slide">
+  <div class="eyebrow">8 · WristTap · test results</div>
+  <h2>Every sensor reads correctly</h2>
+  <div class="stats">
+    <div class="stat"><b>500</b><span>packets per second, 0 drops (check.sh)</span></div>
+    <div class="stat"><b>0.96–1.10 g</b><span>IMU at rest (1.00 g = correct; clone reads high)</span></div>
+    <div class="stat"><b>4095</b><span>piezo peak on a tap (the maximum); 0 at rest</span></div>
+    <div class="stat"><b>~2200</b><span>FSR when pressed; 0 at rest</span></div>
+  </div>
+  <table>
+    <tr><th>Recorded test</th><th class="n">Samples</th><th class="n">Length</th><th>Result</th></tr>
+    <tr><td>Single piezo spoken test (<code>taptest_last.csv</code>)</td><td class="n">22,231</td><td class="n">44.5 s</td><td>Peak 2094, 1,112 samples above 1000 (tap bursts)</td></tr>
+    <tr><td>All 4 piezos (<code>taptest_all_last.csv</code>)</td><td class="n">34,243</td><td class="n">68.5 s</td><td>Median 0 on every disc; samples above 1000: 620 / 958 / 999 / 573</td></tr>
+    <tr><td>Disc strength (taptest.py)</td><td class="n" colspan="2">5 discs</td><td>Discs 1, 2, 3, 5 strong; disc 4 inconsistent, kept as a spare</td></tr>
+  </table>
+  <div class="cols3" style="margin-top:4px">
+    <figure><img src="img/03-mpu-header-unsoldered.jpg" style="height:230px"><figcaption>MPU with the loose, unsoldered header: the cause of "MISSING"</figcaption></figure>
+    <figure><img src="img/06-mpu1-wired.jpg" style="height:230px"><figcaption>MPU #1 wired to the ESP32 (step 3)</figcaption></figure>
+    <figure><img src="img/08-piezo-slot-resistors.jpg" style="height:230px"><figcaption>Piezo slot with 10 kΩ + 1 MΩ resistors</figcaption></figure>
+  </div>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr">
+    <figure><img src="img/11-all-sensors-working.jpg" style="height:300px"><figcaption>All sensors working on the breadboard, 15 Nov</figcaption></figure>
+    <div class="box small">
+      <h3>What the band will sense on the wall (estimates, not tested yet)</h3>
+      <table>
+        <tr><td><b>Tap on the wall</b></td><td class="ok">Strong</td></tr>
+        <tr><td colspan="2" class="mute">The IMU feels the sudden stop; the piezo feels the knock. A hovering hand slows down gently.</td></tr>
+        <tr><td><b>Still palm placed slowly</b></td><td class="warn">Weak</td></tr>
+        <tr><td colspan="2" class="mute">Almost no jolt. The FSR may help.</td></tr>
+        <tr><td><b>Where on the wall</b></td><td class="warn">Rough</td></tr>
+        <tr><td colspan="2" class="mute">Needs a 4-corner calibration and the arm angle. No compass, so left-right drifts slowly.</td></tr>
+        <tr><td><b>Wrist gestures</b></td><td class="ok">Yes</td></tr>
+        <tr><td colspan="2" class="mute">Swipe, twist, shake: like a Wii remote.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>9</span></div>
+</section>
+
+<!-- 10 OPTIONS + BUDGET -->
+<section class="slide">
+  <div class="eyebrow">9 · Options compared · 15 November</div>
+  <h2>Every camera-free option, side by side</h2>
+  <p class="mute">From today's research round. Prices are from Indian shops on 15 Nov. Accuracy figures marked "est." are estimates.</p>
+  <table>
+    <tr><th>Option</th><th class="n">Cost</th><th>Touch vs hover</th><th>Where</th><th>Fits the rules?</th></tr>
+    <tr><td>Foil zones + MPR121 on the wall</td><td class="n">₹620–920</td><td class="ok">Good</td><td>Zone ID</td><td class="bad">No: fixed on the wall</td></tr>
+    <tr><td>Velostat pressure sheet on the wall</td><td class="n">+₹470–630/sheet</td><td class="ok">Hover = 0 by design</td><td>Zone ID</td><td class="bad">No: fixed on the wall</td></tr>
+    <tr><td>2D LiDAR at the edge (LD06/LD19, STL-06N)</td><td class="n">₹5,000–7,500</td><td>Within ~1 cm (est.)</td><td>3–5 cm</td><td class="bad">No: LiDAR, cost</td></tr>
+    <tr><td>DIY infrared beam frame</td><td class="n">₹700–2,000</td><td class="ok">Two layers</td><td>1–2 cm (est.)</td><td class="bad">No: strips on edges</td></tr>
+    <tr><td>HLK-LD2450 radar near the projector</td><td class="n">₹999</td><td class="bad">No</td><td>~15 cm, person only</td><td class="ok">Yes, but no touch</td></tr>
+    <tr><td>Phone sonar, "hand stopped at the wall" guess</td><td class="n">Free</td><td class="warn">70–80% (est.)</td><td>None</td><td class="ok">Yes</td></tr>
+    <tr><td>60 GHz radar, hand-tremor idea (BGT60TR13C)</td><td class="n">~₹18,000</td><td>Untested theory</td><td>Coarse</td><td class="bad">No: cost</td></tr>
+    <tr><td>UWB tag on the band + 3 anchors</td><td class="n">₹6,000–8,100</td><td>No (needs band)</td><td>~10 cm</td><td class="warn">Over budget</td></tr>
+    <tr><td>Tap Strap 2 (product)</td><td class="n">~₹8,500</td><td class="ok">Taps</td><td>Cursor only</td><td class="warn">Over budget</td></tr>
+    <tr><td><b>Wristband (WristTap)</b></td><td class="n"><b>already built</b></td><td class="ok">Taps: strong (est. 90%+)</td><td>Arm angle, rough</td><td class="ok"><b>Yes</b></td></tr>
+  </table>
+  <div class="cols" style="margin-top:4px">
+    <div>
+      <h3>Budget sheet (Claude Sheets, 15 Nov)</h3>
+      <table>
+        <tr><th>Tier</th><th class="n">Total</th><th style="width:150px"></th></tr>
+        <tr><td>Core band</td><td class="n">₹723</td><td><div class="bar"><i class="g" style="width:6.1%"></i></div></td></tr>
+        <tr><td>Core + upgrades (BNO085, Velostat)</td><td class="n">₹2,694</td><td><div class="bar"><i style="width:22.8%"></i></div></td></tr>
+        <tr><td>Everything (+ UWB ₹8,139, radar ₹999)</td><td class="n">₹11,832</td><td><div class="bar"><i style="width:100%"></i></div></td></tr>
+      </table>
+    </div>
+    <div class="box small">
+      <h3>Core bill (₹723)</h3>
+      ESP32-C3 ₹242 · MPU6050 ₹162 · 2 piezos ₹40 · LiPo 300 mAh ₹169 · TP4056 ₹30 · wires ₹30 · Velcro ₹50.
+      <p style="margin-top:6px"><b>No need to buy it now.</b> WristTap already has an ESP32, 2 IMUs, 4 piezos and 2 FSRs. Only the battery and charger are missing, and USB is fine for a class demo.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>10</span></div>
+</section>
+
+<!-- 11 STATUS + NEXT -->
+<section class="slide">
+  <div class="eyebrow">10 · Where it stands · 15 November</div>
+  <h2>Status, next steps and open questions</h2>
+  <table>
+    <tr><th>Project</th><th>Status</th><th>Where</th></tr>
+    <tr><td><b>WristTap</b></td><td class="ok">Built, all sensors verified. Private GitHub repo (pushed 15 Nov 03:25)</td><td>github.com/saikiran9185/WristTap · ~/Projects/WristTap</td></tr>
+    <tr><td><b>PhoneStereo / Touch Stage</b></td><td>Working app. Touch vs hover not solved by cameras. PR #1 <b>not merged</b> into main.</td><td>Private repo PhoneStereo, branch wireless-apps-3cam</td></tr>
+    <tr><td><b>SonarMap</b></td><td>Working 3D sonar map. Candidate "reaching" sensor.</td><td>~/Projects/SonarMap</td></tr>
+    <tr><td><b>AI depth tools</b></td><td>Test done (71.6% best). Weights kept out of git.</td><td>~/Projects/DepthTouchTest</td></tr>
+    <tr><td>Reports</td><td>Sign study, touch study, SurfaceTouch V1, test day, 2 research reports</td><td>PhoneStereo/report, PhoneStereo/reports</td></tr>
+  </table>
+  <h3 style="margin-top:6px">Next steps, one at a time</h3>
+  <table>
+    <tr><th>#</th><th>Step</th><th>Pass test</th></tr>
+    <tr><td>1</td><td><b>Wall tap test</b>: wear the band, tap the wall 30 times, hover 30 times. A script graphs both and counts the result.</td><td>Taps clearly bigger than hovers; aim for 90%+ correct</td></tr>
+    <tr><td>2</td><td><b>Where</b>: touch the 4 corners of the projection once; the arm angle then gives the spot.</td><td>Hits the right button on a 3 × 3 grid</td></tr>
+    <tr><td>3</td><td><b>Click</b>: a tap clicks the Mac mouse at that spot, so any projected app works.</td><td>Works in a slide deck or browser</td></tr>
+    <tr><td>4</td><td><b>Gestures</b>: swipe, twist, shake (about 50 examples each).</td><td>5 gestures recognised</td></tr>
+    <tr><td>5</td><td><b>Wearable</b>: 3D-printed bangle + back-of-hand cover instead of the breadboard; battery later.</td><td>Survives a firm shake (jumpers fall out today)</td></tr>
+  </table>
+  <div class="cols">
+    <div class="box small">
+      <h3>Open questions for the user</h3>
+      <ul>
+        <li>Is a quick tap enough for "touch", or must a still palm count?</li>
+        <li>Is it graded on a live demo, a video, or both? When is it due?</li>
+        <li>Can the breadboard be taped to the forearm for step 1, or should MPU #1 + one piezo move to the wrist on long wires?</li>
+        <li>Merge PhoneStereo PR #1 into main?</li>
+      </ul>
+    </div>
+    <div class="box small">
+      <h3>Known gaps</h3>
+      <ul>
+        <li>Firmware doesn't re-wake an IMU that lost power but still answers (reads zeros, shows MISSING). Press EN to recover. A 2-line fix was offered but not applied.</li>
+        <li>WristTap_Build_Guide.pdf is older than the HTML guide.</li>
+        <li>No wall tap data recorded yet: the band numbers so far are bench tests.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small mute">Sources: git logs of both repos; PhoneStereo/report/*.html; reports/*.md; DepthTouchTest/results.json; WristTap README, firmware, taptest CSVs; project notes from 19 Oct – 15 Nov. Session videos aren't in git because they show the user and their room.</p>
+  <div class="foot"><span>Camera-free touch · progress report</span><span>11</span></div>
+</section>
+
+</body></html>

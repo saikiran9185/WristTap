@@ -47,16 +47,47 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--mute
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
 button,select{font:inherit;color:var(--ink);background:#22262a;border:1px solid #333940;border-radius:8px;padding:7px 12px;cursor:pointer}
 button:hover{border-color:#4a525b}
-#presentBtn{width:100%;padding:12px;font-size:16px;font-weight:600;margin-bottom:12px}
-#swapBtn.on{background:var(--accent);color:#111;border-color:var(--accent)}
-#presentBtn.on{background:var(--accent);color:#111;border-color:var(--accent)}
-.keys{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:8px}
-.keys td{padding:6px 0;border-top:1px solid var(--line)}
-.keys td:last-child{color:var(--ink);font-weight:600;text-align:right}
-.keys td:first-child{color:var(--muted)}
 #mouseBtn.on{background:var(--accent);color:#111;border-color:var(--accent);font-weight:600}
 input[type=range]{accent-color:var(--accent);width:130px}
 small{color:var(--muted)}
+/* webcam + proof strip */
+#cam{position:fixed;top:70px;right:18px;width:360px;aspect-ratio:16/10;border-radius:14px;overflow:hidden;border:2px solid var(--line);background:#000;z-index:5;display:none}
+#cam.on{display:block}
+#cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#cam span{position:absolute;left:10px;top:8px;font-size:12px;font-weight:700;letter-spacing:1px;color:#fff;background:#0009;padding:2px 8px;border-radius:6px}
+#flipRow button.on{background:var(--accent);color:#111;border-color:var(--accent)}
+#recBtn.on{background:var(--bad);color:#fff;border-color:var(--bad);font-weight:700}
+#camBtn.on{background:var(--accent);color:#111;border-color:var(--accent);font-weight:600}
+#proof{background:var(--bg);padding:16px 24px 20px;border-top:1px solid var(--line)}
+#proof h2{display:flex;gap:12px;align-items:baseline}
+#proof h2 small{text-transform:none;letter-spacing:0;font-weight:400}
+#traces{width:100%;height:230px;display:block;background:#121518;border:1px solid var(--line);border-radius:10px}
+/* show mode (guided recording) */
+body.show #stage{height:330px}
+body.show #proof{padding-bottom:200px}
+body.show #log{max-height:70px}
+#showBtn{margin-left:auto}
+#showBtn.on{background:var(--accent);color:#111;border-color:var(--accent);font-weight:600}
+body.show main{padding-bottom:210px;background:var(--bg)}
+body.show [data-zone]{transition:opacity .4s}
+body.show [data-zone].dim{opacity:.18}
+body.show .controls .row:not(:first-child), body.show .controls small, body.show #thrRow{display:none}
+#cap{position:fixed;left:0;right:0;bottom:0;display:none;grid-template-columns:auto 1fr auto;gap:28px;align-items:center;
+  padding:22px 32px;background:#15181bf2;border-top:1px solid var(--line);backdrop-filter:blur(8px)}
+body.show #cap{display:grid}
+#capNum{font-size:56px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1;min-width:70px}
+#capTitle{font-size:30px;font-weight:700;letter-spacing:-.3px;margin:0 0 4px}
+#capDo{font-size:19px;margin:0 0 6px}
+#capHow{font-size:16px;color:var(--muted);margin:0;max-width:980px}
+#capHow b{color:var(--ink);font-weight:600}
+#capSide{text-align:right;font-size:14px;color:var(--muted);min-width:170px}
+#capDone{font-size:18px;font-weight:700;color:var(--ok);min-height:26px;opacity:0;transition:opacity .3s}
+#capDone.on{opacity:1}
+#capDots{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
+#capDots i{width:9px;height:9px;border-radius:50%;background:#333940}
+#capDots i.on{background:var(--accent)}
+#capDots i.past{background:#6b5a2f}
+@media (max-width:860px){#cap{grid-template-columns:1fr;gap:8px}#capSide{text-align:left}#capDots{justify-content:flex-start}}
 @media (max-width:860px){main{grid-template-columns:1fr}#stage{height:300px}#gesture{font-size:34px}section{padding:16px}}
 </style>
 </head>
@@ -64,17 +95,21 @@ small{color:var(--muted)}
 <header>
   <h1>WristTap</h1>
   <span id="status"><span class="dot" id="dot"></span><b id="src">connecting…</b> · <span id="rate">0</span> packets/s</span>
+  <a href="/config" target="_blank" rel="noopener" style="color:var(--muted);font-size:13px;text-decoration:none;border:1px solid #333940;border-radius:8px;padding:7px 12px">Settings ↗</a>
+  <button id="recBtn" title="Record the whole screen to photos/">● Record</button>
+  <button id="camBtn" title="Webcam view of your hand (C)">Camera</button>
+  <button id="showBtn" title="Guided recording mode (S)">Show mode</button>
 </header>
 <main>
   <section>
     <h2>Arm, live</h2>
-    <div id="stage"><div id="world"></div></div>
+    <div data-zone="arm"><div id="stage"><div id="world"></div></div>
     <div id="readout">
       <span>Forearm <b id="r1">–</b></span>
       <span>Hand <b id="r2">–</b></span>
       <span>Wrist bend <b id="bend">–</b></span>
-    </div>
-    <div class="controls">
+    </div></div>
+    <div class="controls" data-zone="mouse">
       <div class="row">
         <button id="mouseBtn">Air mouse: off</button>
         <label>Speed <input type="range" id="sens" min="3" max="40" step="1"></label>
@@ -87,35 +122,39 @@ small{color:var(--muted)}
         <button id="flipy">flip</button>
         <label>Sensor <select id="imu"><option value="2">hand</option><option value="1">forearm</option></select></label>
       </div>
+      <div class="row" id="flipRow">Directions:
+        <button data-ax="roll">Roll ⇄</button><button data-ax="up">Up/down ⇄</button><button data-ax="swing">Swing ⇄</button>
+        <small>press one if the 3D arm moves the opposite way to your arm</small>
+      </div>
       <small>Tap any disc = click. Your trackpad still works the whole time. If the cursor goes the wrong way, change the axis or press flip.</small>
     </div>
   </section>
   <section>
-    <h2>Presentation mode</h2>
-    <button id="presentBtn" class="big">Presentation mode: off</button>
-    <table class="keys">
-      <tr><td>Flick hand right</td><td>Next slide</td></tr>
-      <tr><td>Flick hand left</td><td>Previous slide</td></tr>
-      <tr><td>Double tap any disc</td><td>Next slide</td></tr>
-      <tr><td>Squeeze (FSR)</td><td>Black screen on / off</td></tr>
-    </table>
-    <div class="row" style="margin-bottom:8px"><button id="swapBtn">Swap left / right</button><span>if a right flick goes back a slide</span></div>
-    <small>Turn this on, then click into Keynote, PowerPoint or Google Slides: the keys go to the app in front. Keep the air mouse off while presenting (a tap would also click).</small>
-    <h2 style="margin-top:22px">Last gesture</h2>
+    <div data-zone="gesture"><h2>Last gesture</h2>
     <div id="gesture">—</div>
-    <ul id="log"></ul>
-    <h2 style="margin-top:22px">Taps (4 discs around the wrist)</h2>
-    <div class="ring" id="ring"><div class="wrist"></div><div class="lbl">wrist</div></div>
-    <h2 style="margin-top:14px">Squeeze (forearm FSRs)</h2>
+    <ul id="log"></ul></div>
+    <div data-zone="taps"><h2 style="margin-top:22px">Taps (4 discs around the wrist)</h2>
+    <div class="ring" id="ring"><div class="wrist"></div><div class="lbl">wrist</div></div></div>
+    <div data-zone="squeeze"><h2 style="margin-top:14px">Squeeze (forearm FSRs)</h2>
     <div class="bars">
       <div class="bar"><span>FSR 0</span><div class="track"><div class="fill" id="f0"></div></div><span id="v0">0</span></div>
       <div class="bar"><span>FSR 1</span><div class="track"><div class="fill" id="f1"></div></div><span id="v1">0</span></div>
-    </div>
-    <div class="row" style="margin-top:16px">
+    </div></div>
+    <div class="row" id="thrRow" style="margin-top:16px">
       <label>Tap threshold <input type="range" id="tap_thr" min="40" max="1500" step="10"></label><span id="tapv"></span>
     </div>
   </section>
 </main>
+<section id="proof">
+  <h2>Proof: live signals from the band <small>each lane is one sensor · yellow = gesture recognised · grey dashed = noise the filters ignored</small></h2>
+  <canvas id="traces"></canvas>
+</section>
+<div id="cam"><video id="camVideo" autoplay muted playsinline></video><span>YOUR HAND</span></div>
+<div id="cap" aria-live="polite">
+  <div id="capNum">1</div>
+  <div><p id="capTitle"></p><p id="capDo"></p><p id="capHow"></p></div>
+  <div id="capSide"><div id="capDone">✓ Done</div><div>← → steps · S exit · C camera</div><div id="capDots"></div></div>
+</div>
 <script>
 const $ = id => document.getElementById(id);
 let S = {};
@@ -142,9 +181,27 @@ arm.appendChild(hand); $("world").appendChild(arm);
 let yaw0 = [0,0];
 
 /* ---- wrist ring discs ---- */
-const discs = [0,1,2,3].map(k=>{ const a = k*Math.PI/2 - Math.PI/2, d=document.createElement("div");
-  d.className="disc"; d.style.left = (110+90*Math.cos(a))+"px"; d.style.top=(110+90*Math.sin(a))+"px";
-  d.textContent = "disc "+k; $("ring").appendChild(d); return d; });
+/* calibration (calibrate.py -> calib.json): disc places, IMU axes/signs/level, mouse axes */
+let CAL = {};
+const PLACE_ANGLE = {top:-90, thumb:0, palm:90, pinky:180};      // your view down the arm: thumb right
+const PLACE_NAME = {top:"top", palm:"palm side", thumb:"thumb side", pinky:"little-finger side"};
+const discPlace = k => { const d=CAL.discs||{}; return Object.keys(d).find(p=>d[p]===k); };
+const discName = k => { const p=discPlace(k); return p ? `${PLACE_NAME[p]} (P${k})` : `disc ${k}`; };
+const discs = [0,1,2,3].map(k=>{ const d=document.createElement("div"); d.className="disc"; $("ring").appendChild(d); return d; });
+function placeDiscs(){
+  discs.forEach((d,k)=>{ const p=discPlace(k); const a=((p?PLACE_ANGLE[p]:k*90-90))*Math.PI/180;
+    d.style.left=(110+90*Math.cos(a))+"px"; d.style.top=(110+90*Math.sin(a))+"px";
+    d.innerHTML = p ? `P${k}<br><small style="font-size:10px">${PLACE_NAME[p]}</small>` : "disc "+k; });
+}
+placeDiscs();
+/* displayed angles: roll + = palm up, up + = hand up, swing + = to the right; level pose = 0 */
+const WRAP=a=>((a+180)%360+360)%360-180;   // short way round: 350 deg -> -10 deg
+function disp(m, k){
+  const c=(CAL.imu||[])[k]||{}, i=m.imu[k], r=c.roll||{src:"roll",sign:1,zero:0}, p=c.pitch||{src:"pitch",sign:1,zero:0}, y=c.yaw||{sign:1};
+  const f=CAL.flip||{};
+  return { ok:i.ok, roll:(f.roll||1)*r.sign*WRAP(i[r.src]-r.zero), up:(f.up||1)*p.sign*WRAP(i[p.src]-p.zero), swing:(f.swing||1)*y.sign*(i.yaw-yaw0[k]) };
+}
+fetch("/calib").then(r=>r.json()).then(c=>{ CAL=c||{}; placeDiscs(); syncFlip(); }).catch(()=>{});
 
 /* ---- live stream ---- */
 const names = {"tap":"Tap", "double tap":"Double tap", "squeeze":"Squeeze"};
@@ -152,39 +209,43 @@ let gTimer;
 function gesture(txt){ const g=$("gesture"); g.textContent=txt; g.classList.add("fresh"); clearTimeout(gTimer); gTimer=setTimeout(()=>g.classList.remove("fresh"),900);
   const li=document.createElement("li"); li.textContent = new Date().toLocaleTimeString()+"  "+txt; $("log").prepend(li); while($("log").children.length>8) $("log").lastChild.remove(); }
 const es = new EventSource("/stream");
+es.addEventListener("message",e=>{ const m=P(e); if(m.calib){ CAL=m.calib; placeDiscs(); syncFlip(); } });   // live: Settings changes apply here at once
+const P = e => e._m || (e._m = JSON.parse(e.data));   // one parse shared by every listener
 es.onmessage = e => {
-  const m = JSON.parse(e.data);
+  const m = P(e);
+  if (m.calib) return;
   if (m.settings){ S=m.settings; syncUI(); return; }
   $("src").textContent = m.status; $("rate").textContent = m.rate; $("dot").classList.toggle("on", m.rate>20);
   if (m.imu){
-    const [a,h] = m.imu;
-    if (a.ok) arm.style.transform = `rotateY(${-(a.yaw-yaw0[0])}deg) rotateZ(${a.pitch}deg) rotateX(${a.roll}deg)`;
-    if (h.ok) hand.style.transform = `rotateY(${-((h.yaw-yaw0[1])-(a.yaw-yaw0[0]))}deg) rotateZ(${h.pitch-a.pitch}deg) rotateX(${h.roll-a.roll}deg)`;
-    $("r1").textContent = a.ok ? `${a.roll.toFixed(0)}° / ${a.pitch.toFixed(0)}°` : "missing";
-    $("r2").textContent = h.ok ? `${h.roll.toFixed(0)}° / ${h.pitch.toFixed(0)}°` : "missing";
-    $("bend").textContent = m.bend==null ? "–" : `${m.bend.toFixed(0)}°`;
+    const a = disp(m,0), h = disp(m,1);
+    // CSS: rotateX(+) turns the palm toward you, rotateZ(-) lifts the hand, rotateY(-) swings it right
+    if (a.ok) arm.style.transform = `rotateY(${-a.swing}deg) rotateZ(${-a.up}deg) rotateX(${a.roll}deg)`;
+    if (h.ok) hand.style.transform = `rotateY(${-(h.swing-a.swing)}deg) rotateZ(${-(h.up-a.up)}deg) rotateX(${h.roll-a.roll}deg)`;
+    $("r1").textContent = a.ok ? `roll ${a.roll.toFixed(0)}° · up ${a.up.toFixed(0)}°` : "missing";
+    $("r2").textContent = h.ok ? `roll ${h.roll.toFixed(0)}° · up ${h.up.toFixed(0)}°` : "missing";
+    m.dbend = a.ok && h.ok ? h.up - a.up : null; m.da = a; m.dh = h;
+    $("bend").textContent = m.dbend==null ? "–" : `${m.dbend.toFixed(0)}°`;
     window._yaw = [a.yaw, h.yaw];
   }
   if (m.fsr) m.fsr.forEach((v,k)=>{ $("f"+k).style.width = Math.min(100, v/40.95)+"%"; $("v"+k).textContent=v; });
   for (const ev of m.events||[]){
+    if (ev.kind==="ignored") continue;                 // filtered noise: shown only in the proof strip
     if (ev.disc!=null){ const d=discs[ev.disc]; d.classList.add("hit"); setTimeout(()=>d.classList.remove("hit"),180); }
-    const label = (names[ev.kind]||ev.kind.replace(/^./,c=>c.toUpperCase())) + (ev.disc!=null?` · disc ${ev.disc}`:"") + (ev.fsr!=null?` · FSR ${ev.fsr}`:"") + (ev.action?` → ${ev.action}`:"");
+    const label = (names[ev.kind]||ev.kind.replace(/^./,c=>c.toUpperCase())) + (ev.disc!=null?` · ${discName(ev.disc)}`:"") + (ev.fsr!=null?` · FSR ${ev.fsr}`:"");
     gesture(label);
   }
+  if (m.rec) syncRec(m.rec);
   if (m.mouse !== S.mouse){ S.mouse=m.mouse; syncUI(); }
 };
+es.addEventListener("message", e=>{ const m=P(e); if(!m.settings && !m.calib) showTrack(m); });
 es.onerror = () => { $("src").textContent="demo server stopped"; $("dot").classList.remove("on"); };
 
 /* ---- controls ---- */
 function syncUI(){
   $("mouseBtn").textContent = "Air mouse: " + (S.mouse ? "ON" : "off"); $("mouseBtn").classList.toggle("on", !!S.mouse);
-  $("presentBtn").textContent = "Presentation mode: " + (S.present ? "ON" : "off"); $("presentBtn").classList.toggle("on", !!S.present);
-  $("swapBtn").classList.toggle("on", !!S.swap_lr);
   $("sens").value=S.sens; $("mx").value=S.mx; $("my").value=S.my; $("imu").value=S.imu; $("tap_thr").value=S.tap_thr; $("tapv").textContent=S.tap_thr;
 }
 $("mouseBtn").onclick = ()=> post({mouse: !S.mouse});
-$("presentBtn").onclick = ()=> post({present: !S.present});
-$("swapBtn").onclick = ()=> post({swap_lr: !S.swap_lr});
 $("sens").oninput = e => post({sens: +e.target.value});
 $("tap_thr").oninput = e => post({tap_thr: +e.target.value});
 $("mx").onchange = e => post({mx: e.target.value});
@@ -192,7 +253,132 @@ $("my").onchange = e => post({my: e.target.value});
 $("imu").onchange = e => post({imu: +e.target.value});
 $("flipx").onclick = ()=> post({mx_sign: -S.mx_sign});
 $("flipy").onclick = ()=> post({my_sign: -S.my_sign});
+function syncFlip(){ document.querySelectorAll("#flipRow button").forEach(b=>b.classList.toggle("on",((CAL.flip||{})[b.dataset.ax]||1)<0)); }
+document.querySelectorAll("#flipRow button").forEach(b=>b.onclick=()=>{ const f=Object.assign({roll:1,up:1,swing:1},CAL.flip||{}); f[b.dataset.ax]*=-1; CAL.flip=f; syncFlip();
+  fetch("/calib",{method:"POST",body:JSON.stringify({flip:f})}); });
 $("recenter").onclick = ()=> { if (window._yaw) yaw0 = window._yaw.slice(); };
+
+/* ---- Show mode: guided steps with captions, for recording ---- */
+const STEPS = [
+  {zones:["arm","gesture","taps","squeeze"], title:"WristTap", do:"One band on the forearm. No camera, no cable: it runs on a power bank over Bluetooth.",
+   how:"An <b>ESP32</b> reads <b>8 sensors 500 times a second</b> (2 motion sensors, 4 piezo discs, 2 pressure sensors) and streams them to the Mac."},
+  {zones:["arm"], title:"The arm follows you", do:"Roll the wrist, tilt the hand, swing the arm.",
+   how:"Motion sensors on the forearm and back of the hand. <b>Gravity</b> gives the tilt, the <b>gyro</b> gives fast turns; blended, the angle is quick and steady.", done:"roll"},
+  {zones:["arm"], title:"Wrist bend", do:"Keep the forearm still and bend only the wrist up and down.",
+   how:"<b>Hand angle − forearm angle = wrist bend.</b> Two sensors let the Mac tell the hand from the arm.", done:"bend"},
+  {zones:["taps","gesture"], title:"Taps", do:"Tap each disc in turn: top, thumb side, palm side, little-finger side.",
+   how:"Piezo discs touch the skin. A tap sends a tiny shock that the disc turns into a <b>voltage spike</b>; a spike over the threshold = a tap, and the disc says <b>where</b>.", done:"taps"},
+  {zones:["taps","gesture"], title:"Double tap", do:"Tap twice, quickly.",
+   how:"Two taps inside <b>0.4 s</b> = a double tap, like a double click.", done:"double tap"},
+  {zones:["squeeze","gesture"], title:"Squeeze", do:"Make a fist, then relax.",
+   how:"Force sensors under the strap feel the <b>forearm tendons tighten</b>. The bar shows <b>how hard</b>, not just yes/no.", done:"squeeze"},
+  {zones:["gesture","arm"], title:"Flick", do:"Flick the hand left or right, fast.",
+   how:"A sudden gyro spike over <b>260°/s</b> = a flick. Which axis spiked gives the direction: next / previous, undo.", done:"flick"},
+  {zones:["mouse","gesture"], title:"Air mouse", do:"Move the cursor round the screen with your hand. Tap a disc to click.",
+   how:"Hand <b>rotation speed → cursor speed</b>, tap = click. Your eyes correct any drift, exactly like a normal mouse.", mouse:true, done:"move"},
+  {zones:["arm","gesture","taps","squeeze"], title:"One band: when, what, how much", do:"Taps say WHEN and WHERE, gestures say WHAT, squeeze says HOW MUCH.",
+   how:"Next: a soldered, smaller band, and touch on a projected wall with an arm model (no camera)."},
+];
+let show = false, step = 0, prog = {};
+STEPS.forEach(()=>$("capDots").appendChild(document.createElement("i")));
+function renderStep(){
+  const st = STEPS[step];
+  document.body.classList.toggle("show", show); $("showBtn").classList.toggle("on", show);
+  document.querySelectorAll("[data-zone]").forEach(z=> z.classList.toggle("dim", show && !st.zones.includes(z.dataset.zone)));
+  $("capNum").textContent = step+1; $("capTitle").textContent = st.title; $("capDo").textContent = st.do; $("capHow").innerHTML = st.how;
+  [...$("capDots").children].forEach((d,i)=>{ d.className = i===step ? "on" : i<step ? "past" : ""; });
+  $("capDone").classList.remove("on"); prog = {roll:new Set(), bend:new Set(), discs:new Set(), fsr:new Set(), moves:0};
+  if (show && !!st.mouse !== !!S.mouse) post({mouse: !!st.mouse});
+}
+function done(){ if (show) $("capDone").classList.add("on"); }
+function go(d){ step = Math.max(0, Math.min(STEPS.length-1, step+d)); renderStep(); }
+function toggleShow(){ show = !show; if (!show && S.mouse) post({mouse:false}); if (show) setCam(true); renderStep(); }
+$("showBtn").onclick = toggleShow;
+document.addEventListener("keydown", e=>{
+  if (e.target.tagName==="INPUT"||e.target.tagName==="SELECT") return;
+  if (e.key==="s"||e.key==="S") toggleShow();
+  else if (!show) return;
+  else if (e.key==="ArrowRight"||e.key===" "){ e.preventDefault(); go(1); }
+  else if (e.key==="ArrowLeft") go(-1);
+  else if (e.key==="Escape") toggleShow();
+});
+function showTrack(m){
+  if (!show) return;
+  const k = STEPS[step].done; if (!k) return;
+  if (k==="roll" && m.da && m.da.ok){ const r=m.da.roll, p=m.da.up;
+    if (r>20) prog.roll.add("r+"); if (r<-20) prog.roll.add("r-"); if (Math.abs(p)>15) prog.roll.add("p"); if (prog.roll.size>=2) done(); }
+  if (k==="bend" && m.dbend!=null){ if (m.dbend>15) prog.bend.add("+"); if (m.dbend<-15) prog.bend.add("-"); if (prog.bend.size>=2) done(); }
+  for (const ev of m.events||[]){
+    if (ev.kind==="ignored") continue;
+    if (k==="taps" && ev.disc!=null){ prog.discs.add(ev.disc); if (prog.discs.size===4) done(); }
+    if (k==="double tap" && ev.kind==="double tap") done();
+    if (k==="squeeze" && ev.kind==="squeeze") done();
+    if (k==="flick" && /flick|roll (left|right)/.test(ev.kind)) done();
+  }
+  if (k==="move" && m.imu && m.imu[1].ok){ prog.moves++; if (prog.moves>200) done(); }
+}
+renderStep();
+
+/* ---- Full-screen recording (server runs screencapture into photos/) ---- */
+let recOn=false;
+function syncRec(r){ recOn=r.on; const b=$("recBtn"); b.classList.toggle("on",r.on);
+  b.textContent=r.on?`■ Stop ${String(Math.floor(r.secs/60)).padStart(2,"0")}:${String(r.secs%60).padStart(2,"0")}`:"● Record"; }
+$("recBtn").onclick=async()=>{ const r=await fetch("/record",{method:"POST",body:JSON.stringify({action:recOn?"stop":"start",audio:false})}).then(x=>x.json()); syncRec(r);
+  if(!r.on&&r.file) alert("Saved: WristTap/photos/"+r.file); };
+document.addEventListener("keydown",e=>{ if((e.key==="r"||e.key==="R")&&e.target.tagName!=="INPUT"&&e.target.tagName!=="SELECT") $("recBtn").click(); });
+
+/* ---- Webcam: shows the hand doing the gesture next to the data ---- */
+let camStream=null;
+async function setCam(on){
+  if(on && !camStream){ try{ camStream=await navigator.mediaDevices.getUserMedia({video:{width:1280,height:800},audio:false}); $("camVideo").srcObject=camStream; }catch(e){ alert("Camera blocked: allow camera access for this browser, then press Camera again."); return; } }
+  if(!on && camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+  $("cam").classList.toggle("on",!!on); $("camBtn").classList.toggle("on",!!on);
+}
+$("camBtn").onclick=()=>setCam(!camStream);
+document.addEventListener("keydown",e=>{ if((e.key==="c"||e.key==="C")&&e.target.tagName!=="INPUT"&&e.target.tagName!=="SELECT") setCam(!camStream); });
+
+/* ---- Proof strip: scrolling raw traces + gesture markers ---- */
+const LANES=[
+  {name:"Disc 0 (tap)",col:"#f2b134",get:m=>m.piezo&&m.piezo[0],max:1500},
+  {name:"Disc 1 (tap)",col:"#f2b134",get:m=>m.piezo&&m.piezo[1],max:1500},
+  {name:"Disc 2 (tap)",col:"#f2b134",get:m=>m.piezo&&m.piezo[2],max:1500},
+  {name:"Disc 3 (tap)",col:"#f2b134",get:m=>m.piezo&&m.piezo[3],max:1500},
+  {name:"FSR 0 (squeeze)",col:"#5cc38a",get:m=>m.fsr&&m.fsr[0],max:4095},
+  {name:"FSR 1 (squeeze)",col:"#5cc38a",get:m=>m.fsr&&m.fsr[1],max:4095},
+  {name:"Hand roll °",col:"#8a76c9",get:m=>m.dh&&m.dh.ok?m.dh.roll:null,min:-120,max:120},
+  {name:"Wrist bend °",col:"#6fa8dc",get:m=>m.dbend,min:-60,max:60},
+];
+const HIST=400; const hist=LANES.map(()=>[]); const marks=[]; let tick=0;
+function proofPush(m){
+  if(!m.imu&&!m.piezo) return;
+  tick++;
+  LANES.forEach((L,i)=>{ const v=L.get(m); hist[i].push(v==null?null:v); if(hist[i].length>HIST) hist[i].shift(); });
+  for(const ev of m.events||[]) marks.push({t:tick,ign:ev.kind==="ignored",label:ev.kind==="ignored"?"ignored: "+ev.why:ev.kind+(ev.disc!=null?" P"+ev.disc:"")+(ev.fsr!=null?" F"+ev.fsr:"")});
+  while(marks.length&&marks[0].t<tick-HIST) marks.shift();
+}
+function proofDraw(){
+  const c=$("traces"), r=c.getBoundingClientRect(), dpr=devicePixelRatio||1;
+  if(c.width!==Math.round(r.width*dpr)){ c.width=Math.round(r.width*dpr); c.height=Math.round(r.height*dpr); }
+  const g=c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); const W=r.width,H=r.height,lab=130,lh=H/LANES.length;
+  g.clearRect(0,0,W,H); g.font="12px -apple-system,system-ui,sans-serif";
+  const x=i=>lab+(W-lab-8)*i/(HIST-1);
+  LANES.forEach((L,k)=>{ const y0=k*lh, mn=L.min??0, mx=L.max;
+    g.fillStyle=k%2?"#15191c":"#121518"; g.fillRect(0,y0,W,lh);
+    g.fillStyle="#9aa1a9"; g.fillText(L.name,10,y0+lh/2+4);
+    const h=hist[k], off=HIST-h.length; g.strokeStyle=L.col; g.lineWidth=1.6; g.beginPath(); let pen=false;
+    h.forEach((v,i)=>{ if(v==null){pen=false;return;} const t=Math.max(0,Math.min(1,(v-mn)/(mx-mn))); const yy=y0+lh-3-t*(lh-6);
+      if(!pen){g.moveTo(x(i+off),yy);pen=true;} else g.lineTo(x(i+off),yy); }); g.stroke();
+    const last=h[h.length-1]; if(last!=null){ g.fillStyle="#e9e7e3"; g.textAlign="right"; g.fillText(Math.round(last),W-10,y0+14); g.textAlign="left"; }
+  });
+  g.strokeStyle="#f2b134"; g.fillStyle="#f2b134"; g.lineWidth=1.5;
+  for(const mk of marks){ const xx=x(HIST-1-(tick-mk.t)); if(xx<lab) continue; const c=mk.ign?"#6b7178":"#f2b134"; g.strokeStyle=c; g.fillStyle=c;
+    g.setLineDash(mk.ign?[4,4]:[]); g.beginPath(); g.moveTo(xx,0); g.lineTo(xx,H); g.stroke(); g.setLineDash([]); g.fillText(mk.label,xx+4,mk.ign?H-6:12); }
+  requestAnimationFrame(proofDraw);
+}
+requestAnimationFrame(proofDraw);
+es.addEventListener("message",e=>{ const m=P(e); if(!m.settings && !m.calib) proofPush(m); });
+/* ?show opens straight into Show mode with the camera on (for recording) */
+if (new URLSearchParams(location.search).has("show")) setTimeout(()=>{ if(!show) toggleShow(); }, 300);
 </script>
 </body>
 </html>

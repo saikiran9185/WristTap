@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WristTap Try It</title>
+<style>
+:root{--bg:#0f1113;--panel:#171a1d;--panel2:#1e2226;--line:#2a2f35;--ink:#ece9e3;--muted:#9ea5ad;--accent:#f2b134;--ok:#5cc38a;--bad:#e46a5e;--blue:#5b8fd9;--violet:#8a76c9}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;user-select:none}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 20px;border-bottom:1px solid var(--line)}
+header h1{font-size:18px;margin:0}
+.pill{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pill i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:6px}
+.pill i.on{background:var(--ok)}
+.sp{flex:1}
+button,a.btn{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid #363c43;border-radius:10px;padding:8px 14px;cursor:pointer;text-decoration:none}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid #363c43;border-radius:12px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:transparent;padding:9px 16px}
+.seg button.on{background:var(--accent);color:#14171a;font-weight:700}
+#recBtn.on{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:700}
+#camBtn.on{background:var(--accent);color:#14171a;font-weight:700}
+/* action toast */
+#toast{position:fixed;left:50%;top:76px;transform:translateX(-50%) scale(.96);background:var(--accent);color:#14171a;font-weight:800;font-size:28px;padding:10px 26px;border-radius:999px;opacity:0;transition:opacity .2s,transform .2s;z-index:20;pointer-events:none;white-space:nowrap}
+#toast.on{opacity:1;transform:translateX(-50%) scale(1)}
+#toast.err{background:var(--bad);color:#fff;font-size:18px}
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:8px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+.legend span{font-size:15px;padding:8px 14px;border-radius:999px;background:var(--panel2);border:1px solid var(--line)}
+.legend b{color:var(--accent)}
+main{padding:20px;max-width:1280px;margin:0 auto}
+/* present */
+#deck{position:relative;aspect-ratio:16/9;max-height:calc(100vh - 230px);margin:0 auto;border-radius:18px;overflow:hidden;background:#15181b;border:1px solid var(--line)}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:6%;opacity:0;transform:translateX(40px);transition:opacity .35s,transform .35s}
+.slide.on{opacity:1;transform:none}
+.slide.past{transform:translateX(-40px)}
+.slide .eb{font:600 14px ui-monospace,Menlo,monospace;letter-spacing:2px;color:var(--accent);margin:0 0 14px}
+.slide h2{font-size:clamp(34px,5vw,72px);line-height:1.05;margin:0 0 18px;letter-spacing:-1px}
+.slide p{font-size:clamp(18px,2vw,28px);color:var(--muted);margin:0;max-width:900px}
+.slide .big{font-size:clamp(60px,10vw,150px);line-height:1}
+#black{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .3s;display:grid;place-items:center;color:#333;font-size:14px}
+#black.on{opacity:1}
+#pageNo{position:absolute;right:20px;bottom:14px;font:600 14px ui-monospace,Menlo,monospace;color:var(--muted)}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.dots i{width:10px;height:10px;border-radius:50%;background:#333940}
+.dots i.on{background:var(--accent)}
+/* ui playground */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+.box h3{margin:0 0 4px;font-size:16px}
+.box small{color:var(--muted);display:block;margin-bottom:12px}
+.bigbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bigbtns button{padding:22px 6px;font-size:18px;font-weight:700;border-radius:14px;transition:transform .1s,background .2s}
+.bigbtns button:active{transform:scale(.96)}
+.bigbtns button .n{display:block;font-size:28px;color:var(--accent)}
+.bigbtns button.flash{background:var(--accent);color:#14171a}
+.bigbtns button.flash .n{color:#14171a}
+.sw{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-top:1px solid var(--line);font-size:18px;cursor:pointer}
+.sw:first-of-type{border-top:0}
+.tg{width:62px;height:34px;border-radius:999px;background:#333940;position:relative;transition:background .2s;flex:none}
+.tg::after{content:"";position:absolute;left:4px;top:4px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .2s}
+.sw.on .tg{background:var(--ok)}
+.sw.on .tg::after{left:32px}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent)}
+.vol{font-size:44px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.list{height:240px;overflow-y:auto;border:1px solid var(--line);border-radius:12px}
+.list div{padding:12px 14px;border-top:1px solid var(--line);font-size:17px}
+.list div:first-child{border-top:0}
+.tray{display:flex;gap:10px;min-height:86px;flex-wrap:wrap}
+.card{width:96px;height:70px;border-radius:12px;display:grid;place-items:center;font-weight:800;color:#14171a;cursor:grab;touch-action:none;position:relative}
+.card.drag{cursor:grabbing;box-shadow:0 12px 30px #0008;z-index:30}
+.drop{margin-top:12px;min-height:100px;border:2px dashed #3a4048;border-radius:14px;display:flex;flex-wrap:wrap;gap:10px;padding:12px;align-items:center;color:var(--muted)}
+.drop.hot{border-color:var(--accent);background:#2a2416}
+.folder{display:flex;gap:16px;align-items:center}
+.ficon{width:110px;height:86px;border-radius:12px;background:var(--blue);display:grid;place-items:center;font-size:40px;cursor:pointer}
+.ficon.open{background:var(--accent)}
+.files{font-size:16px;color:var(--muted)}
+/* camera */
+#cam{position:fixed;right:18px;bottom:18px;width:320px;aspect-ratio:16/10;border-radius:14px;overflow:hidden;border:2px solid var(--line);background:#000;z-index:15;display:none}
+#cam.on{display:block}
+#cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#cam span{position:absolute;left:10px;top:8px;font-size:12px;font-weight:700;letter-spacing:1px;color:#fff;background:#0009;padding:5px 10px;border-radius:6px}
+@media (max-width:980px){.grid{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.grid{grid-template-columns:1fr}#toast{font-size:20px}#cam{width:200px}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>WristTap · Try it</h1>
+  <span class="pill"><i id="dot"></i><span id="src">connecting…</span></span>
+  <div class="seg" role="tablist" aria-label="What the band controls">
+    <button data-mode="present">▶ Presenting</button>
+    <button data-mode="ui">🖱 Real UI control</button>
+    <button data-mode="demo">Off</button>
+  </div>
+  <span class="sp"></span>
+  <button id="camBtn">Camera</button>
+  <button id="recBtn">● Record</button>
+  <a class="btn" href="/" target="_blank" rel="noopener">Demo ↗</a>
+</header>
+<div class="legend" id="legend"></div>
+<div id="needCfg" hidden style="margin:12px 20px 0;padding:12px 16px;border-radius:12px;background:#2c1714;border:1px solid var(--bad);font-size:15px">Settings not done yet: <b id="needWhat"></b>. The band may go the wrong way. <a href="/config" style="color:var(--accent);font-weight:700">Open Settings first →</a></div>
+<div id="toast"></div>
+
+<main>
+  <!-- PRESENTING -->
+  <section id="vPresent">
+    <div id="deck">
+      <div class="slide on"><p class="eb">PRESENTING WITH WRISTTAP</p><h2>No clicker in my hand.</h2><p>The band on my wrist runs this deck. Watch the camera.</p></div>
+      <div class="slide"><p class="eb">FLICK RIGHT</p><div class="big">→</div><h2>Next slide</h2><p>A quick flick of the hand sends the Right Arrow key.</p></div>
+      <div class="slide"><p class="eb">FLICK LEFT</p><div class="big">←</div><h2>Previous slide</h2><p>Flick the other way to go back.</p></div>
+      <div class="slide"><p class="eb">DOUBLE TAP</p><div class="big">■</div><h2>Black screen</h2><p>Double tap a disc to blank the screen and talk to the room. Double tap again to come back.</p></div>
+      <div class="slide"><p class="eb">ANY APP</p><h2>Keynote · PowerPoint · Google Slides</h2><p>It sends real keyboard keys, so it works in any presentation app, not just this page.</p></div>
+      <div class="slide"><p class="eb">WRISTTAP</p><h2>Thank you.</h2><p>Hands free. No camera. Just the band.</p></div>
+      <div id="black">screen blanked: double tap to return</div>
+      <div id="pageNo">1 / 6</div>
+    </div>
+    <div class="dots" id="dots"></div>
+  </section>
+
+  <!-- REAL UI -->
+  <section id="vUi" hidden>
+    <div class="grid">
+      <div class="box"><h3>Buttons</h3><small>Point with your hand, tap a disc to click.</small>
+        <div class="bigbtns"><button data-c="like">👍<span class="n">0</span></button><button data-c="save">⭐<span class="n">0</span></button><button data-c="share">↗<span class="n">0</span></button></div></div>
+      <div class="box"><h3>Switches</h3><small>Tap to flip.</small>
+        <div class="sw" data-s>Wi-Fi<span class="tg"></span></div><div class="sw on" data-s>Bluetooth<span class="tg"></span></div><div class="sw" data-s>Do Not Disturb<span class="tg"></span></div></div>
+      <div class="box"><h3>Slider</h3><small>Squeeze and hold on the knob, move your hand, let go.</small>
+        <div class="vol" id="volV">40</div><input type="range" id="vol" min="0" max="100" value="40" aria-label="Volume"></div>
+      <div class="box"><h3>Scroll a list</h3><small>Point at the list, roll your wrist to scroll.</small>
+        <div class="list" id="list"></div></div>
+      <div class="box"><h3>Drag and drop</h3><small>Squeeze to grab a card, move, let go over the box.</small>
+        <div class="tray" id="tray"><div class="card" style="background:#f2b134">Idea</div><div class="card" style="background:#5cc38a">Sketch</div><div class="card" style="background:#8a76c9">Build</div></div>
+        <div class="drop" id="drop">Done ✓</div></div>
+      <div class="box"><h3>Open a folder</h3><small>Point at it and double tap.</small>
+        <div class="folder"><div class="ficon" id="folder">📁</div><div class="files" id="files">closed</div></div></div>
+    </div>
+  </section>
+</main>
+<div id="cam"><video id="camVideo" autoplay muted playsinline></video><span>MY HAND</span></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const LEG={present:[["Flick right","next slide"],["Flick left","previous slide"],["Double tap","black screen"],["Esc","stop"]],
+  ui:[["Turn hand","move cursor"],["Tap","click"],["Double tap","double-click"],["Squeeze + hold","drag"],["Roll wrist","scroll"],["Esc","stop control"]],
+  demo:[["Band not controlling anything","choose Presenting or Real UI control"]]};
+let mode="demo";
+async function setMode(m){ const r=await fetch("/",{method:"POST",body:JSON.stringify({mode:m,mouse:false})}).then(x=>x.json()); mode=r.mode; syncMode(); }
+function syncMode(){ document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("on",b.dataset.mode===mode));
+  $("legend").innerHTML=LEG[mode].map(([g,a])=>`<span><b>${g}</b> → ${a}</span>`).join("");
+  $("vPresent").hidden=mode==="ui"; $("vUi").hidden=mode!=="ui"; }
+document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") setMode("demo"); });
+
+/* toast for every action the band performs */
+let tT; function toast(t,err){ const el=$("toast"); el.textContent=t; el.classList.toggle("err",!!err); el.classList.add("on"); clearTimeout(tT); tT=setTimeout(()=>el.classList.remove("on"),err?4000:1100); }
+const es=new EventSource("/stream");
+es.onmessage=e=>{ const m=JSON.parse(e.data);
+  if(m.calib) return;
+  if(m.settings){ mode=m.settings.mode||"demo"; syncMode(); return; }
+  $("src").textContent=`${m.status} · ${m.rate}/s`; $("dot").classList.toggle("on",m.rate>20);
+  if(m.rec) syncRec(m.rec);
+  for(const ev of m.events||[]){
+    if(ev.kind==="action") toast(({"next slide":"→ Next slide","previous slide":"← Previous slide","black screen (B)":"■ Black screen","click":"Tap → click","double-click":"Double tap → double-click","drag: grab":"Squeeze → grab","drag: drop":"Let go → drop","scroll down":"Roll → scroll down","scroll up":"Roll → scroll up"})[ev.what]||ev.what);
+    if(ev.kind==="action error") toast("Mac blocked the input: allow your terminal in System Settings → Privacy & Security → Accessibility",true);
+  }
+};
+
+/* the deck answers real arrow keys and B, exactly like Keynote would */
+const slides=[...document.querySelectorAll(".slide")]; let cur=0;
+slides.forEach(()=>$("dots").appendChild(document.createElement("i")));
+function show(i){ cur=Math.max(0,Math.min(slides.length-1,i)); slides.forEach((s,k)=>{ s.classList.toggle("on",k===cur); s.classList.toggle("past",k<cur); });
+  [...$("dots").children].forEach((d,k)=>d.classList.toggle("on",k===cur)); $("pageNo").textContent=`${cur+1} / ${slides.length}`; }
+document.addEventListener("keydown",e=>{ if(mode==="ui") return;
+  if(e.key==="ArrowRight"||e.key===" ") show(cur+1); else if(e.key==="ArrowLeft") show(cur-1); else if(e.key==="b"||e.key==="B") $("black").classList.toggle("on"); });
+show(0);
+
+/* real UI elements: they react to the real (band-driven) mouse */
+document.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>{ const n=b.querySelector(".n"); n.textContent=+n.textContent+1; b.classList.add("flash"); setTimeout(()=>b.classList.remove("flash"),250); }));
+document.querySelectorAll("[data-s]").forEach(s=>s.addEventListener("click",()=>s.classList.toggle("on")));
+$("vol").addEventListener("input",e=>$("volV").textContent=e.target.value);
+$("list").innerHTML=Array.from({length:30},(_,i)=>`<div>${["Inbox","Design review","Jury deck","Sieve notes","WristTap print","Studio","Typeface","Reading"][i%8]} · item ${i+1}</div>`).join("");
+$("folder").addEventListener("dblclick",()=>{ const o=$("folder").classList.toggle("open"); $("folder").textContent=o?"📂":"📁"; $("files").innerHTML=o?"WristTap.scad<br>demo.mov<br>slides.pdf":"closed"; });
+// pointer-based drag (works with the band's mouse-down / move / mouse-up)
+document.querySelectorAll(".card").forEach(c=>{ let sx,sy,on=false;
+  c.addEventListener("pointerdown",e=>{ on=true; sx=e.clientX; sy=e.clientY; c.classList.add("drag"); c.setPointerCapture(e.pointerId); });
+  c.addEventListener("pointermove",e=>{ if(!on) return; c.style.transform=`translate(${e.clientX-sx}px,${e.clientY-sy}px)`;
+    const r=$("drop").getBoundingClientRect(); $("drop").classList.toggle("hot",e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom); });
+  c.addEventListener("pointerup",e=>{ on=false; c.classList.remove("drag"); c.style.transform=""; const r=$("drop").getBoundingClientRect();
+    if(e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom){ $("drop").appendChild(c); toast("Dropped ✓"); } $("drop").classList.remove("hot"); }); });
+
+/* camera + recording */
+let camStream=null;
+async function setCam(on){ if(on&&!camStream){ try{ camStream=await navigator.mediaDevices.getUserMedia({video:{width:1280,height:800},audio:false}); $("camVideo").srcObject=camStream; }catch(e){ toast("Camera blocked: allow camera for this browser",true); return; } }
+  if(!on&&camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; } $("cam").classList.toggle("on",!!on); $("camBtn").classList.toggle("on",!!on); }
+$("camBtn").onclick=()=>setCam(!camStream);
+let recOn=false;
+function syncRec(r){ recOn=r.on; $("recBtn").classList.toggle("on",r.on); $("recBtn").textContent=r.on?`■ Stop ${String(Math.floor(r.secs/60)).padStart(2,"0")}:${String(r.secs%60).padStart(2,"0")}`:"● Record"; }
+$("recBtn").onclick=async()=>{ const r=await fetch("/record",{method:"POST",body:JSON.stringify({action:recOn?"stop":"start"})}).then(x=>x.json()); syncRec(r); if(!r.on&&r.file) toast("Saved: photos/"+r.file); };
+const q=new URLSearchParams(location.search); if(q.has("cam")) setCam(true); if(q.get("mode")) setMode(q.get("mode"));
+syncMode();
+fetch("/calib").then(r=>r.json()).then(c=>{ const m=(c&&c.mouse)||{}, miss=[];
+  if(Object.keys((c&&c.discs)||{}).length<4) miss.push("disc places"); if(!(m.mx&&m.my&&m.roll_sign)) miss.push("hand directions");
+  if(miss.length){ $("needWhat").textContent=miss.join(" and "); $("needCfg").hidden=false; } }).catch(()=>{});
+</script>
+</body>
+</html>
