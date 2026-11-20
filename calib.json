@@ -1,0 +1,76 @@
+{
+  "discs": {
+    "top": 0,
+    "thumb": 1,
+    "palm": 3,
+    "pinky": 0
+  },
+  "imu": [
+    {
+      "roll": {
+        "src": "pitch",
+        "sign": 1,
+        "zero": -14.8
+      },
+      "pitch": {
+        "src": "roll",
+        "sign": -1,
+        "zero": -156.8
+      },
+      "yaw": {
+        "sign": -1
+      }
+    },
+    {
+      "roll": {
+        "src": "roll",
+        "sign": -1,
+        "zero": 164.9
+      },
+      "pitch": {
+        "src": "pitch",
+        "sign": 1,
+        "zero": 16.2
+      },
+      "yaw": {
+        "sign": -1
+      }
+    }
+  ],
+  "mouse": {
+    "mx": "gz",
+    "mx_sign": -1,
+    "my": "gy",
+    "my_sign": 1,
+    "roll_sign": -1
+  },
+  "settings": {
+    "tap_thr_d": [
+      124,
+      516,
+      434,
+      312
+    ],
+    "one_disc": true,
+    "bump_discs": 3,
+    "echo_ms": 120,
+    "tap_motion_dps": 0,
+    "tap_lock_ms": 0,
+    "flick_lock_ms": 300,
+    "flick_dps": 200,
+    "fsr_thr_d": [
+      1327,
+      300
+    ],
+    "fsr_hyst": 0.7,
+    "double_ms": 400,
+    "sens": 14,
+    "dead": 4
+  },
+  "flip": {
+    "roll": 1,
+    "up": 1,
+    "swing": 1
+  },
+  "fsr_done": true
+}

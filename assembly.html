@@ -1,0 +1,312 @@
+<title>WristTap Assembly</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: workbench. Big drawing of the part on the left, the one thing to do now on the right, all steps below. */
+:root{
+  --bg:#f3f5f4; --panel:#ffffff; --ink:#18201f; --muted:#5a6866; --line:#d9e0de;
+  --pla:#2f8f94; --pla-dk:#1f5f63; --brass:#c99a2e; --hot:#e0682b; --ok:#2f7d4f;
+  --board:#fbfbf8; --pcb:#22303d; --mpu:#6b4fb3; --mpu2:#2f6fb8; --fsr:#3d8b5a; --skin:#e9d3c0; --skin-dk:#cfae93;
+  --display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101615; --panel:#172120; --ink:#e7eeec; --muted:#9aaba8; --line:#2a3836;
+  --pla:#4fb3b8; --pla-dk:#2f8f94; --brass:#e0b54a; --hot:#f08a52; --ok:#69c48f;
+  --board:#e6e6e1; --skin:#5a4a3f; --skin-dk:#7a6454; color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101615;--panel:#172120;--ink:#e7eeec;--muted:#9aaba8;--line:#2a3836;--pla:#4fb3b8;--pla-dk:#2f8f94;--brass:#e0b54a;--hot:#f08a52;--ok:#69c48f;--board:#e6e6e1;--skin:#5a4a3f;--skin-dk:#7a6454;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body)}
+.wrap{max-width:1120px;margin:0 auto;padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
+h1{font:700 30px/1.1 var(--display);margin:0;letter-spacing:-.5px;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.prog{min-width:220px;flex:1;max-width:360px}
+.prog .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.prog .fill{height:100%;background:var(--pla);width:0;transition:width .3s}
+.prog .lbl{font:500 12.5px var(--mono);color:var(--muted);margin-top:6px;display:flex;justify-content:space-between}
+.main{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:18px}
+@media (max-width:860px){.main{grid-template-columns:1fr}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;min-width:0}
+.stage svg{display:block;width:100%;height:auto}
+.stage .cap{font:500 12px var(--mono);color:var(--muted);padding:4px 6px 0;letter-spacing:.3px;text-transform:uppercase}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.6px;text-transform:uppercase;color:var(--pla-dk)}
+:root:not([data-theme="light"]) .eyebrow{color:var(--pla)}
+.card h2{font:700 23px/1.2 var(--display);margin:2px 0 0;text-wrap:balance}
+.card ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.check{border-left:3px solid var(--ok);padding:8px 12px;background:color-mix(in srgb,var(--ok) 9%,transparent);border-radius:0 8px 8px 0;font-size:14px}
+.check b{color:var(--ok)}
+.warn{border-left:3px solid var(--hot);padding:8px 12px;background:color-mix(in srgb,var(--hot) 9%,transparent);border-radius:0 8px 8px 0;font-size:14px}
+code{font:500 13px var(--mono);background:color-mix(in srgb,var(--line) 60%,transparent);padding:2px 6px;border-radius:5px}
+.cmd{display:flex;gap:8px;align-items:center}
+.cmd code{flex:1;padding:8px 10px;overflow-x:auto;white-space:nowrap}
+button{font:600 14px var(--body);border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:9px 14px;cursor:pointer}
+button:hover{border-color:var(--pla)}
+button:focus-visible,.step:focus-visible{outline:2px solid var(--pla);outline-offset:2px}
+button.primary{background:#1f5f63;border-color:#1f5f63;color:#fff}
+button.primary:hover{background:#174649}
+.nav{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}
+.nav .primary{flex:1}
+.list{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.phase h3{font:500 12px var(--mono);letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.step{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:1px solid transparent;background:none;padding:7px 8px;font-weight:400;border-radius:8px}
+.step:hover{background:color-mix(in srgb,var(--line) 45%,transparent);border-color:transparent}
+.step.on{background:color-mix(in srgb,var(--pla) 12%,transparent);border-color:color-mix(in srgb,var(--pla) 40%,transparent)}
+.step .n{font:500 12px var(--mono);min-width:26px;height:22px;border-radius:11px;display:grid;place-items:center;border:1px solid var(--line);color:var(--muted);flex:none}
+.step.done .n{background:var(--ok);border-color:var(--ok);color:#fff}
+.step.done .t{color:var(--muted);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--muted) 50%,transparent)}
+.hint{font-size:12.5px;color:var(--muted)}
+/* svg */
+svg text{font-family:var(--body)}
+.lbl{font:600 12px var(--body);fill:var(--muted)}
+.mono{font:500 11px var(--mono);fill:var(--muted)}
+.item{transition:opacity .35s}
+.ghost{opacity:.18}
+.hl{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{filter:drop-shadow(0 0 6px var(--hot))}}
+@media (prefers-reduced-motion:reduce){.hl{animation:none;filter:drop-shadow(0 0 4px var(--hot))}.item,.prog .fill{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>WristTap assembly</h1>
+      <p class="sub">Printed tray + 7 holders onto your left arm. One step at a time. Demo day, 18 Nov.</p>
+    </div>
+    <div class="prog"><div class="bar"><div class="fill" id="fill"></div></div><div class="lbl"><span id="plabel">0 of 16 done</span><span>← → keys</span></div></div>
+  </header>
+
+  <div class="main">
+    <div class="stage"><div class="cap" id="cap"></div><svg id="svg" viewBox="0 0 640 430" role="img" aria-label="Drawing of the current step"></svg></div>
+    <div class="card">
+      <div><div class="eyebrow" id="eyebrow"></div><h2 id="title"></h2></div>
+      <ul id="body"></ul>
+      <div id="extra"></div>
+      <div class="nav">
+        <button id="prev">← Back</button>
+        <button id="done" class="primary">Done, next step →</button>
+      </div>
+      <div class="hint">Orange glow = the part you handle in this step. Faded parts are not in yet.</div>
+    </div>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<script>
+const NS="http://www.w3.org/2000/svg", svg=document.getElementById("svg");
+const E=(t,a,p=svg)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const T=(x,y,s,cls="lbl",p=svg,anchor="middle")=>{const e=E("text",{x,y,class:cls,"text-anchor":anchor},p);e.textContent=s;return e;};
+const G=(id,p=svg)=>E("g",{id,class:"item"},p);
+const scenes={};
+
+/* ---------- scene: TRAY (top view, wrist left, elbow right) ---------- */
+{
+  const s=scenes.tray=E("g",{});
+  T(40,40,"◀ WRIST END","mono",s,"start"); T(600,40,"ELBOW END · USB ▶","mono",s,"end");
+  const tray=G("tray",s);
+  E("rect",{x:30,y:95,width:580,height:240,rx:14,fill:"var(--pla)",stroke:"var(--pla-dk)","stroke-width":2},tray);
+  [[175,60],[175,335],[460,60],[460,335]].forEach(([x,y])=>{
+    E("rect",{x,y,width:110,height:36,rx:8,fill:"var(--pla)",stroke:"var(--pla-dk)","stroke-width":2},tray);
+    E("rect",{x:x+12,y:y+12,width:86,height:12,rx:3,fill:"var(--bg)"},tray);
+  });
+  E("rect",{x:44,y:120,width:92,height:190,rx:6,fill:"var(--pla-dk)",opacity:.45},tray);
+  T(90,328,"MPU #1 bay","mono",s);
+  E("rect",{x:146,y:108,width:300,height:214,rx:6,fill:"var(--pla-dk)",opacity:.45},tray);
+  T(296,353-12,"","mono",s);
+  E("rect",{x:456,y:118,width:146,height:194,rx:6,fill:"var(--pla-dk)",opacity:.45},tray);
+  for(let i=0;i<4;i++)E("rect",{x:470+i*36,y:150,width:8,height:130,rx:2,fill:"var(--pla)"},tray);
+  E("rect",{x:604,y:190,width:8,height:50,fill:"var(--bg)"},tray);
+  const slotLbl=G("slots",s); [[230,52],[515,52]].forEach(([x,y])=>T(x,y,"strap slot","mono",slotLbl));
+
+  const bb=G("bb",s);
+  E("rect",{x:154,y:116,width:284,height:198,rx:5,fill:"var(--board)",stroke:"#bdbdb6"},bb);
+  for(let r=0;r<30;r++)for(let c=0;c<10;c++)E("rect",{x:162+r*9.2,y:150+c*13+(c>4?14:0),width:4,height:4,fill:"#b9bcb6"},bb);
+  [124,136,292,304].forEach((y,i)=>E("line",{x1:162,y1:y,x2:436,y2:y,stroke:i%2? "#2f6fb8":"#d0362b","stroke-width":1.5,opacity:.6},bb));
+  T(296,232,"half breadboard 83 × 55","mono",bb);
+
+  const esp=G("esp",s);
+  E("rect",{x:466,y:160,width:132,height:110,rx:6,fill:"var(--pcb)"},esp);
+  E("rect",{x:486,y:185,width:56,height:60,rx:3,fill:"#8a96a3"},esp);
+  for(let i=0;i<15;i++){E("circle",{cx:476+i*8.3,cy:167,r:2.2,fill:"#d4af37"},esp);E("circle",{cx:476+i*8.3,cy:263,r:2.2,fill:"#d4af37"},esp);}
+  E("rect",{x:590,y:203,width:16,height:24,rx:2,fill:"#c5c9cc"},esp);
+  T(514,220,"ESP32","mono",esp).setAttribute("style","fill:#1f2b3a;font-weight:600");
+
+  const mpu=G("mpu1",s);
+  E("rect",{x:58,y:180,width:64,height:76,rx:4,fill:"var(--mpu)"},mpu);
+  for(let i=0;i<8;i++)E("circle",{cx:116,cy:188+i*8.6,r:2,fill:"#d4af37"},mpu);
+  E("rect",{x:76,y:206,width:22,height:22,fill:"#1b1b1b"},mpu);
+  T(90,172,"MPU #1  pins ▶","mono",mpu);
+
+  const tape=G("tape",s);
+  [160,256].forEach(y=>E("rect",{x:462,y,width:140,height:16,rx:2,fill:"#f2d27a",opacity:.75,stroke:"#c9a640"},tape));
+  T(532,150,"tape over pin rows","mono",tape);
+
+  const wires=G("trayWires",s);
+  [[436,160,470,167],[436,190,500,263],[436,270,540,263],[120,210,170,170],[120,230,170,250]].forEach(([a,b,c,d])=>
+    E("path",{d:`M${a} ${b} C ${(a+c)/2} ${b-30}, ${(a+c)/2} ${d+30}, ${c} ${d}`,fill:"none",stroke:["#d0362b","#2f6fb8","#d79a00","#7a55c9","#3d8b5a"][Math.floor(Math.random()*5)],"stroke-width":2.5,"stroke-linecap":"round"},wires));
+}
+
+/* ---------- scene: PODS ---------- */
+{
+  const s=scenes.pods=E("g",{});
+  const pod=(id,x,y,label,kind)=>{
+    const g=E("g",{},s);
+    E("rect",{x,y,width:110,height:110,rx:14,fill:"var(--pla)",stroke:"var(--pla-dk)","stroke-width":2},g);
+    E("rect",{x:x-6,y:y+40,width:6,height:30,fill:"var(--pla-dk)"},g);E("rect",{x:x+110,y:y+40,width:6,height:30,fill:"var(--pla-dk)"},g);
+    if(kind==="disc"){E("circle",{cx:x+55,cy:y+55,r:40,fill:"var(--pla-dk)",opacity:.5},g);
+      const d=G(id,g);E("circle",{cx:x+55,cy:y+55,r:37,fill:"var(--brass)"},d);E("circle",{cx:x+55,cy:y+55,r:24,fill:"#e8e4da",opacity:.9},d);
+      E("path",{d:`M${x+55} ${y+55} q 30 30 70 40`,stroke:"#d0362b","stroke-width":2.5,fill:"none"},d);}
+    if(kind==="fsr"){E("circle",{cx:x+55,cy:y+48,r:26,fill:"var(--pla-dk)",opacity:.5},g);E("rect",{x:x+48,y:y+70,width:14,height:40,fill:"var(--pla-dk)",opacity:.5},g);
+      const d=G(id,g);E("circle",{cx:x+55,cy:y+48,r:22,fill:"#2b2b2b"},d);E("circle",{cx:x+55,cy:y+48,r:14,fill:"none",stroke:"#777","stroke-width":1.5},d);E("rect",{x:x+51,y:y+68,width:8,height:56,fill:"var(--fsr)"},d);}
+    if(kind==="mpu"){E("rect",{x:x+18,y:y+22,width:74,height:66,rx:4,fill:"var(--pla-dk)",opacity:.5},g);
+      const d=G(id,g);E("rect",{x:x+22,y:y+26,width:66,height:58,rx:3,fill:"var(--mpu2)"},d);E("rect",{x:x+44,y:y+44,width:20,height:20,fill:"#1b1b1b"},d);
+      ["#d0362b","#d79a00","#29bf12","#2f6fb8","#7a55c9"].forEach((c,i)=>E("path",{d:`M${x+36+i*8} ${y+84} l 0 34`,stroke:c,"stroke-width":3},d));}
+    T(x+55,y+132,label,"mono",s);
+  };
+  T(320,30,"Holders, skin side up. The part sits in the bottom, facing the skin.","lbl",s);
+  pod("discP0",30,50,"P0 PINKY BONE","disc");pod("discP1",180,50,"P1 INNER WRIST","disc");pod("discP2",330,50,"P2 THUMB BONE","disc");pod("discP3",480,50,"P3 WRIST TOP","disc");
+  pod("fsr0",105,250,"F0 INNER FOREARM","fsr");pod("fsr1",255,250,"F1 INNER FOREARM","fsr");pod("mpu2",425,250,"MPU #2 HAND","mpu");
+}
+
+/* ---------- scene: ARM (left arm, palm down, from above; hand left, elbow right) ---------- */
+{
+  const s=scenes.arm=E("g",{});
+  T(320,24,"Left arm, palm down, seen from above","lbl",s);
+  T(150,52,"thumb side","mono",s);T(150,262,"little-finger side","mono",s);
+  // arm + hand
+  E("path",{d:"M150 95 L600 70 L600 235 L150 210 Z",fill:"var(--skin)",stroke:"var(--skin-dk)","stroke-width":2},s);
+  E("path",{d:"M150 95 C 120 88, 95 84, 60 88 L 20 92 C 6 94 6 112 20 114 L 40 116 L 40 130 L 12 132 C 0 134 0 150 12 152 L 40 154 L 40 168 L 14 170 C 2 172 2 188 14 190 L 42 192 L 44 204 L 22 206 C 10 208 12 222 24 222 L 70 218 C 110 216 135 214 150 210 Z",fill:"var(--skin)",stroke:"var(--skin-dk)","stroke-width":2},s);
+  E("path",{d:"M100 86 C 110 60, 130 46, 150 40",fill:"none",stroke:"var(--skin-dk)","stroke-width":16,"stroke-linecap":"round"},s);
+  T(612,156,"elbow","mono",s,"start").setAttribute("transform","rotate(90 612 156)");
+
+  const straps=G("armStraps",s);
+  [[248,82,225],[520,74,232]].forEach(([x,y1,y2])=>E("rect",{x:x-12,y:y1-8,width:24,height:(y2-y1)+16,rx:4,fill:"#2b2f33",opacity:.85},straps));
+  const fp=G("armF",s);
+  [[502,214],[530,214]].forEach(([x,y],i)=>{E("rect",{x:x-11,y,width:22,height:24,rx:4,fill:"var(--pla)",stroke:"var(--pla-dk)","stroke-dasharray":"3 2"},fp);});
+  T(516,258,"F0 F1 underneath","mono",fp);
+
+  const tray=G("armTray",s);
+  E("rect",{x:200,y:105,width:340,height:96,rx:10,fill:"var(--pla)",stroke:"var(--pla-dk)","stroke-width":2},tray);
+  E("rect",{x:206,y:118,width:46,height:70,rx:4,fill:"var(--mpu)"},tray);
+  E("rect",{x:262,y:113,width:174,height:80,rx:4,fill:"var(--board)"},tray);
+  E("rect",{x:446,y:122,width:86,height:62,rx:4,fill:"var(--pcb)"},tray);
+  T(370,98,"tray: MPU #1 end at the wrist","mono",tray);
+  E("line",{x1:175,y1:225,x2:200,y2:225,stroke:"var(--ink)"},tray);T(188,240,"1.5 cm","mono",tray);
+
+  const ws=G("armWrist",s);
+  E("rect",{x:150,y:86,width:24,height:134,rx:4,fill:"#2b2f33",opacity:.85},ws);
+  E("rect",{x:150,y:76,width:24,height:22,rx:4,fill:"#29bf12"},ws);T(162,92,"P2","mono",ws).setAttribute("style","fill:#111;font-weight:700");
+  E("rect",{x:150,y:208,width:24,height:22,rx:4,fill:"#e4572e"},ws);T(162,224,"P0","mono",ws).setAttribute("style","fill:#111;font-weight:700");
+  E("rect",{x:150,y:142,width:24,height:22,rx:4,fill:"#3b82c4"},ws);T(162,158,"P3","mono",ws).setAttribute("style","fill:#111;font-weight:700");
+
+  const hand=G("armHand",s);
+  E("rect",{x:66,y:96,width:22,height:118,rx:4,fill:"#2b2f33",opacity:.85},hand);
+  E("rect",{x:58,y:132,width:38,height:44,rx:6,fill:"var(--pla)",stroke:"var(--pla-dk)","stroke-width":2},hand);
+  E("rect",{x:64,y:138,width:26,height:32,rx:2,fill:"var(--mpu2)"},hand);
+  T(77,250,"MPU #2, 2 cm behind knuckles","mono",hand);
+
+  const w=G("armWires",s);
+  [[96,160,200,150,"#7a55c9"],[174,87,210,112,"#29bf12"],[174,219,214,196,"#e4572e"],[174,153,206,160,"#3b82c4"],[516,214,500,198,"#3d8b5a"]].forEach(([a,b,c,d,col])=>
+    E("path",{d:`M${a} ${b} Q ${(a+c)/2} ${(b+d)/2+8} ${c} ${d}`,fill:"none",stroke:col,"stroke-width":2.5},w));
+
+  // wrist ring inset
+  const ring=G("armRing",s);
+  E("rect",{x:300,y:270,width:320,height:150,rx:12,fill:"var(--panel)",stroke:"var(--line)"},ring);
+  T(460,292,"Wrist strap, seen from your fingertips","mono",ring);
+  E("ellipse",{cx:460,cy:355,rx:70,ry:44,fill:"var(--skin)",stroke:"var(--skin-dk)","stroke-width":2},ring);
+  E("ellipse",{cx:460,cy:355,rx:80,ry:54,fill:"none",stroke:"#2b2f33","stroke-width":8,opacity:.85},ring);
+  [[460,301,"P3","#3b82c4","top"],[460,409,"P1","#f2b134","palm"],[380,355,"P2","#29bf12","thumb"],[540,355,"P0","#e4572e","pinky"]].forEach(([x,y,t,c,l])=>{
+    E("rect",{x:x-13,y:y-10,width:26,height:20,rx:4,fill:c},ring);T(x,y+4,t,"mono",ring).setAttribute("style","fill:#111;font-weight:700");
+    const lx=x<420?x-22:x>500?x+22:x, ly=y<330?y:y>390?y:y;
+    if(x<420)T(lx,ly+4,l,"mono",ring,"end");else if(x>500)T(lx,ly+4,l,"mono",ring,"start");else T(x+20,y+4,l,"mono",ring,"start");
+  });
+}
+Object.values(scenes).forEach(g=>g.style.display="none");
+
+/* ---------- steps ---------- */
+const STEPS=[
+ {ph:"A · On the table",t:"Fit check, no wires",sc:"tray",show:["tray","bb","esp","mpu1"],hl:["bb","esp","mpu1"],
+  b:["Breadboard drops into the big pocket.","ESP32 sits on the ribs, USB pointing out of the <b>elbow-end</b> hole.","MPU board lies flat in the wrist-end bay.","A 25 mm strap slides through all 4 slots."],
+  x:`<div class="warn">Something tight or loose? Stop here and tell Claude the part and how many mm. Reprint is cheaper now than later.</div>`},
+ {ph:"A · On the table",t:"Fit check, holders",sc:"pods",show:["discP0","discP1","discP2","discP3","fsr0","fsr1","mpu2"],hl:["discP0","discP1","discP2","discP3","fsr0","fsr1","mpu2"],
+  b:["Each piezo disc (27 mm) drops into P0–P3.","Each FSR pad (18.5 mm) drops into F0 and F1, tail in the groove.","MPU #2 lies flat in the HAND holder.","Strap slides through the tunnel on every holder."],
+  x:`<div class="check"><b>Then take everything out again</b> for the baseline test.</div>`},
+ {ph:"A · On the table",t:"Baseline test",sc:"tray",show:["tray","bb","esp","mpu1","trayWires"],hl:["trayWires"],
+  b:["Wiring on the half breadboard must be finished (TODO.md, wiring steps).","Plug USB in, run the check, tap every disc, press both FSRs."],
+  x:`<div class="cmd"><code>cd ~/Projects/WristTap && ./check.sh</code><button data-copy="cd ~/Projects/WristTap && ./check.sh">Copy</button></div><div class="check"><b>Pass:</b> IMU1 and IMU2 ≈ 1 g · each disc jumps to hundreds on a tap · FSR 1000–4000 pressed, 0 at rest.</div>`},
+ {ph:"B · Fill the tray",t:"Breadboard in",sc:"tray",show:["tray","bb","trayWires"],hl:["bb"],
+  b:["<b>Unplug USB first.</b>","A strip of double tape or foam under the board.","Press it down into the pocket, wires and all. Row 1 at the ESP end."]},
+ {ph:"B · Fill the tray",t:"ESP32 in",sc:"tray",show:["tray","bb","esp","trayWires"],hl:["esp"],
+  b:["Lay it on the rib frame, pins down.","The jumper plugs hang in the gaps between the ribs.","USB port faces the hole in the elbow-end wall."]},
+ {ph:"B · Fill the tray",t:"MPU #1 in",sc:"tray",show:["tray","bb","esp","mpu1","trayWires"],hl:["mpu1"],
+  b:["Wrist-end bay, board flat, tape under it.","Pins and plugs point sideways, towards the breadboard (arrow \"PINS >\").","Don't press on the header: MPU #1 has dropped out before from bad pin contact."]},
+ {ph:"B · Fill the tray",t:"Tape the jumpers",sc:"tray",show:["tray","bb","esp","mpu1","trayWires","tape"],hl:["tape"],
+  b:["One strip of tape along each ESP32 pin row, over the plugs.","A firm shake knocks loose jumpers out. Tape stops that."]},
+ {ph:"C · Fill the holders",t:"Discs into P0–P3",sc:"pods",show:["discP0","discP1","discP2","discP3"],hl:["discP0","discP1","discP2","discP3"],
+  b:["Match the engraved name to the disc number on its wire.","<b>Brass side faces the skin</b> (down into the pocket).","A small loop of tape on the rim holds it. Wire leaves along the strap direction."]},
+ {ph:"C · Fill the holders",t:"FSRs into F0 and F1",sc:"pods",show:["discP0","discP1","discP2","discP3","fsr0","fsr1"],hl:["fsr0","fsr1"],
+  b:["Round pad faces the skin.","Tail runs out of the groove towards the tray.","Don't fold the tail sharply where it meets the pad: that's where FSRs break."]},
+ {ph:"C · Fill the holders",t:"MPU #2 into HAND",sc:"pods",show:["discP0","discP1","discP2","discP3","fsr0","fsr1","mpu2"],hl:["mpu2"],
+  b:["Board flat, tape under it.","Rainbow ribbon points to the wrist."]},
+ {ph:"D · Put it on",t:"Thread the straps",sc:"arm",show:["armStraps","armF"],hl:["armStraps","armF"],
+  b:["2 straps through the tray's side slots, one at each end.","Slide F0 and F1 onto the <b>elbow-end</b> strap, about 3 cm apart.","Don't close anything yet."]},
+ {ph:"D · Put it on",t:"Wrist strap with P0–P3",sc:"arm",show:["armWrist","armRing"],hl:["armWrist","armRing"],
+  b:["Thread on P0 → P1 → P2 → P3.","Close it just below the wrist bones, towards the hand. Firm: loose means weak taps.","Slide each holder onto its spot (see the circle drawing)."],
+  x:`<div class="check"><b>Spots:</b> P0 little-finger wrist bump · P1 palm side, middle · P2 thumb-side bump · P3 back of wrist.</div>`},
+ {ph:"D · Put it on",t:"Tray on the forearm",sc:"arm",show:["armWrist","armStraps","armF","armTray"],hl:["armTray"],
+  b:["Top of the forearm, MPU #1 end towards the wrist, about 1.5 cm behind the wrist strap.","Close both straps. F0 + F1 land side by side on the soft inner forearm.","Bend your elbow: if the tray's end hits it, slide the tray towards the wrist."]},
+ {ph:"D · Put it on",t:"Hand holder on",sc:"arm",show:["armWrist","armStraps","armF","armTray","armHand"],hl:["armHand"],
+  b:["Back of the hand, middle, about 2 cm behind the knuckles.","Strap round the palm through the two side slots.","Make a fist: it shouldn't press on the knuckles."]},
+ {ph:"D · Put it on",t:"Tidy the wires",sc:"arm",show:["armWrist","armStraps","armF","armTray","armHand","armWires"],hl:["armWires"],
+  b:["Run every wire along a strap to the tray. Tape so nothing makes a loop.","Make a fist, bend the wrist up and down, rotate it.","<b>Nothing may pull tight.</b> Give slack where it does."]},
+ {ph:"E · Check",t:"Worn test",sc:"arm",show:["armWrist","armStraps","armF","armTray","armHand","armWires"],hl:["armTray","armWrist","armF"],
+  b:["USB in, run the check while wearing it.","Tap each disc spot, squeeze your fist, wave your hand."],
+  x:`<div class="cmd"><code>./check.sh</code><button data-copy="./check.sh">Copy</button></div><div class="check"><b>Pass:</b> both IMUs ≈ 1 g · every disc reacts · FSR 1000–4000 when squeezing.</div><div class="warn">A sensor dropped out? It's almost always a jumper that moved. Press it back in, re-tape.</div>`},
+ {ph:"E · Check",t:"Demo rehearsal",sc:"arm",show:["armWrist","armStraps","armF","armTray","armHand","armWires"],hl:[],
+  b:["Power bank into the ESP32, wait 5 s, run the Bluetooth demo.","No Bluetooth? Plug USB in and run <code>./demo.sh</code>. Same demo.","Order: arm copies you → tap each disc → squeeze → flick → air mouse."],
+  x:`<div class="cmd"><code>./demo.sh --ble</code><button data-copy="./demo.sh --ble">Copy</button></div>`},
+];
+const ALL={tray:["tray","bb","esp","mpu1","tape","trayWires","slots"],pods:["discP0","discP1","discP2","discP3","fsr0","fsr1","mpu2"],arm:["armStraps","armF","armTray","armWrist","armHand","armWires","armRing"]};
+const CAP={tray:"Tray · top view",pods:"Holders · skin side up",arm:"On the arm"};
+
+let cur=0, done=new Set();
+try{const s=JSON.parse(localStorage.getItem("wt-asm")||"{}");cur=s.cur||0;done=new Set(s.done||[]);}catch(e){}
+const save=()=>{try{localStorage.setItem("wt-asm",JSON.stringify({cur,done:[...done]}));}catch(e){}};
+
+const list=document.getElementById("list");
+const phases=[...new Set(STEPS.map(s=>s.ph))];
+phases.forEach(ph=>{const d=document.createElement("div");d.className="phase";d.innerHTML=`<h3>${ph}</h3>`;
+  STEPS.forEach((s,i)=>{if(s.ph!==ph)return;const b=document.createElement("button");b.className="step";b.dataset.i=i;
+    b.innerHTML=`<span class="n">${done.has(i)?"✓":i+1}</span><span class="t">${s.t}</span>`;b.onclick=()=>go(i);d.appendChild(b);});
+  list.appendChild(d);});
+
+function render(){
+  const s=STEPS[cur];
+  Object.entries(scenes).forEach(([k,g])=>g.style.display=k===s.sc?"":"none");
+  document.getElementById("cap").textContent=CAP[s.sc];
+  ALL[s.sc].forEach(id=>{const el=document.getElementById(id);if(!el)return;
+    const shown=s.show.includes(id)||id==="slots";
+    el.classList.toggle("ghost",!shown);el.classList.toggle("hl",s.hl.includes(id));});
+  document.getElementById("eyebrow").textContent=`Step ${cur+1} of ${STEPS.length} · ${s.ph}`;
+  document.getElementById("title").textContent=s.t;
+  document.getElementById("body").innerHTML=s.b.map(x=>`<li>${x}</li>`).join("");
+  document.getElementById("extra").innerHTML=s.x||"";
+  document.getElementById("prev").disabled=cur===0;
+  document.getElementById("done").textContent=cur===STEPS.length-1?(done.has(cur)?"All done ✓":"Done, finished"):"Done, next step →";
+  document.querySelectorAll(".step").forEach(b=>{const i=+b.dataset.i;b.classList.toggle("on",i===cur);b.classList.toggle("done",done.has(i));b.querySelector(".n").textContent=done.has(i)?"✓":i+1;});
+  document.getElementById("fill").style.width=(done.size/STEPS.length*100)+"%";
+  document.getElementById("plabel").textContent=`${done.size} of ${STEPS.length} done`;
+  document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const t=b.dataset.copy;
+    navigator.clipboard.writeText(t).then(()=>{b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1200);}).catch(()=>{const r=document.createRange();r.selectNodeContents(b.previousElementSibling);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);});});
+  save();
+}
+function go(i){cur=Math.max(0,Math.min(STEPS.length-1,i));render();}
+document.getElementById("prev").onclick=()=>go(cur-1);
+document.getElementById("done").onclick=()=>{done.add(cur);if(cur<STEPS.length-1)go(cur+1);else render();};
+addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(cur+1);if(e.key==="ArrowLeft")go(cur-1);});
+render();
+</script>

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WristTap Check</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0b0c10; --card:#15171e; --line:#262a35; --ink:#eef0f6; --muted:#8a90a2; --ok:#3ddc97; --warn:#ffc24b; --bad:#ff5c50; --acc:#5aa9ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 Inter, system-ui, sans-serif; padding:24px 16px 60px; }
+  .wrap { max-width:1100px; margin:0 auto; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+  h1 { margin:0; font-size:26px; letter-spacing:-.01em; }
+  h1 small { color:var(--muted); font-weight:400; font-size:15px; margin-left:8px; }
+  .score { display:flex; align-items:center; gap:14px; }
+  .ring { width:64px; height:64px; }
+  .score b { font-size:22px; } .score span { color:var(--muted); display:block; font-size:13px; }
+  button { font:600 13px Inter; color:var(--ink); background:#20232d; border:1px solid var(--line); border-radius:10px; padding:9px 14px; cursor:pointer; }
+  button:hover { background:#2a2e3a; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 18px; position:relative; transition:border-color .25s; }
+  .card.pass { border-color:rgba(61,220,151,.55); }
+  .card.fail { border-color:rgba(255,92,80,.55); }
+  .card h2 { margin:0 0 2px; font-size:16px; display:flex; align-items:center; gap:8px; }
+  .card .sub { color:var(--muted); font-size:13px; margin-bottom:12px; }
+  .dot { width:10px; height:10px; border-radius:50%; background:#3a3f4d; flex:none; }
+  .pass .dot { background:var(--ok); }
+  .fail .dot { background:var(--bad); }
+  .wait .dot { background:var(--warn); animation:blink 1s infinite; }
+  @keyframes blink { 50% { opacity:.3 } }
+  .todo { font-size:14px; padding:8px 10px; border-radius:10px; background:#1c1f28; margin-top:10px; }
+  .pass .todo { color:var(--ok); background:rgba(61,220,151,.08); }
+  .fail .todo { color:#ffb3ac; background:rgba(255,92,80,.08); }
+  .bar { height:10px; border-radius:99px; background:#232733; overflow:hidden; margin:6px 0; position:relative; }
+  .bar i { display:block; height:100%; width:0; background:var(--acc); transition:width .08s; border-radius:99px; }
+  .bar .thr { position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--warn); }
+  .row { display:flex; justify-content:space-between; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+  .big { font-size:28px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .discs { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .disc { text-align:center; padding:10px 4px; border-radius:12px; background:#1c1f28; border:1px solid var(--line); transition:background .1s, border-color .2s; }
+  .disc .c { width:44px; height:44px; border-radius:50%; margin:2px auto 6px; border:2px solid #3a3f4d; display:grid; place-items:center; font-weight:700; transition:background .08s; }
+  .disc.hit .c { background:var(--acc); border-color:var(--acc); }
+  .disc.ok { border-color:rgba(61,220,151,.55); }
+  .disc.ok .c { border-color:var(--ok); }
+  .disc.bad { border-color:rgba(255,92,80,.55); }
+  .disc small { display:block; color:var(--muted); font-size:11px; line-height:1.3; }
+  .disc b { font-size:12px; font-variant-numeric:tabular-nums; }
+  .tilt { display:flex; gap:16px; align-items:center; }
+  .tilt svg { width:110px; height:110px; flex:none; }
+  .ang { font-variant-numeric:tabular-nums; font-size:13px; color:var(--muted); }
+  .ang b { color:var(--ink); font-size:20px; display:block; }
+  .banner { padding:12px 16px; border-radius:12px; margin-bottom:16px; background:#1c1f28; border:1px solid var(--line); color:var(--muted); }
+  .banner.bad { color:#ffb3ac; border-color:rgba(255,92,80,.4); }
+  .banner code { color:var(--ink); background:#262a35; padding:2px 6px; border-radius:6px; }
+  .issues { margin-top:18px; }
+  .issues li { margin:6px 0; color:#ffb3ac; }
+  @media (max-width:520px) { .discs { grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>WristTap check <small>try each card's action; it turns green when the sensor works</small></h1>
+    <div class="score">
+      <svg class="ring" viewBox="0 0 64 64"><circle cx="32" cy="32" r="27" fill="none" stroke="#262a35" stroke-width="7"/><circle id="ringArc" cx="32" cy="32" r="27" fill="none" stroke="#3ddc97" stroke-width="7" stroke-linecap="round" stroke-dasharray="0 170" transform="rotate(-90 32 32)"/></svg>
+      <div><b id="scoreTxt">0 / 9</b><span>working</span></div>
+      <button id="reset">Start over</button>
+    </div>
+  </header>
+
+  <div id="banner" class="banner">Connecting to the band…</div>
+
+  <div class="grid">
+    <div class="card wait" id="c-link">
+      <h2><span class="dot"></span>Connection</h2>
+      <div class="sub">USB cable from the band to the Mac</div>
+      <div class="big" id="rate">0</div><div class="row"><span>packets / second</span><span id="status">—</span></div>
+      <div class="todo" id="t-link">Waiting for data…</div>
+    </div>
+
+    <div class="card wait" id="c-imu0">
+      <h2><span class="dot"></span>MPU #1 · forearm</h2>
+      <div class="sub">Tilt your forearm left and right</div>
+      <div class="tilt"><svg viewBox="-55 -55 110 110" id="g-imu0"></svg><div class="ang"><b id="a-imu0">—</b>roll · pitch<br><span id="r-imu0">range 0°</span></div></div>
+      <div class="todo" id="t-imu0">Tilt more than 40°</div>
+    </div>
+
+    <div class="card wait" id="c-imu1">
+      <h2><span class="dot"></span>MPU #2 · back of hand</h2>
+      <div class="sub">Bend your wrist up and down</div>
+      <div class="tilt"><svg viewBox="-55 -55 110 110" id="g-imu1"></svg><div class="ang"><b id="a-imu1">—</b>roll · pitch<br><span id="r-imu1">range 0°</span></div></div>
+      <div class="todo" id="t-imu1">Tilt more than 40°</div>
+    </div>
+
+    <div class="card wait" id="c-pz" style="grid-column:1 / -1">
+      <h2><span class="dot"></span>Piezo discs · wrist</h2>
+      <div class="sub">Tap each disc twice with a finger. Keep still between taps.</div>
+      <div class="discs" id="discs"></div>
+      <div class="todo" id="t-pz">Tap disc 0</div>
+    </div>
+
+    <div class="card wait" id="c-fsr0">
+      <h2><span class="dot"></span>FSR 0 · squeeze</h2>
+      <div class="sub">Press the pad firmly, then let go</div>
+      <div class="bar"><i id="b-fsr0"></i><span class="thr" id="th-fsr0"></span></div>
+      <div class="row"><span id="v-fsr0">0</span><span>peak <b id="p-fsr0">0</b></span></div>
+      <div class="todo" id="t-fsr0">Press and release</div>
+    </div>
+
+    <div class="card wait" id="c-fsr1">
+      <h2><span class="dot"></span>FSR 1 · squeeze</h2>
+      <div class="sub">Press the pad firmly, then let go</div>
+      <div class="bar"><i id="b-fsr1"></i><span class="thr" id="th-fsr1"></span></div>
+      <div class="row"><span id="v-fsr1">0</span><span>peak <b id="p-fsr1">0</b></span></div>
+      <div class="todo" id="t-fsr1">Press and release</div>
+    </div>
+  </div>
+
+  <ul class="issues" id="issues"></ul>
+</div>
+
+<script>
+const SERVER = location.protocol.startsWith('http') ? '' : 'http://localhost:8791';
+const DISC_NAMES = ['outer wrist bone', 'inner wrist', 'thumb-side bone', 'top of wrist'];
+const $ = id => document.getElementById(id);
+let tapThr = 900, fsrThr = 1200;
+
+// ---------------------------------------------------------------- state
+let S;
+function reset() {
+  S = {
+    link: false, lastData: 0,
+    imu: [0, 1].map(() => ({ seenOk: false, min: { r: 1e9, p: 1e9 }, max: { r: -1e9, p: -1e9 }, pass: false, missingFor: 0 })),
+    pz: [0, 1, 2, 3].map(() => ({ taps: 0, lastTap: 0, rest: [], stuck: 0, pass: false, hitUntil: 0 })),
+    fsr: [0, 1].map(() => ({ peak: 0, pressed: false, pass: false, restHigh: 0 })),
+  };
+  $('discs').innerHTML = DISC_NAMES.map((n, i) => `<div class="disc" id="d${i}"><div class="c">${i}</div><b id="dv${i}">0</b><small>${n}</small><small id="dt${i}">0 / 2 taps</small></div>`).join('');
+  for (const k of [0, 1]) drawTilt(k, 0, 0, false);
+  render();
+}
+$('reset').onclick = reset;
+
+// ---------------------------------------------------------------- tilt gauge
+function drawTilt(k, roll, pitch, ok) {
+  const col = ok ? '#5aa9ff' : '#3a3f4d';
+  const y = Math.max(-40, Math.min(40, pitch * 0.5));
+  $('g-imu' + k).innerHTML = `
+    <circle r="50" fill="#1c1f28" stroke="#262a35"/>
+    <line x1="-50" y1="0" x2="50" y2="0" stroke="#262a35"/><line x1="0" y1="-50" x2="0" y2="50" stroke="#262a35"/>
+    <g transform="translate(0 ${y}) rotate(${roll})">
+      <rect x="-34" y="-7" width="68" height="14" rx="7" fill="${col}"/>
+      <circle cx="34" r="5" fill="#fff" opacity=".8"/>
+    </g>`;
+}
+
+// ---------------------------------------------------------------- stream
+function onFrame(f) {
+  if (f.settings) { tapThr = f.settings.tap_thr ?? tapThr; fsrThr = f.settings.fsr_thr ?? fsrThr; return; }
+  const now = performance.now();
+  $('rate').textContent = f.rate ?? 0;
+  $('status').textContent = f.status || '';
+  if ((f.rate || 0) > 30) { S.link = true; S.lastData = now; }
+
+  if (f.imu) f.imu.forEach((m, k) => {
+    const st = S.imu[k];
+    drawTilt(k, m.roll, m.pitch, m.ok);
+    if (m.ok) {
+      st.seenOk = true; st.missingFor = 0;
+      st.min.r = Math.min(st.min.r, m.roll); st.max.r = Math.max(st.max.r, m.roll);
+      st.min.p = Math.min(st.min.p, m.pitch); st.max.p = Math.max(st.max.p, m.pitch);
+      const range = Math.max(st.max.r - st.min.r, st.max.p - st.min.p);
+      $('a-imu' + k).textContent = `${Math.round(m.roll)}° · ${Math.round(m.pitch)}°`;
+      $('r-imu' + k).textContent = `range ${Math.round(range)}°`;
+      if (range > 40) st.pass = true;
+    } else { st.missingFor++; $('a-imu' + k).textContent = 'MISSING'; }
+  });
+
+  if (f.piezo) f.piezo.forEach((v, k) => {
+    const st = S.pz[k];
+    $('dv' + k).textContent = v;
+    st.rest.push(v); if (st.rest.length > 80) st.rest.shift();
+    if (v >= 4000) st.stuck++; else st.stuck = Math.max(0, st.stuck - 2);
+  });
+  for (const ev of f.events || []) {
+    if ((ev.kind === 'tap' || ev.kind === 'double tap') && ev.disc !== undefined) {
+      const st = S.pz[ev.disc];
+      st.taps++; st.hitUntil = now + 160;
+      if (st.taps >= 2) st.pass = true;
+      $('dt' + ev.disc).textContent = `${Math.min(st.taps, 2)} / 2 taps`;
+    }
+  }
+
+  if (f.fsr) f.fsr.forEach((v, k) => {
+    const st = S.fsr[k];
+    st.peak = Math.max(st.peak, v);
+    $('b-fsr' + k).style.width = Math.min(100, v / 40.95) + '%';
+    $('th-fsr' + k).style.left = Math.min(100, fsrThr / 40.95) + '%';
+    $('v-fsr' + k).textContent = v;
+    $('p-fsr' + k).textContent = st.peak;
+    if (v > fsrThr) st.pressed = true;
+    else if (st.pressed && v < fsrThr * 0.5) st.pass = true;
+    if (v > fsrThr) st.restHigh++; else st.restHigh = 0;
+  });
+  render();
+}
+
+function connect() {
+  const es = new EventSource(SERVER + '/stream');
+  es.onmessage = e => { try { onFrame(JSON.parse(e.data)); } catch (_) {} };
+  es.onopen = () => { $('banner').className = 'banner'; $('banner').textContent = 'Connected to the demo server. Waiting for band data…'; };
+  es.onerror = () => {
+    $('banner').className = 'banner bad';
+    $('banner').innerHTML = 'Can’t reach the band server. In Terminal run <code>cd ~/Projects/WristTap && ./demo.sh --no-open</code> (USB), then reload this page.';
+  };
+}
+
+// ---------------------------------------------------------------- render
+function setCard(id, state, text) {
+  const c = $('c-' + id);
+  c.className = 'card ' + state;
+  $('t-' + id).textContent = text;
+}
+
+function render() {
+  const now = performance.now();
+  const issues = [];
+  let pass = 0;
+  const live = S.link && now - S.lastData < 1500;
+
+  // connection
+  if (live) { setCard('link', 'pass', '✓ Data is flowing'); pass++; $('banner').style.display = 'none'; }
+  else if (S.link) { setCard('link', 'fail', 'Data stopped. Check the USB cable.'); issues.push('Data stopped: the USB cable came loose, or the board reset.'); }
+  else setCard('link', 'wait', 'Waiting for data… plug the band into the Mac');
+
+  // IMUs
+  S.imu.forEach((st, k) => {
+    const id = 'imu' + k, name = k ? 'MPU #2 (hand)' : 'MPU #1 (forearm)';
+    if (st.pass) { setCard(id, 'pass', '✓ Working'); pass++; }
+    else if (live && st.missingFor > 40) {
+      setCard(id, 'fail', 'MISSING: not answering');
+      issues.push(`${name} missing: press its header pins down. If it comes back while you press, it's a loose contact. Otherwise check its VCC, GND, SDA (row 8 left) and SCL (row 8 right) wires.`);
+    } else setCard(id, 'wait', st.seenOk ? 'Tilt more than 40°' : 'Waiting for the sensor…');
+  });
+
+  // piezos
+  let pzPass = 0;
+  S.pz.forEach((st, k) => {
+    const el = $('d' + k);
+    const stuck = st.stuck > 30;
+    el.className = 'disc' + (now < st.hitUntil ? ' hit' : '') + (st.pass ? ' ok' : stuck ? ' bad' : '');
+    if (st.pass) pzPass++;
+    if (stuck) issues.push(`Disc ${k} stuck at maximum: the ground line isn't connected (ESP32 GND → blue line), or its 1M resistor is missing.`);
+  });
+  const nextDisc = S.pz.findIndex(p => !p.pass);
+  if (pzPass === 4) { setCard('pz', 'pass', '✓ All 4 discs respond'); pass += 4; }
+  else { pass += pzPass; setCard('pz', S.pz.some(p => p.stuck > 30) ? 'fail' : 'wait', `Tap disc ${nextDisc} (${DISC_NAMES[nextDisc]}) twice`); }
+
+  // FSRs
+  S.fsr.forEach((st, k) => {
+    const id = 'fsr' + k;
+    if (st.pass) { setCard(id, 'pass', '✓ Working'); pass++; }
+    else if (live && st.restHigh > 120) { setCard(id, 'fail', 'Always reads pressed'); issues.push(`FSR ${k} always reads pressed: its 10k resistor to ground is missing or in the wrong row.`); }
+    else setCard(id, 'wait', st.pressed ? 'Now let go' : 'Press and release');
+  });
+
+  // FSRs read 1 each, piezos 4, IMUs 2, link 1 → 9 counted as: link + 2 IMU + 4 discs + 2 FSR = 9
+  const total = 9;
+  $('scoreTxt').textContent = `${pass} / ${total}`;
+  $('ringArc').setAttribute('stroke-dasharray', `${(pass / total) * 170} 170`);
+  $('issues').innerHTML = issues.map(t => `<li>${t}</li>`).join('');
+}
+
+reset();
+connect();
+setInterval(render, 500);
+</script>
+</body>
+</html>

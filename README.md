@@ -5,6 +5,22 @@ ESP32 + 2× MPU6050 (motion) + 4 piezo discs (taps) + 2 FSRs (pressure), sent ov
 
 ![All sensors working on the breadboard](photos/11-all-sensors-working.jpg)
 
+**Full project history, what worked and what is still open: [HISTORY.md](HISTORY.md).**
+Demo video (720p): [photos/WristTap_demo_20261120.m4v](photos/WristTap_demo_20261120.m4v)
+
+## Latest (20 Nov 2026)
+
+| Page | Run `./demo.sh --ble --no-open`, then open |
+|---|---|
+| Setup tutorial: guide arm shows each move, repeat 3×, saved | `localhost:8791/setup` |
+| Settings: discs, directions, squeeze numbers, noise, false-trigger filters, gesture lab | `localhost:8791/config` |
+| Try it: presenting (flick = slides) and real UI control (cursor, click, drag, scroll) | `localhost:8791/play` |
+| Live demo: 3D arm, Show mode (S), camera (C), record (R) | `localhost:8791/` |
+| Rewire the breadboard from zero, one wire per step | `rewire.html` |
+| Old click-through breadboard guide | `wiring-setup.html` |
+
+Known open problem: F1 (FSR on VN) reads 0 on the band; wiring fault in row 5.
+
 ## Status (15 Nov 2026)
 
 | Step | Part | Result |

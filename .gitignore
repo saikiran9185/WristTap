@@ -4,3 +4,6 @@ __pycache__/
 .DS_Store
 firmware/wristtap/secrets.h
 sessions/
+
+# full-quality screen recordings are too big for GitHub; a 720p .m4v copy is committed
+*.mov

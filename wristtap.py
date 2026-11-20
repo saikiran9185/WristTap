@@ -68,11 +68,17 @@ class Band:
     # ── transports ──
     def _run_serial(self):
         import serial
-        self.ser = serial.Serial(self.source, 921600, timeout=0.05)
-        self.status = f"USB {self.source}"
-        while self.running:
-            self._feed(self.ser.read(4096))
-        self.ser.close()
+        while self.running:                       # survives unplug/replug (rewire guide checks)
+            try:
+                self.ser = serial.Serial(self.source, 921600, timeout=0.05)
+                self.status = f"USB {self.source}"
+                while self.running:
+                    self._feed(self.ser.read(4096))
+                self.ser.close()
+            except (serial.SerialException, OSError):
+                self.status = "USB unplugged, waiting for the band..."
+                self.buf = b""
+                time.sleep(1)
 
     def _run_udp(self):
         import socket

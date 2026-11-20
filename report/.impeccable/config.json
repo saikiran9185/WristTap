@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "undersized-ui-text",
+        "value": "*",
+        "files": [
+          "report/report.html"
+        ],
+        "createdAt": "2026-11-14T22:11:56.915Z",
+        "reason": "Claude decided: print-only A4 PDF report rendered at 96 dpi; 9-11px = 6.8-8.3pt, normal for printed tables and footers; not an interactive UI"
+      }
+    ]
+  }
+}

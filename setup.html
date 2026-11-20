@@ -5,344 +5,290 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WristTap Setup</title>
 <style>
-:root{
-  --bg:#f6f5f2; --panel:#ffffff; --ink:#1b1d20; --muted:#5b626a; --line:#e2dfd9;
-  --board:#fbfbf9; --hole:#c9cbc6; --strip:#f2b134; --ok:#2f7d4f; --bad:#b3412f; --accent:#b97a06;
-  --red:#d0362b; --gnd:#2b2b2b; --sda:#2f74c0; --scl:#d79a00; --sig:#7a55c9; --fsr:#3d8b5a;
-  --ease:cubic-bezier(.2,.8,.2,1);
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#111315; --panel:#191c1f; --ink:#ebe9e5; --muted:#a2a9b0; --line:#2b2f34;
-  --board:#e9e9e5; --ok:#69c48f; --bad:#ec8a78; --accent:#f2b134;
-}}
-:root[data-theme="dark"]{--bg:#111315;--panel:#191c1f;--ink:#ebe9e5;--muted:#a2a9b0;--line:#2b2f34;--board:#e9e9e5;--ok:#69c48f;--bad:#ec8a78;--accent:#f2b134}
+:root{--bg:#0f1113;--panel:#171a1d;--panel2:#1e2226;--line:#2a2f35;--ink:#ece9e3;--muted:#9ea5ad;--accent:#f2b134;--ok:#5cc38a;--bad:#e46a5e;--arm:#5b6b80;--hand:#8a76c9;--ghost:#f2b134}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
-.wrap{max-width:1180px;margin:0 auto;padding:22px 18px 40px}
-.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px;margin-bottom:12px}
-h1{font-size:24px;margin:0;letter-spacing:-.3px}
-.sub{color:var(--muted);font-size:14px}
-/* stage chips */
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
-.chip{font:600 12.5px/1 -apple-system,system-ui,sans-serif;padding:7px 10px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
-.chip.now{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.chip.done{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
-.chip:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
-@media (max-width:980px){.main{grid-template-columns:1fr}}
-.stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px;position:relative}
-.stage svg{display:block;width:100%;height:auto}
-svg text{font-family:-apple-system,system-ui,sans-serif}
-.wire{fill:none;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;transition:opacity .35s var(--ease)}
-.wire.old{opacity:.32}
-.res .body{transition:opacity .35s}
-.res.old{opacity:.4}
-.strip{fill:var(--strip);opacity:0;transition:opacity .35s var(--ease)}
-.strip.lit{opacity:.38}
-.hole{fill:var(--hole)}
-.hole.lit{fill:#b97a06}
-.src{transition:opacity .3s}
-.src.hot rect,.src.hot circle.pinhot{stroke:#b97a06;stroke-width:3}
-.tag{font-size:11px;font-weight:600}
-/* side panel */
-.side{display:grid;gap:12px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
-.count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;display:flex;justify-content:space-between}
-.cap{font-size:19px;line-height:1.35;margin:8px 0 6px;font-weight:600;letter-spacing:-.2px}
-.why{font-size:15px;color:var(--muted);margin:0}
-.where{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.where span{font:600 14px ui-monospace,Menlo,monospace;padding:6px 10px;border-radius:8px;background:color-mix(in srgb,var(--line) 55%,transparent)}
-.where span.arrow{background:none;padding:6px 0;color:var(--muted)}
-.ctl{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}
-button{font:600 15px -apple-system,system-ui,sans-serif;border-radius:10px;padding:12px 14px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
-button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-button:disabled{opacity:.35;cursor:default}
-.bar{height:5px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s var(--ease)}
-/* live check */
-.live{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px;display:none}
-.live.show{display:block}
-.live h2{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:8px}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--bad);display:inline-block}
-.dot.on{background:var(--ok)}
-.crit{display:grid;gap:6px;font-size:14px}
-.crit div{display:flex;justify-content:space-between;gap:8px;padding:6px 8px;border-radius:8px;background:color-mix(in srgb,var(--line) 35%,transparent)}
-.crit div.pass{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok);font-weight:600}
-.crit .v{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:400}
-.crit div.pass .v{color:var(--ok)}
-.cmd{display:flex;gap:6px;align-items:center;margin-top:8px}
-.cmd code{flex:1;font:12.5px ui-monospace,Menlo,monospace;background:color-mix(in srgb,var(--line) 55%,transparent);padding:7px 8px;border-radius:7px;overflow-x:auto;white-space:nowrap}
-.cmd button{padding:7px 10px;font-size:13px}
-.honest{font-size:12.5px;color:var(--muted);margin-top:8px}
-.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--muted);padding:6px 8px 2px}
-.legend i{display:inline-block;width:14px;height:4px;border-radius:2px;vertical-align:middle;margin-right:4px}
-kbd{font:12px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px}
-@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:12px 24px;border-bottom:1px solid var(--line)}
+header h1{font-size:18px;margin:0}
+.pill{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pill i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:6px}
+.pill i.on{background:var(--ok)}
+.sp{flex:1}
+button,a.btn{font:inherit;font-size:15px;color:var(--ink);background:var(--panel2);border:1px solid #363c43;border-radius:10px;padding:9px 16px;cursor:pointer;text-decoration:none}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#14171a;font-weight:800}
+button:disabled{opacity:.4;cursor:default}
+#recBtn.on{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:700}
+#camBtn.on{background:var(--accent);color:#14171a;font-weight:700}
+.prog{display:flex;gap:4px;padding:0 24px;margin-top:14px}
+.prog i{flex:1;height:6px;border-radius:3px;background:#2a2f35}
+.prog i.done{background:var(--ok)}
+.prog i.cur{background:var(--accent)}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;padding:18px 24px 24px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:18px;position:relative;overflow:hidden;min-height:340px;display:flex;flex-direction:column}
+.stage h3{margin:0;padding:14px 18px 0;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+.stage .view{flex:1;perspective:900px;display:grid;place-items:center;overflow:hidden}
+.world{transform-style:preserve-3d;transform:rotateX(-20deg) rotateY(-32deg) scale(.82)}
+.g{transform-style:preserve-3d;position:absolute}
+.face{position:absolute;border:1px solid rgba(255,255,255,.16)}
+.ghost .face{border-color:rgba(242,177,52,.7)}
+.anim{transition:transform .9s cubic-bezier(.3,.1,.2,1)}
+.foot{padding:0 18px 14px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.foot b{color:var(--ink)}
+/* instruction panel */
+.panel{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 24px}
+.eb{font:700 13px ui-monospace,Menlo,monospace;letter-spacing:2px;color:var(--accent);margin:0 0 6px}
+#title{font-size:clamp(28px,3.4vw,46px);line-height:1.1;margin:0 0 8px;letter-spacing:-.5px}
+#say{font-size:clamp(17px,1.6vw,22px);color:var(--muted);margin:0;max-width:880px}
+#cue{font-size:clamp(34px,4.6vw,64px);font-weight:900;color:var(--accent);margin-top:10px;min-height:1.1em;letter-spacing:-.5px}
+#cue.go{color:var(--ok)}
+.reps{display:flex;gap:10px;margin-top:10px}
+.reps span{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:800;border:2px solid #3a4048;color:var(--muted)}
+.reps span.ok{background:var(--ok);border-color:var(--ok);color:#10261a}
+.reps span.cur{border-color:var(--accent);color:var(--accent)}
+.reps span.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+#result{font-size:15px;margin-top:8px;color:var(--muted)}
+#result b.ok{color:var(--ok)} #result b.bad{color:var(--bad)}
+.actions{display:flex;flex-direction:column;gap:10px;align-items:stretch;min-width:200px}
+.actions button{padding:14px 20px;font-size:17px}
+/* wrist dial for disc steps */
+.dial{position:absolute;right:16px;bottom:14px;width:150px;height:150px}
+.dial .d{position:absolute;width:52px;height:52px;margin:-26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:#2a2620;border:2px solid #4a4130;color:var(--muted)}
+.dial .d.target{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 6px rgba(242,177,52,.18)}
+.dial .d.hit{background:var(--accent);color:#14171a}
+.fsrbig{position:absolute;right:18px;bottom:14px;text-align:right}
+.fsrbig small{color:var(--muted);display:block;font-size:12px}
+.fsrbig b{font-size:52px;font-variant-numeric:tabular-nums;line-height:1}
+/* camera */
+#cam{position:fixed;right:18px;top:70px;width:300px;aspect-ratio:16/10;border-radius:14px;overflow:hidden;border:2px solid var(--line);background:#000;z-index:15;display:none}
+#cam.on{display:block}
+#cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#cam span{position:absolute;left:10px;top:8px;font-size:12px;font-weight:700;letter-spacing:1px;color:#fff;background:#0009;padding:5px 10px;border-radius:6px}
+/* summary */
+#summary table{border-collapse:collapse;font-size:15px;margin-top:8px}
+#summary td,#summary th{padding:5px 12px 5px 0;text-align:left;border-top:1px solid var(--line)}
+#summary th{color:var(--muted);font-weight:600}
+@media (max-width:900px){main{grid-template-columns:1fr}.panel{grid-template-columns:1fr}#cam{width:200px}}
+@media (prefers-reduced-motion: reduce){.anim{transition:none}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <h1>WristTap setup</h1>
-    <span class="sub">One half breadboard (30 rows), one wire per step. Press <kbd>→</kbd> for the next wire. Keep USB unplugged until a check step asks for it.</span>
-  </div>
-  <div class="chips" id="chips"></div>
-  <div class="main">
-    <div class="stage">
-      <svg id="svg" viewBox="0 0 1000 880" aria-label="Breadboard with the ESP32 on the left and the sensors on the right"></svg>
-      <div class="legend">
-        <span><i style="background:var(--red)"></i>3V3 power</span><span><i style="background:var(--gnd)"></i>GND</span>
-        <span><i style="background:var(--sda)"></i>SDA</span><span><i style="background:var(--scl)"></i>SCL</span>
-        <span><i style="background:var(--sig)"></i>signal to ESP32</span><span><i style="background:var(--strip)"></i>hidden metal strip (all its holes are joined)</span>
-      </div>
+<header>
+  <h1>WristTap · Setup tutorial</h1>
+  <span class="pill"><i id="dot"></i><span id="src">connecting…</span></span>
+  <span class="sp"></span>
+  <label class="pill"><input type="checkbox" id="autoRec" checked> record the screen during setup</label>
+  <button id="camBtn">Camera</button>
+  <button id="recBtn">● Record</button>
+  <a class="btn" href="/config" target="_blank" rel="noopener">Settings ↗</a>
+</header>
+<div class="prog" id="prog"></div>
+
+<main>
+  <div class="panel">
+    <div>
+      <p class="eb" id="eb">SETUP</p>
+      <h2 id="title">Teach WristTap how you wear it</h2>
+      <p id="say">Wear the band and sit at a table. Each step shows the move on the yellow guide arm. You copy it 3 times, so the band learns from steady data, not one lucky try.</p>
+      <div id="cue"></div>
+      <div class="reps" id="reps"></div>
+      <div id="result"></div>
+      <div id="summary"></div>
     </div>
-    <div class="side">
-      <div class="card" aria-live="polite">
-        <div class="count"><span id="stageName"></span><span id="count"></span></div>
-        <div class="cap" id="cap"></div>
-        <p class="why" id="why"></p>
-        <div class="where" id="where"></div>
-        <div class="live" id="live">
-          <h2><span class="dot" id="ldot"></span><span id="lstat">Waiting for the band…</span></h2>
-          <div class="crit" id="crit"></div>
-          <div class="cmd"><code id="cmdtxt">cd ~/Projects/WristTap && ./demo.sh --no-open</code><button id="copy">Copy</button></div>
-          <div class="honest">Run that in Terminal once (with USB plugged in) and leave it running. The boxes turn green on their own.</div>
-        </div>
-        <div class="bar"><i id="prog"></i></div>
-      </div>
-      <div class="ctl">
-        <button id="prev">← Back</button>
-        <button id="next" class="primary">Next wire →</button>
-      </div>
+    <div class="actions">
+      <button class="primary" id="goBtn">Start setup</button>
+      <button id="redoBtn" hidden>Redo this step</button>
+      <button id="skipBtn" hidden>Skip step</button>
     </div>
   </div>
-</div>
+  <section class="stage"><h3>Do this (guide)</h3><div class="view"><div class="world" id="ghostWorld"></div></div><div class="foot" id="ghostFoot">the yellow arm shows the move</div>
+    <div class="dial" id="dial" hidden></div></section>
+  <section class="stage"><h3>Your arm (live, with what it has learned)</h3><div class="view"><div class="world" id="liveWorld"></div></div>
+    <div class="foot">Forearm <b id="aF">–</b> · Hand <b id="aH">–</b></div>
+    <div class="fsrbig" id="fsrBig" hidden><small>FSR 0 live</small><b id="fsrV">0</b></div></section>
+</main>
+<div id="cam"><video id="camVideo" autoplay muted playsinline></video><span>MY HAND</span></div>
+
 <script>
-/* ============ geometry ============ */
-const NS="http://www.w3.org/2000/svg", svg=document.getElementById("svg");
-const E=(t,a,p=svg)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
-const T=(x,y,s,o={},p=svg)=>{const e=E("text",{x,y,"font-size":o.fs||12,fill:o.fill||"#4a4f55","text-anchor":o.a||"middle","font-weight":o.w||400},p);e.textContent=s;return e;};
-const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const RY=r=>118+(r-1)*24;
-const CX={"T+":282,"T-":312,a:362,b:392,c:422,d:452,e:482,f:542,g:572,h:602,i:632,j:662,"B+":712,"B-":742};
-const railHas=r=>r%6!==0;
-const P=h=>{const m=h.match(/^([TB][+-]|[a-j])(\d+)$/);return {x:CX[m[1]],y:RY(+m[2]),col:m[1],row:+m[2]};};
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const avg=xs=>{xs=xs.filter(x=>x!=null&&!isNaN(x));return xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:0;};
+const W=a=>((a+180)%360+360)%360-180;
+const pct=(xs,p)=>{xs=xs.slice().sort((a,b)=>a-b);return xs.length?xs[Math.min(xs.length-1,Math.floor(p*xs.length))]:0;};
 
-/* board */
-E("rect",{x:258,y:72,width:510,height:770,rx:12,fill:"var(--board)",stroke:"#cfcfcb"});
-E("rect",{x:502,y:84,width:20,height:746,rx:3,fill:"#e2e2de"});
-T(512,66,"centre gap",{fs:11,fill:"#8a8f95"});
-const strips={};
-const stripRect=(key,x,y,w,h)=>{strips[key]=E("rect",{x,y,width:w,height:h,rx:6,class:"strip"});};
-["T+","T-","B+","B-"].forEach(k=>stripRect(k,CX[k]-10,96,20,730));
-for(let r=1;r<=30;r++){stripRect("L"+r,CX.a-12,RY(r)-9,CX.e-CX.a+24,18);stripRect("R"+r,CX.f-12,RY(r)-9,CX.j-CX.f+24,18);}
-[["T+","--red"],["T-","--sda"],["B+","--red"],["B-","--sda"]].forEach(([k,c])=>E("line",{x1:CX[k]-14,y1:92,x2:CX[k]-14,y2:830,stroke:`var(${c})`,"stroke-width":2,opacity:.6}));
-T(CX["T+"],90,"+",{fs:13,fill:"var(--red)",w:700});T(CX["T-"],90,"−",{fs:15,fill:"var(--sda)",w:700});
-T(CX["B+"],90,"+",{fs:13,fill:"var(--red)",w:700});T(CX["B-"],90,"−",{fs:15,fill:"var(--sda)",w:700});
-for(const k of "abcdefghij")T(CX[k],90,k,{fs:12,fill:"#5d6369",w:600});
-const holes={};
-for(let r=1;r<=30;r++){
-  T(244,RY(r)+4,r,{fs:12,fill:"#5d6369",w:600});
-  for(const k in CX){ if(k.length===2&&!railHas(r))continue; holes[k+r]=E("rect",{x:CX[k]-5,y:RY(r)-5,width:10,height:10,rx:2,class:"hole"}); }
-}
-T(512,862,"rows 29–30 stay free (for the button later)",{fs:12,fill:"#8a8f95"});
-
-/* ESP32 (left) */
-const ESP_L=["EN","VP 36","VN 39","D34","D35","D32","D33","D25","D26","D27","D14","D12","D13","GND","VIN"];
-const ESP_R=["D23","D22","TX0","RX0","D21","D19","D18","D5","TX2","RX2","D4","D2","D15","GND","3V3"];
-const espG=E("g",{class:"src",id:"src-esp"});
-E("rect",{x:40,y:96,width:170,height:440,rx:10,fill:"#1f2b3a"},espG);
-E("rect",{x:85,y:104,width:80,height:62,rx:4,fill:"#8a96a3"},espG); T(125,140,"ESP32",{fs:13,fill:"#1f2b3a",w:700},espG);
-E("rect",{x:110,y:530,width:30,height:16,fill:"#bbb"},espG); T(125,566,"USB",{fs:11,fill:"#6a7077"},espG);
-const PIN={};
-ESP_L.forEach((p,i)=>{const y=186+i*23;PIN["L:"+p.split(" ")[0]]={x:52,y};E("circle",{cx:52,cy:y,r:4.5,fill:"#d4af37",class:"pin","data-pin":"L:"+p.split(" ")[0]},espG);T(62,y+4,p,{fs:10.5,fill:p==="VIN"?"#ff9a8a":"#e8edf2",a:"start"},espG);});
-ESP_R.forEach((p,i)=>{const y=186+i*23;PIN["R:"+p]={x:198,y};E("circle",{cx:198,cy:y,r:4.5,fill:"#d4af37",class:"pin","data-pin":"R:"+p},espG);T(188,y+4,p,{fs:10.5,fill:"#e8edf2",a:"end"},espG);});
-T(125,604,"VIN = 5 V: never use",{fs:11,fill:"var(--bad)",w:600});
-
-/* sensors (right) */
-const SRC={};
-function sensor(id,x,y,w,h,fill,label,sub,pins){
-  const g=E("g",{class:"src",id:"src-"+id});
-  if(id.startsWith("pz")){E("circle",{cx:x+22,cy:y+22,r:22,fill:"#c8a464"},g);E("circle",{cx:x+22,cy:y+22,r:12,fill:"#efece6"},g);T(x+54,y+20,label,{fs:12,fill:"var(--ink)",a:"start",w:600},g);T(x+54,y+35,sub,{fs:10.5,fill:"var(--muted)",a:"start"},g);}
-  else if(id.startsWith("fsr")){E("circle",{cx:x+18,cy:y+18,r:17,fill:"#2a2a2a"},g);E("rect",{x:x+35,y:y+13,width:26,height:10,fill:"#7fa38d"},g);T(x+68,y+16,label,{fs:12,fill:"var(--ink)",a:"start",w:600},g);T(x+68,y+31,sub,{fs:10.5,fill:"var(--muted)",a:"start"},g);}
-  else {E("rect",{x,y,width:w,height:h,rx:6,fill},g);T(x+w/2,y+h/2-2,label,{fs:12.5,fill:"#fff",w:700},g);T(x+w/2,y+h/2+13,sub,{fs:10,fill:"#e6e9ef"},g);}
-  pins.forEach(([name,dx,dy])=>{SRC[id+":"+name]={x:x+dx,y:y+dy};});
-}
-sensor("mpu1",830,150,140,56,"#2b6cb0","MPU #1","forearm",[["VCC",0,8],["GND",0,18],["AD0",0,28],["SDA",0,38],["SCL",0,48]]);
-sensor("mpu2",830,222,140,56,"#6b4fb8","MPU #2","back of hand",[["VCC",0,8],["GND",0,18],["AD0",0,28],["SDA",0,38],["SCL",0,48]]);
-[0,1,2,3].forEach(k=>sensor("pz"+k,830,RY([14,17,20,23][k])-22,44,44,"","Piezo "+k,["little-finger bone","inner wrist","thumb bone","top of wrist"][k],[["red",4,14],["black",4,30]]));
-[0,1].forEach(k=>sensor("fsr"+k,830,RY([26,28][k])-18,36,36,"","FSR "+k,"inner forearm",[["A",2,10],["B",2,26]]));
-
-/* ============ the build, one item per frame ============ */
-const S=[ // stages
- {id:"start",name:"Start"},{id:"pow",name:"1 Power"},{id:"m1",name:"2 MPU #1"},{id:"m2",name:"3 MPU #2"},
- {id:"p0",name:"4 Piezo 0"},{id:"p13",name:"5 Piezos 1–3"},{id:"fsr",name:"6 FSRs"},{id:"end",name:"Done"}];
-const F=[]; // frames
-const W=(st,from,to,color,cap,why)=>F.push({st,kind:"wire",from,to,color,cap,why});
-const R=(st,a,b,val,cap,why)=>F.push({st,kind:"res",a,b,val,cap,why});
-const C=(st,check,cap,why)=>F.push({st,kind:"check",check,cap,why});
-F.push({st:"start",kind:"intro",cap:"Each sensor needs only one row.",why:"Under every row of 5 holes there's a hidden metal strip. Anything you push into the same strip is connected, like plugs on one extension board. Watch the strips light up as you go."});
-F.push({st:"start",kind:"intro2",cap:"Pull every wire off both old boards first.",why:"Keep the sensors, the ESP32 and the 10 resistors (6× 10 kΩ brown-black-orange, 4× 1 MΩ brown-black-green). USB stays unplugged while you wire."});
-W("pow","esp:R:3V3","T+1","--red","ESP32 3V3 → left red line, hole T+1","Now the whole left red line carries 3.3 V. Every sensor takes its power from here.");
-W("pow","esp:R:GND","T-2","--gnd","ESP32 GND (right side) → left blue line, T-2","The left blue line is now ground (GND).");
-W("pow","esp:L:GND","B-2","--gnd","ESP32 GND (left side) → right blue line, B-2","The right blue line is ground too. The right red line is never used.");
-C("pow","power","Check: plug in USB.","The ESP32's red LED should light, and the reader sees about 500 packets a second.");
-W("m1","mpu1:VCC","T+4","--red","MPU #1 VCC → T+4","Power for the first sensor, from the red line.");
-W("m1","mpu1:GND","B-4","--gnd","MPU #1 GND → B-4","Ground from the right blue line.");
-W("m1","mpu1:AD0","B-5","--gnd","MPU #1 AD0 → B-5 (ground)","AD0 on ground gives this sensor the name 0x68, so the ESP32 can tell the two MPUs apart.");
-W("m1","mpu1:SDA","c8","--sda","MPU #1 SDA → c8","Row 8, left half, is the SDA strip: the data wire both MPUs share.");
-W("m1","mpu1:SCL","h8","--scl","MPU #1 SCL → h8","Row 8, right half, is the SCL strip: the clock wire both MPUs share.");
-W("m1","esp:R:D21","a8","--sda","ESP32 D21 → a8","D21 joins the SDA strip. One empty hole between each plug, so they're easy to push in.");
-W("m1","esp:R:D22","j8","--scl","ESP32 D22 → j8","D22 joins the SCL strip.");
-C("m1","imu1","Check MPU #1.","Plug in USB. IMU 1 should appear and move when you tilt it.");
-W("m2","mpu2:VCC","T+9","--red","MPU #2 VCC → T+9","Power for the hand sensor.");
-W("m2","mpu2:AD0","T+10","--red","MPU #2 AD0 → T+10 (3V3)","AD0 on 3V3 gives this one the name 0x69. Different from MPU #1, so both can share the same two wires.");
-W("m2","mpu2:GND","B-9","--gnd","MPU #2 GND → B-9","Ground.");
-W("m2","mpu2:SDA","e8","--sda","MPU #2 SDA → e8","Same strip as MPU #1's SDA and D21. Three plugs, one strip, one connection.");
-W("m2","mpu2:SCL","f8","--scl","MPU #2 SCL → f8","Same strip as the other SCL wires.");
-C("m2","imu2","Check both MPUs.","Both IMU 1 and IMU 2 should be live.");
-const PZ=[["D32",14],["D33",17],["D34",20],["D35",23]];
-PZ.forEach(([pin,r],k)=>{
-  const st=k===0?"p0":"p13", pre=k===0?"":`Disc ${k}: `;
-  W(st,`pz${k}:red`,`a${r}`,"--red",`${pre}Piezo ${k} red wire → a${r}`,k===0?`Row ${r} belongs to piezo ${k}. Two empty rows above and below, so nothing touches.`:`Same pattern as piezo 0, three rows down.`);
-  R(st,`c${r}`,`T-${r}`,"1M",`${pre}1 MΩ: c${r} → T-${r}`,k===0?"The 1 MΩ (brown-black-green) drains the disc back to zero after each tap. Without it the number never returns to 0.":"Drain resistor to ground. Push both legs fully in.");
-  R(st,`e${r}`,`f${r}`,"10k",`${pre}10 kΩ across the gap: e${r} → f${r}`,k===0?"The 10 kΩ (brown-black-orange) jumps the centre gap. It's a speed bump that protects the ESP32 pin from the disc's spike.":"Bridge the centre gap.");
-  W(st,`esp:L:${pin}`,`j${r}`,"--sig",`${pre}ESP32 ${pin} → j${r}`,k===0?`The right half of row ${r} is the piezo's signal. ${pin} reads it.`:`${pin} reads disc ${k}.`);
-  W(st,`pz${k}:black`,`B-${r}`,"--gnd",`${pre}Piezo ${k} black wire → B-${r}`,"Disc ground to the right blue line.");
-  if(k===0) C("p0","pz0","Check piezo 0: tap the disc.","It sits near 0 at rest and jumps to hundreds on a tap, then falls back to 0.");
-});
-C("p13","pz13","Check discs 1, 2, 3: tap each one.","Each disc lights up on its own and falls back to 0. If one wanders at rest, push its 1 MΩ in again.");
-W("fsr","fsr0:A","T+26","--red","FSR 0 leg A → T+26","One leg of the squeeze sensor takes 3.3 V.");
-W("fsr","fsr0:B","a26","--fsr","FSR 0 leg B → a26","Row 26, left half, is FSR 0.");
-R("fsr","c26","T-26","10k","10 kΩ: c26 → T-26","This 10 kΩ turns 'how hard you press' into a voltage the ESP32 can read.");
-W("fsr","esp:L:VP","e26","--sig","ESP32 VP → e26","VP (pin 36) measures FSR 0.");
-W("fsr","fsr1:A","T+28","--red","FSR 1 leg A → T+28","Second squeeze sensor, power.");
-W("fsr","fsr1:B","a28","--fsr","FSR 1 leg B → a28","Row 28 is FSR 1. Same pattern, two rows down.");
-R("fsr","c28","T-28","10k","10 kΩ: c28 → T-28","Same job as the other one.");
-W("fsr","esp:L:VN","e28","--sig","ESP32 VN → e28","VN (pin 39) measures FSR 1.");
-C("fsr","fsr","Check: squeeze each FSR.","About 0 at rest, over 1000 when pressed.");
-F.push({st:"end",kind:"done",cap:"Done. Every part has its own row.",why:"Rows 29–30 are free for the button. Run ./demo.sh --ble with the power bank and show the demo."});
-
-/* ============ drawing items ============ */
-const layer=E("g",{});
-const nodes=[];
-let laneL=0, laneR=0;
-function srcPt(s){ const [dev,...rest]=s.split(":"); if(dev==="esp") return PIN[rest.join(":")]; return SRC[s]; }
-function wirePath(from,to,idx){
-  const a=srcPt(from), b=P(to);
-  if(from.startsWith("esp:L")){ const lane=14+(idx%5)*5; const top=76-(idx%6)*6;
-    return `M${a.x} ${a.y} H${lane} V${top} H${b.x} V${b.y}`; }
-  if(from.startsWith("esp:R")){ return `M${a.x} ${a.y} C${a.x+60} ${a.y} ${b.x-70} ${b.y} ${b.x} ${b.y}`; }
-  return `M${a.x} ${a.y} C${a.x-70} ${a.y} ${b.x+80} ${b.y} ${b.x} ${b.y}`;
-}
-F.forEach((f,i)=>{
-  if(f.kind==="wire"){
-    const p=E("path",{d:wirePath(f.from,f.to,i),class:"wire",stroke:`var(${f.color})`},layer);
-    const end=P(f.to); const plug=E("rect",{x:end.x-5,y:end.y-5,width:10,height:10,rx:2,fill:`var(${f.color})`,stroke:"#fff","stroke-width":1.2},layer);
-    nodes[i]={els:[p,plug],path:p};
-  } else if(f.kind==="res"){
-    const a=P(f.a),b=P(f.b),g=E("g",{class:"res"},layer);
-    E("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#7d7d7d","stroke-width":2},g);
-    const ang=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI,len=Math.hypot(b.x-a.x,b.y-a.y),bw=Math.min(30,len*.62);
-    const rg=E("g",{transform:`translate(${(a.x+b.x)/2},${(a.y+b.y)/2}) rotate(${ang})`},g);
-    E("rect",{x:-bw/2,y:-6,width:bw,height:12,rx:5,fill:f.val==="1M"?"#e6cfe6":"#ecdcb4",stroke:"#8a6d3b",class:"body"},rg);
-    const lbl=E("g",{transform:`translate(${(a.x+b.x)/2},${(a.y+b.y)/2-12})`},g); T(0,0,f.val==="1M"?"1MΩ":"10k",{fs:10,fill:"#6b4f1d",w:700},lbl);
-    E("circle",{cx:a.x,cy:a.y,r:3.4,fill:"#555"},g);E("circle",{cx:b.x,cy:b.y,r:3.4,fill:"#555"},g);
-    nodes[i]={els:[g]};
-  }
-});
-function stripOf(h){const p=P(h); if(p.col.length===2) return p.col; return ("abcde".includes(p.col)?"L":"R")+p.row;}
-
-/* ============ stepper ============ */
-let cur=0, playing=null;
-try{ const s=+localStorage.getItem("wt-setup-step-30"); if(s>0&&s<F.length) cur=s; }catch(e){}
-const chipsEl=document.getElementById("chips");
-S.forEach(s=>{const b=document.createElement("button");b.className="chip";b.textContent=s.name;b.dataset.st=s.id;
-  b.onclick=()=>{const i=F.findIndex(f=>f.st===s.id);if(i>=0)go(i);};chipsEl.appendChild(b);});
-function go(i){
-  cur=Math.max(0,Math.min(F.length-1,i));
-  try{localStorage.setItem("wt-setup-step-30",cur);}catch(e){}
-  const f=F[cur];
-  F.forEach((g,k)=>{ const n=nodes[k]; if(!n) return;
-    const show=k<=cur;
-    n.els.forEach(el=>{ el.style.display=show?"":"none"; el.classList.toggle("old",k<cur); });
-    if(n.path){ if(k===cur){ const L=n.path.getTotalLength(); n.path.style.transition="none"; n.path.style.strokeDasharray=L; n.path.style.strokeDashoffset=L;
-        requestAnimationFrame(()=>requestAnimationFrame(()=>{n.path.style.transition="stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1), opacity .35s"; n.path.style.strokeDashoffset=0;})); }
-      else { n.path.style.strokeDasharray="none"; } }
-  });
-  // hidden strips: light the strip(s) this item lands in, and every hole on them
-  Object.values(strips).forEach(s=>s.classList.remove("lit")); Object.values(holes).forEach(h=>h.classList.remove("lit"));
-  document.querySelectorAll(".src").forEach(s=>s.classList.remove("hot"));
-  const lit=[];
-  if(f.kind==="wire") lit.push(stripOf(f.to)); if(f.kind==="res") lit.push(stripOf(f.a),stripOf(f.b));
-  if(f.kind==="intro") lit.push("L1","R1");
-  lit.forEach(k=>{strips[k].classList.add("lit"); for(const h in holes){ if(stripOf(h)===k) holes[h].classList.add("lit"); }});
-  if(f.kind==="wire"){ const dev=f.from.split(":")[0]; const el=document.getElementById("src-"+dev); if(el) el.classList.add("hot"); }
-  // text
-  const st=S.find(s=>s.id===f.st);
-  document.getElementById("stageName").textContent=st.name;
-  document.getElementById("count").textContent=`step ${cur+1} / ${F.length}`;
-  document.getElementById("cap").textContent=f.cap;
-  document.getElementById("why").textContent=f.why||"";
-  const wh=document.getElementById("where"); wh.innerHTML="";
-  const add=(t,c)=>{const s=document.createElement("span");s.textContent=t;if(c)s.className=c;wh.appendChild(s);};
-  if(f.kind==="wire"){ add(prettySrc(f.from)); add("→","arrow"); add(f.to); }
-  if(f.kind==="res"){ add(f.val==="1M"?"1 MΩ":"10 kΩ"); add(f.a); add("→","arrow"); add(f.b); }
-  document.getElementById("prog").style.width=(cur/(F.length-1)*100)+"%";
-  document.getElementById("prev").disabled=cur===0;
-  const nx=document.getElementById("next"); nx.disabled=cur===F.length-1;
-  nx.textContent= f.kind==="check" ? (passed(f.check)?"Passed. Next →":"Next (skip check) →") : (cur===F.length-1?"Finished":"Next wire →");
-  // chips
-  const order=S.map(s=>s.id), ci=order.indexOf(f.st);
-  chipsEl.querySelectorAll(".chip").forEach(c=>{const k=order.indexOf(c.dataset.st);c.classList.toggle("now",k===ci);c.classList.toggle("done",k<ci);});
-  showLive(f);
-}
-function prettySrc(s){ const [dev,...r]=s.split(":"); const n=r.join(":");
-  if(dev==="esp") return "ESP32 "+n.split(":")[1]+(n.startsWith("L")?" (left)":" (right)");
-  return ({mpu1:"MPU #1",mpu2:"MPU #2",fsr0:"FSR 0",fsr1:"FSR 1"}[dev]||("Piezo "+dev.slice(2)))+" "+n; }
-document.getElementById("next").onclick=()=>go(cur+1);
-document.getElementById("prev").onclick=()=>go(cur-1);
-document.addEventListener("keydown",e=>{ if(e.key==="ArrowRight"){go(cur+1);e.preventDefault();} if(e.key==="ArrowLeft"){go(cur-1);e.preventDefault();} });
-document.getElementById("copy").onclick=e=>{navigator.clipboard&&navigator.clipboard.writeText(document.getElementById("cmdtxt").textContent);e.target.textContent="Copied";setTimeout(()=>e.target.textContent="Copy",1200);};
-
-/* ============ live check (reads ./demo.sh --no-open on this Mac) ============ */
-const L={rate:0,imu:[false,false],piezo:[0,0,0,0],fsr:[0,0],taps:[false,false,false,false],fsrSeen:[false,false],last:0};
-const CHECKS={
-  power:()=>[["Band streaming",L.rate>200,L.rate+" /s"]],
-  imu1:()=>[["IMU 1 (forearm)",L.imu[0],L.imu[0]?"live":"missing"]],
-  imu2:()=>[["IMU 1 (forearm)",L.imu[0],L.imu[0]?"live":"missing"],["IMU 2 (hand)",L.imu[1],L.imu[1]?"live":"missing"]],
-  pz0:()=>[["Tap disc 0",L.taps[0],"peak "+L.piezo[0]]],
-  pz13:()=>[1,2,3].map(k=>["Tap disc "+k,L.taps[k],"peak "+L.piezo[k]]),
-  fsr:()=>[0,1].map(k=>["Squeeze FSR "+k,L.fsrSeen[k],String(L.fsr[k])]),
+/* ---------- live data ---------- */
+let CAL={}, S={}, last=null; const FR=[];
+const es=new EventSource("/stream");
+es.onmessage=e=>{ const m=JSON.parse(e.data);
+  if(m.calib){ CAL=m.calib; return; }
+  if(m.settings){ S=m.settings; return; }
+  last=m; FR.push({t:performance.now(),m}); while(FR.length>1500) FR.shift();
+  $("src").textContent=`${m.status} · ${m.rate}/s`; $("dot").classList.toggle("on",m.rate>20);
+  if(m.rec) syncRec(m.rec);
+  if(m.imu) drawLive(m);
+  if(m.fsr) $("fsrV").textContent=m.fsr[0];
+  for(const ev of m.events||[]) if(ev.disc!=null&&ev.kind!=="ignored") flashDisc(ev.disc);
 };
-function passed(c){ return c && CHECKS[c] && CHECKS[c]().every(x=>x[1]); }
-function showLive(f){
-  const box=document.getElementById("live");
-  box.classList.toggle("show",f.kind==="check");
-  if(f.kind!=="check") return;
-  if(f.check==="pz0"||f.check==="pz13") L.taps=[false,false,false,false];
-  if(f.check==="fsr") L.fsrSeen=[false,false];
-  renderLive();
+fetch("/calib").then(r=>r.json()).then(c=>CAL=c||{});
+fetch("/",{method:"POST",body:"{}"}).then(r=>r.json()).then(s=>S=s).catch(()=>{});
+const since=t0=>FR.filter(f=>f.t>=t0).map(f=>f.m);
+
+/* ---------- 3D arms ---------- */
+function cuboid(w,h,d,color,ghost){ const g=document.createElement("div"); g.className="g";
+  const F=(fw,fh,t,shade)=>{ const f=document.createElement("div"); f.className="face"; f.style.cssText=`width:${fw}px;height:${fh}px;left:${-fw/2}px;top:${-fh/2}px;transform:${t};background:color-mix(in srgb, ${color} ${shade}%, black);${ghost?"opacity:.55":""}`; g.appendChild(f); };
+  F(w,h,`translateZ(${d/2}px)`,100); F(w,h,`rotateY(180deg) translateZ(${d/2}px)`,70); F(d,h,`rotateY(90deg) translateZ(${w/2}px)`,80); F(d,h,`rotateY(-90deg) translateZ(${w/2}px)`,80);
+  F(w,d,`rotateX(90deg) translateZ(${h/2}px)`,115); F(w,d,`rotateX(-90deg) translateZ(${h/2}px)`,55); return g; }
+function makeArm(host,ghost){ const armC=ghost?"#c98f1c":"#5b6b80", handC=ghost?"#f2b134":"#8a76c9";
+  const arm=document.createElement("div"); arm.className="g"+(ghost?" anim ghost":""); const ab=cuboid(260,46,62,armC,ghost); ab.style.transform="translateX(-130px)"; arm.appendChild(ab);
+  const th=cuboid(40,10,16,"#e9e2d2",ghost); th.style.transform="translate3d(-20px,0,34px)"; arm.appendChild(th);     // thumb-side marker
+  const hand=document.createElement("div"); hand.className="g"+(ghost?" anim":""); const hb=cuboid(150,26,80,handC,ghost); hb.style.transform="translateX(75px)"; hand.appendChild(hb); arm.appendChild(hand);
+  host.appendChild(arm); return {arm,hand}; }
+const G=makeArm($("ghostWorld"),true), L=makeArm($("liveWorld"),false);
+function pose(p){ p=p||{}; G.arm.style.transform=`rotateY(${-(p.swing||0)}deg) rotateZ(${-(p.up||0)}deg) rotateX(${p.roll||0}deg)`;
+  G.hand.style.transform=`rotateY(${-(p.hswing||0)}deg) rotateZ(${-(p.hup||0)}deg) rotateX(${p.hroll||0}deg)`; }
+let yaw0=[0,0];
+function disp(m,k){ const c=(CAL.imu||[])[k]||{}, i=m.imu[k], r=c.roll||{src:"roll",sign:1,zero:0}, p=c.pitch||{src:"pitch",sign:1,zero:0}, y=c.yaw||{sign:1}, f=CAL.flip||{};
+  return {ok:i.ok, roll:(f.roll||1)*r.sign*W(i[r.src]-r.zero), up:(f.up||1)*p.sign*W(i[p.src]-p.zero), swing:(f.swing||1)*y.sign*(i.yaw-yaw0[k])}; }
+function drawLive(m){ const a=disp(m,0), h=disp(m,1);
+  if(a.ok) L.arm.style.transform=`rotateY(${-a.swing}deg) rotateZ(${-a.up}deg) rotateX(${a.roll}deg)`;
+  if(h.ok) L.hand.style.transform=`rotateY(${-(h.swing-a.swing)}deg) rotateZ(${-(h.up-a.up)}deg) rotateX(${h.roll-a.roll}deg)`;
+  $("aF").textContent=a.ok?`roll ${a.roll.toFixed(0)}° · up ${a.up.toFixed(0)}°`:"missing"; $("aH").textContent=h.ok?`roll ${h.roll.toFixed(0)}° · up ${h.up.toFixed(0)}°`:"missing"; }
+
+/* wrist dial (disc steps) */
+const DIAL={top:[75,14],thumb:[136,75],palm:[75,136],pinky:[14,75]};
+const dialEls={}; for(const [k,[x,y]] of Object.entries(DIAL)){ const d=document.createElement("div"); d.className="d"; d.style.left=x+"px"; d.style.top=y+"px"; d.textContent={top:"top",thumb:"thumb",palm:"palm",pinky:"little"}[k]; $("dial").appendChild(d); dialEls[k]=d; }
+function flashDisc(k){ const p=Object.keys(CAL.discs||{}).find(x=>CAL.discs[x]===k); if(p&&dialEls[p]){ dialEls[p].classList.add("hit"); setTimeout(()=>dialEls[p].classList.remove("hit"),220); } }
+
+/* ---------- UI helpers ---------- */
+function show(o){ if(o.eb!=null) $("eb").textContent=o.eb; if(o.title!=null) $("title").textContent=o.title; if(o.say!=null) $("say").textContent=o.say; }
+function cue(t,go){ $("cue").textContent=t||""; $("cue").classList.toggle("go",!!go); }
+function reps(n,cur,state){ $("reps").innerHTML=Array.from({length:n},(_,i)=>`<span class="${state[i]||(i===cur?"cur":"")}">${state[i]==="ok"?"✓":state[i]==="bad"?"✕":i+1}</span>`).join(""); }
+async function count(label,secs){ for(let i=secs;i>0;i--){ cue(`${label} ${i}`); await sleep(1000); } }
+async function phase(text,ms,ghostPose,go){ if(ghostPose!==undefined) pose(ghostPose); cue(text,go); const t0=performance.now(); await sleep(ms); return since(t0); }
+const majority=arr=>{ const c={}; arr.forEach(x=>c[x]=(c[x]||0)+1); const best=Object.keys(c).reduce((a,b)=>c[a]>=c[b]?a:b); return {v:best,n:c[best]}; };
+
+/* ---------- learned values ---------- */
+const OUT={imu:[{},{}],mouse:{},discs:{},level:null};
+const meanAng=(fr,k)=>{ const ok=fr.filter(m=>m.imu&&m.imu[k].ok); return {roll:avg(ok.map(m=>m.imu[k].roll)),pitch:avg(ok.map(m=>m.imu[k].pitch)),yaw:avg(ok.map(m=>m.imu[k].yaw)),n:ok.length}; };
+const tail=(fr,frac)=>fr.slice(Math.floor(fr.length*(1-frac)));
+
+/* each rep: start pose (hold) → move (hold) → back. Returns frames for both holds. */
+async function rep(startPose,movePose,moveText,backText){
+  const a=await phase("Start position…",1600,startPose); const b=await phase(moveText,2200,movePose,true); await phase(backText||"Back…",1300,startPose); return {a,b}; }
+
+/* ---------- the steps ---------- */
+const STEPS=[
+ {eb:"STEP 1 · LEVEL",title:"Rest your arm flat",say:"Forearm flat on the table, palm DOWN, hand straight, thumb pointing away from you. Stay still while it measures.",ghost:{},
+  run:async()=>{ await count("Get into position…",3); const fr=await phase("Hold still…",3000,{},true);
+    const L0=[0,1].map(k=>meanAng(tail(fr,.8),k)); if(L0.some(x=>!x.n)) return {ok:false,msg:"A motion sensor isn't sending. Check the band."};
+    OUT.level=L0; yaw0=[L0[0].yaw,L0[1].yaw]; return {ok:true,msg:"Level pose saved."}; }},
+ {eb:"STEP 2 · ROLL",title:"Turn your palm up",say:"From the flat pose, roll your whole forearm so the palm faces UP, hold it, then turn back down. 3 times.",ghost:{roll:90,hroll:0},
+  run:()=>axisStep(3,{},{roll:90},"Palm UP — hold",(fa,fb)=>[0,1].map(k=>axisOf(fa,fb,k,null)),(res)=>{ [0,1].forEach(k=>OUT.imu[k].roll=res[k]); return `forearm ${sg(res[0])}, hand ${sg(res[1])}`; })},
+ {eb:"STEP 3 · WRIST BEND",title:"Bend your wrist up",say:"Forearm stays on the table. Bend only the WRIST so the hand points up, hold, then down. 3 times.",ghost:{hup:45},
+  run:()=>axisStep(3,{},{hup:45},"Hand UP — hold",(fa,fb)=>[axisOf(fa,fb,1,OUT.imu[1].roll&&OUT.imu[1].roll.src)],(res)=>{ OUT.imu[1].pitch=res[0]; return "hand "+sg(res[0]); })},
+ {eb:"STEP 4 · FOREARM LIFT",title:"Lift your forearm",say:"Hand straight. Keep the elbow on the table and lift the forearm up, hold, then down. 3 times.",ghost:{up:30},
+  run:()=>axisStep(3,{},{up:30},"Forearm UP — hold",(fa,fb)=>[axisOf(fa,fb,0,OUT.imu[0].roll&&OUT.imu[0].roll.src)],(res)=>{ OUT.imu[0].pitch=res[0]; return "forearm "+sg(res[0]); })},
+ {eb:"STEP 5 · SWING",title:"Slide your arm right",say:"Forearm flat. Slide the whole arm to the RIGHT along the table, hold, then slide back. 3 times.",ghost:{swing:30},
+  run:async()=>{ const signs=[[],[]], st=[]; for(let i=0;i<3;i++){ reps(3,i,st); const {a,b}=await rep({},{swing:30},"Slide RIGHT — hold");
+      let good=true; for(const k of [0,1]){ const d=meanAng(tail(b,.4),k).yaw-meanAng(tail(a,.5),k).yaw; if(Math.abs(d)<3) good=false; else signs[k].push(d>0?1:-1); } st[i]=good?"ok":"bad"; reps(3,-1,st); }
+    if(signs[0].length<2||signs[1].length<2) return {ok:false,msg:"Not enough swing seen. Slide further."};
+    const r=[0,1].map(k=>majority(signs[k])); [0,1].forEach(k=>OUT.imu[k].yaw={sign:+r[k].v}); return {ok:true,msg:`swing learned (${Math.min(r[0].n,r[1].n)}/3 agree)`}; }},
+ {eb:"STEP 6 · CURSOR RIGHT",title:"Turn your hand right",say:"Lift the hand like holding a mouse in the air. Turn it to the RIGHT, hold, back to the middle. 3 times. This sets the cursor and the slide flicks.",ghost:{hswing:35},
+  run:()=>gyroStep({hswing:35},"Turn RIGHT — hold",null,(d)=>{ OUT.mouse.mx=d.ax; OUT.mouse.mx_sign=d.s; return `right = ${d.s>0?"+":"−"}${d.ax}`; })},
+ {eb:"STEP 7 · CURSOR UP",title:"Tilt your hand up",say:"Same hand in the air. Tilt it UP, hold, back to the middle. 3 times.",ghost:{hup:35},
+  run:()=>gyroStep({hup:35},"Tilt UP — hold",()=>[OUT.mouse.mx],(d)=>{ OUT.mouse.my=d.ax; OUT.mouse.my_sign=-d.s; return `up = ${d.s>0?"+":"−"}${d.ax}`; })},
+ {eb:"STEP 8 · ROLL RIGHT",title:"Roll your wrist right",say:"Roll the wrist clockwise, like turning a key, hold, then back. 3 times. This sets the scroll direction.",ghost:{hroll:-60},
+  run:()=>gyroStep({hroll:-60},"Roll RIGHT — hold",()=>[OUT.mouse.mx,OUT.mouse.my],(d)=>{ OUT.mouse.roll_sign=d.s; return "roll learned"; })},
+ ...[["top","the TOP of the wrist (back of the hand side)"],["thumb","the THUMB side"],["palm","the PALM side (under the wrist)"],["pinky","the LITTLE-FINGER side"]].map(([place,words],i)=>(
+ {eb:`STEP ${9+i} · DISC`,title:`Tap the disc on ${words.split(" (")[0].toLowerCase()}`,say:`Tap the disc on ${words} firmly, 3 times, when it says TAP.`,ghost:{},disc:place,
+  run:async()=>{ const votes=[], st=[]; for(let i=0;i<3;i++){ reps(3,i,st); await phase("Ready…",900); const fr=await phase("TAP!",1300,undefined,true);
+      const sc=[0,1,2,3]; for(let k=0;k<4;k++) sc[k]=Math.max(0,...fr.map(m=>m.piezo?m.piezo[k]:0)); const best=sc.indexOf(Math.max(...sc));
+      if(sc[best]>100){ votes.push(best); st[i]="ok"; } else st[i]="bad"; reps(3,-1,st); }
+    if(votes.length<2) return {ok:false,msg:"Not enough taps felt. Tap harder."};
+    const r=majority(votes); for(const p in OUT.discs) if(OUT.discs[p]===+r.v) delete OUT.discs[p]; OUT.discs[place]=+r.v;
+    return {ok:r.n>=2,msg:`that is P${r.v} (${r.n}/3 agree)`}; }})),
+ {eb:"STEP 13 · SQUEEZE",title:"Squeeze (FSR 0)",say:"First keep the hand relaxed. Then, each time it says SQUEEZE, make a normal fist and hold, then relax. 3 times.",ghost:{},fsr:true,
+  run:async()=>{ const rest=await phase("Relax…",2500); const restMax=Math.max(0,...rest.map(m=>m.fsr?m.fsr[0]:0)); const vals=[], st=[];
+    for(let i=0;i<3;i++){ reps(3,i,st); const fr=await phase("SQUEEZE — hold",1800,undefined,true); await phase("Relax…",1300);
+      const v=pct(tail(fr,.6).map(m=>m.fsr?m.fsr[0]:0),.5); if(v>restMax+80){ vals.push(v); st[i]="ok"; } else st[i]="bad"; reps(3,-1,st); }
+    if(vals.length<2) return {ok:false,msg:`FSR 0 hardly changed (rest ${restMax}, squeezes ${vals.join(", ")||"none"}). Check the strip.`};
+    OUT.fsr0=Math.max(restMax+60,Math.round((restMax+Math.min(...vals))/2)); return {ok:true,msg:`rest ${restMax}, squeezes ${vals.join(" / ")} → threshold ${OUT.fsr0}`}; }},
+];
+const sg=c=>c?`${c.sign>0?"+":"−"}${c.src}`:"?";
+function axisOf(fa,fb,k,exclude){ if(!OUT.level) return null; const A=meanAng(tail(fa,.5),k), B=meanAng(tail(fb,.45),k); if(!A.n||!B.n) return null;
+  const d={roll:W(B.roll-A.roll),pitch:W(B.pitch-A.pitch)}; if(exclude) delete d[exclude];
+  const a=Object.keys(d).reduce((x,y)=>Math.abs(d[x])>Math.abs(d[y])?x:y); return Math.abs(d[a])<12?null:{src:a,sign:d[a]>0?1:-1}; }
+async function axisStep(n,start,move,text,measure,save){
+  const got=[], st=[]; for(let i=0;i<n;i++){ reps(n,i,st); const {a,b}=await rep(start,move,text); const r=measure(a,b); const ok=r.every(Boolean); st[i]=ok?"ok":"bad"; if(ok) got.push(r); reps(n,-1,st); }
+  if(got.length<2) return {ok:false,msg:"Not enough movement seen. Move further and hold still at the end."};
+  const res=got[0].map((_,j)=>{ const key=majority(got.map(g=>g[j].src+(g[j].sign>0?"+":"-"))); const src=key.v.slice(0,-1), sign=key.v.endsWith("+")?1:-1;
+    return {src,sign,zero:+OUT.level[j===0&&got[0].length===1?(move.hup?1:0):j][src].toFixed(1),_n:key.n}; });
+  // single-sensor steps: wrist bend = hand (1), forearm lift = forearm (0)
+  if(got[0].length===1){ const k=move.hup?1:0; res[0].zero=+OUT.level[k][res[0].src].toFixed(1); }
+  const agree=Math.min(...res.map(r=>r._n)); res.forEach(r=>delete r._n);
+  return {ok:true,msg:`${save(res)} (${agree}/${n} agree)`}; }
+function gyroDom(fr,excl){ const g=fr.map(m=>m.gyro&&m.gyro[1]).filter(Boolean); if(!g.length) return null;
+  const tot=[0,1,2].map(i=>g.reduce((a,v)=>a+v[i],0)); const cand=[0,1,2].filter(i=>!(excl||[]).includes("g"+"xyz"[i]));
+  const i=cand.reduce((a,b)=>Math.abs(tot[a])>Math.abs(tot[b])?a:b); return Math.abs(tot[i])<40?null:{ax:"g"+"xyz"[i],s:tot[i]>0?1:-1}; }
+async function gyroStep(move,text,exclFn,save){
+  const got=[], st=[]; for(let i=0;i<3;i++){ reps(3,i,st); const {b}=await rep({},move,text); const d=gyroDom(b.slice(0,Math.ceil(b.length*.6)),exclFn&&exclFn()); st[i]=d?"ok":"bad"; if(d) got.push(d); reps(3,-1,st); }
+  if(got.length<2) return {ok:false,msg:"Not enough turning seen. Move a bit faster."};
+  const key=majority(got.map(d=>d.ax+(d.s>0?"+":"-"))); const d={ax:key.v.slice(0,-1),s:key.v.endsWith("+")?1:-1};
+  return {ok:key.n>=2,msg:`${save(d)} (${key.n}/3 agree)`}; }
+
+/* ---------- flow ---------- */
+let cur=-1, busy=false;
+$("prog").innerHTML=STEPS.map(()=>"<i></i>").join("");
+function progress(){ [...$("prog").children].forEach((el,i)=>{ el.className=i<cur?"done":i===cur?"cur":""; }); }
+async function runStep(i){
+  busy=true; cur=i; progress(); const st=STEPS[i]; show(st); $("result").innerHTML=""; $("summary").innerHTML=""; reps(0,0,[]);
+  $("dial").hidden=!st.disc; Object.values(dialEls).forEach(d=>d.classList.remove("target")); if(st.disc) dialEls[st.disc].classList.add("target");
+  $("fsrBig").hidden=!st.fsr; $("ghostFoot").textContent=st.disc?"tap the highlighted place on the right":st.fsr?"make a fist on SQUEEZE":"the yellow arm shows the move";
+  // preview the move twice on the guide arm before the real thing
+  if(st.ghost&&Object.keys(st.ghost).length){ cue("Watch the yellow arm…"); for(let r=0;r<2;r++){ pose(st.ghost); await sleep(1100); pose({}); await sleep(900); } }
+  $("goBtn").disabled=true; $("redoBtn").hidden=true; $("skipBtn").hidden=true;
+  const r=await st.run(); cue(r.ok?"✓ Done":"Try again", r.ok); pose({});
+  $("result").innerHTML=`<b class="${r.ok?"ok":"bad"}">${r.ok?"✓":"✕"}</b> ${r.msg}`;
+  if(r.ok) await saveSoFar();
+  $("goBtn").disabled=false; $("goBtn").textContent=i===STEPS.length-1?"Finish":"Next step →"; $("redoBtn").hidden=false; $("skipBtn").hidden=r.ok;
+  STEPS[i].done=r.ok; busy=false;
 }
-function renderLive(){
-  const f=F[cur]; if(f.kind!=="check") return;
-  const on=Date.now()-L.last<1500;
-  document.getElementById("ldot").classList.toggle("on",on&&L.rate>0);
-  document.getElementById("lstat").textContent= on ? (L.rate>0?`Band connected · ${L.rate} packets/s`:"Reader running, no band data (USB plugged in?)") : "Waiting for the reader (run the command below)";
-  document.getElementById("crit").innerHTML=CHECKS[f.check]().map(([t,ok,v])=>`<div class="${ok?"pass":""}"><span>${ok?"✓ ":""}${t}</span><span class="v">${v}</span></div>`).join("");
-  const nx=document.getElementById("next"); nx.textContent=passed(f.check)?"Passed. Next →":"Next (skip check) →";
+async function saveSoFar(){
+  const imu=JSON.parse(JSON.stringify(CAL.imu||[{},{}])); OUT.imu.forEach((o,k)=>Object.assign(imu[k]=imu[k]||{},o));
+  const upd={imu,flip:{roll:1,up:1,swing:1}};
+  if(Object.keys(OUT.mouse).length) upd.mouse=Object.assign({},CAL.mouse||{},OUT.mouse);
+  if(Object.keys(OUT.discs).length) upd.discs=Object.assign({},CAL.discs||{},OUT.discs);
+  if(OUT.fsr0){ const a=(S.fsr_thr_d||[900,900]).slice(); a[0]=OUT.fsr0; S=await fetch("/",{method:"POST",body:JSON.stringify({fsr_thr_d:a})}).then(r=>r.json());
+    const keep={}; for(const k of ["tap_thr_d","one_disc","bump_discs","echo_ms","tap_motion_dps","tap_lock_ms","flick_lock_ms","flick_dps","fsr_thr_d","fsr_hyst","double_ms","sens","dead","smooth_hz","return_ms","rearm"]) keep[k]=S[k]; upd.settings=keep; upd.fsr_done=true; }
+  CAL=await fetch("/calib",{method:"POST",body:JSON.stringify(upd)}).then(r=>r.json());
 }
-let es;
-function connect(){
-  try{ es=new EventSource("http://localhost:8791/stream"); }catch(e){ setTimeout(connect,3000); return; }
-  es.onmessage=e=>{ const m=JSON.parse(e.data); if(m.settings) return; L.last=Date.now(); L.rate=m.rate||0;
-    if(m.imu) L.imu=m.imu.map(x=>x.ok);
-    if(m.piezo){ L.piezo=m.piezo; m.piezo.forEach((v,k)=>{ if(v>150) L.taps[k]=true; }); }
-    if(m.fsr){ L.fsr=m.fsr; m.fsr.forEach((v,k)=>{ if(v>900) L.fsrSeen[k]=true; }); }
-    renderLive(); };
-  es.onerror=()=>{ es.close(); setTimeout(connect,3000); renderLive(); };
+async function finish(){
+  cur=STEPS.length; progress(); show({eb:"DONE",title:"Setup saved",say:"Move your arm: the purple arm on the right now follows you. Taps, flicks, scroll and the air mouse all use what you just taught it."});
+  cue("✓ All set",true); reps(0,0,[]); $("dial").hidden=true; $("fsrBig").hidden=true;
+  const rows=STEPS.map(s=>`<tr><td>${s.title}</td><td>${s.done?"✓ learned":"– skipped"}</td></tr>`).join("");
+  $("summary").innerHTML=`<table><tr><th>Step</th><th>Result</th></tr>${rows}</table>`;
+  $("goBtn").textContent="Open Try it page →"; $("goBtn").onclick=()=>open("/play?cam=1&mode=present","_blank"); $("redoBtn").hidden=true; $("skipBtn").hidden=true;
+  if(recOn&&$("autoRec").checked){ await sleep(6000); $("recBtn").click(); }
 }
-connect(); setInterval(renderLive,1000);
-go(cur);
+$("goBtn").onclick=async()=>{ if(busy) return;
+  if(cur===-1){ if($("autoRec").checked&&!recOn) await recToggle(); if(!camStream) await setCam(true); }
+  if(cur>=STEPS.length-1&&cur!==-1) return finish(); runStep(cur+1); };
+$("redoBtn").onclick=()=>{ if(!busy) runStep(cur); };
+$("skipBtn").onclick=()=>{ if(busy) return; if(cur>=STEPS.length-1) finish(); else runStep(cur+1); };
+document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&!busy&&!$("goBtn").disabled) $("goBtn").click(); });
+pose({});
+
+/* ---------- camera + recording ---------- */
+let camStream=null;
+async function setCam(on){ if(on&&!camStream){ try{ camStream=await navigator.mediaDevices.getUserMedia({video:{width:1280,height:800},audio:false}); $("camVideo").srcObject=camStream; }catch(e){ return; } }
+  if(!on&&camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; } $("cam").classList.toggle("on",!!on); $("camBtn").classList.toggle("on",!!on); }
+$("camBtn").onclick=()=>setCam(!camStream);
+let recOn=false;
+function syncRec(r){ recOn=r.on; $("recBtn").classList.toggle("on",r.on); $("recBtn").textContent=r.on?`■ Stop ${String(Math.floor(r.secs/60)).padStart(2,"0")}:${String(r.secs%60).padStart(2,"0")}`:"● Record"; }
+async function recToggle(){ const r=await fetch("/record",{method:"POST",body:JSON.stringify({action:recOn?"stop":"start"})}).then(x=>x.json()); syncRec(r); if(!r.on&&r.file) $("result").insertAdjacentHTML("beforeend",`<br>Video saved: WristTap/photos/${r.file}`); }
+$("recBtn").onclick=recToggle;
+if(new URLSearchParams(location.search).has("cam")) setCam(true);
 </script>
 </body>
 </html>

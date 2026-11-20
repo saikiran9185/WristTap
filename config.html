@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WristTap Settings</title>
+<style>
+:root{
+  --bg:#f3f1ec; --panel:#fbfaf7; --panel2:#efece5; --line:#dad4c8; --ink:#1b1e22; --muted:#585f68;
+  --accent:#a86f00; --accent-ink:#fff; --ok:#1f7a4a; --ok-bg:#ddf0e4; --bad:#b3372b; --bad-bg:#f6e0dc; --ign:#8a8f96;
+  --arm:#5b6b80; --hand:#8a76c9; --disc:#e9e2d2; --disc-line:#c9bfa8;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1113; --panel:#171a1d; --panel2:#1d2125; --line:#2a2f35; --ink:#ece9e3; --muted:#a0a7af;
+  --accent:#f2b134; --accent-ink:#14171a; --ok:#5cc38a; --ok-bg:#15261b; --bad:#e46a5e; --bad-bg:#2c1714; --ign:#7d848c;
+  --arm:#5b6b80; --hand:#8a76c9; --disc:#2a2620; --disc-line:#4a4130;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f1113; --panel:#171a1d; --panel2:#1d2125; --line:#2a2f35; --ink:#ece9e3; --muted:#a0a7af;
+  --accent:#f2b134; --accent-ink:#14171a; --ok:#5cc38a; --ok-bg:#15261b; --bad:#e46a5e; --bad-bg:#2c1714; --ign:#7d848c;
+  --arm:#5b6b80; --hand:#8a76c9; --disc:#2a2620; --disc-line:#4a4130;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--line)}
+header h1{font-size:18px;margin:0;letter-spacing:-.2px}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pill i{width:9px;height:9px;border-radius:50%;background:var(--bad)}
+.pill i.on{background:var(--ok)}
+.pill b{color:var(--ink)}
+header .sp{flex:1}
+a.btn,button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:7px 13px;cursor:pointer;text-decoration:none;white-space:nowrap}
+button:hover,a.btn:hover{border-color:var(--muted)}
+button:focus-visible,a.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+button:disabled{opacity:.4;cursor:default}
+#recBtn.on{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:700}
+.chk{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;max-width:1320px;margin:0 auto;padding:20px}
+.cards{display:grid;gap:16px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.card>h2{display:flex;align-items:center;gap:10px;font-size:17px;margin:0 0 4px;letter-spacing:-.2px}
+.card>h2 .num{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;background:var(--panel2);color:var(--muted);flex:none}
+.card>h2 .state{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted);background:var(--panel2);padding:3px 9px;border-radius:999px}
+.card>h2 .state.done{background:var(--ok-bg);color:var(--ok)}
+.card>p.sub{color:var(--muted);margin:0 0 14px}
+/* learn steps */
+.steps{display:grid;gap:8px}
+.step{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.step .what b{display:block}
+.step .what small{color:var(--muted)}
+.res{font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;min-width:110px}
+.res.ok{color:var(--ok);font-weight:600}
+.res.bad{color:var(--bad);font-weight:600}
+.run{position:relative;overflow:hidden;min-width:120px}
+.run .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:color-mix(in srgb,var(--accent) 30%,transparent);pointer-events:none}
+.run span{position:relative}
+/* wrist slots */
+.wrist{position:relative;width:300px;height:250px;margin:4px auto 8px}
+.wrist .bone{position:absolute;left:85px;top:60px;width:130px;height:130px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;text-align:center;color:var(--muted);font-size:12px}
+.slot{position:absolute;width:118px;transform:translate(-50%,-50%);display:grid;gap:2px;text-align:center;padding:8px 6px;border-radius:12px;background:var(--disc);border:2px solid var(--disc-line);cursor:pointer;color:var(--ink)}
+.slot b{font-size:20px}
+.slot small{font-size:11px;color:var(--muted)}
+.slot.listening{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 30%,transparent)}
+.slot.hit{background:var(--accent);color:var(--accent-ink)}
+.slot.hit small{color:var(--accent-ink)}
+.bars{display:grid;gap:6px}
+.bar{display:grid;grid-template-columns:120px 1fr 56px;gap:10px;align-items:center;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.track{position:relative;height:12px;background:var(--panel2);border-radius:6px;overflow:hidden}
+.track .f{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent);border-radius:6px}
+.track .thr{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--bad)}
+/* rules */
+.rules{display:grid;gap:4px}
+.rule{display:grid;grid-template-columns:1fr 210px 64px;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.rule b{display:block;font-size:14px}
+.rule small{color:var(--muted)}
+.rule input[type=range]{width:100%;accent-color:var(--accent)}
+.rule output{font-variant-numeric:tabular-nums;text-align:right;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-top:1px solid var(--line)}
+th{color:var(--muted);font-weight:600}
+/* lab */
+.lab{display:grid;gap:8px}
+.lrow{display:grid;grid-template-columns:170px auto 1fr;gap:12px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.lrow b{display:block}
+.lrow small{color:var(--muted)}
+.out{font-size:13px;line-height:1.45}
+.out .score{font-weight:700}
+.out .score.ok{color:var(--ok)} .out .score.bad{color:var(--bad)}
+.out .also{color:var(--bad)}
+.out .ign{color:var(--ign)}
+.fix{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--bad-bg)}
+.fix button{padding:4px 10px;font-size:13px}
+/* preview */
+.preview{position:sticky;top:70px;display:grid;gap:14px;align-self:start}
+.preview .card{padding:14px 16px}
+.preview h3{font-size:12px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:700}
+#stage{height:230px;perspective:800px;display:grid;place-items:center;overflow:hidden}
+#world{transform-style:preserve-3d;transform:rotateX(-22deg) rotateY(-30deg) scale(.7)}
+.g{transform-style:preserve-3d;position:absolute}
+.face{position:absolute;border:1px solid rgba(255,255,255,.18)}
+.ang{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ang b{color:var(--ink)}
+#evlog{list-style:none;margin:0;padding:0;font-size:13px;max-height:220px;overflow:hidden;font-variant-numeric:tabular-nums}
+#evlog li{padding:4px 0;border-top:1px solid var(--line)}
+#evlog li.ign{color:var(--ign)}
+#evlog li.acc b{color:var(--ok)}
+.saved{font-size:12px;color:var(--ok);opacity:0;transition:opacity .3s}
+.saved.on{opacity:1}
+.readybar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;max-width:1320px;margin:16px auto 0;padding:12px 16px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.readybar #readyList{display:flex;flex-wrap:wrap;gap:8px;flex:1}
+.readybar .it{font-size:13px;padding:6px 12px;border-radius:999px;background:var(--panel2);color:var(--muted)}
+.readybar .it.ok{background:var(--ok-bg);color:var(--ok);font-weight:600}
+.readybar #readyGo.go{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+@media (max-width:1000px){.readybar{margin:16px 16px 0}}
+.fsrlive{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.fsrbox{padding:14px 16px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.fsrbox small{color:var(--muted);display:block}
+.fsrbox .v{font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.fsrbox .v.on{color:var(--accent)}
+.fsrbox .meta{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.fsrbox .track{margin-top:8px}
+code{font:12px ui-monospace,Menlo,monospace}
+@media (max-width:1000px){.layout{grid-template-columns:1fr}.preview{position:static}}
+@media (max-width:640px){.step{grid-template-columns:1fr}.res{text-align:left}.rule{grid-template-columns:1fr}.lrow{grid-template-columns:1fr}.bar{grid-template-columns:90px 1fr 50px}.wrist{transform:scale(.9)}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>WristTap · Settings</h1>
+  <span class="pill"><i id="dot"></i><b id="src">connecting…</b> · <span id="rate">0</span>/s</span>
+  <span class="saved" id="saved">✓ saved</span>
+  <span class="sp"></span>
+  <label class="chk"><input type="checkbox" id="mic"> record my voice</label>
+  <button id="recBtn" title="Record the whole screen to photos/">● Record screen</button>
+  <a class="btn" href="/" target="_blank" rel="noopener">Open demo ↗</a>
+</header>
+
+<div id="ready" class="readybar"><div id="readyList"></div><a class="btn" id="readyGo" href="/play?cam=1&mode=present" target="_blank" rel="noopener">Use it: Try it page ↗</a></div>
+<div class="layout">
+<div class="cards">
+
+  <!-- 1 DISCS -->
+  <section class="card" id="cDiscs">
+    <h2><span class="num">1</span>Discs: where each one sits<span class="state" id="stDiscs">not set</span></h2>
+    <p class="sub">Click a place, then tap the disc that sits there three times. The strongest disc gets that place. Your view: looking down your arm, palm down, thumb on the right.</p>
+    <div class="wrist" id="wrist"><div class="bone">wrist<br>(your view)</div></div>
+    <div class="bars" id="pzBars"></div>
+  </section>
+
+  <!-- 2 MOTION -->
+  <section class="card" id="cArm">
+    <h2><span class="num">2</span>Motion sensors: directions<span class="state" id="stArm">not set</span></h2>
+    <p class="sub">Do these in order. Each one counts down 3 s so you can get into the pose, then measures for 2 s. Watch the 3D arm on the right: after all 5 it should move like your arm.</p>
+    <div class="steps" id="armSteps"></div>
+    <div class="rules" style="margin-top:10px">
+      <div class="rule"><div><b>Flip a direction</b><small>Only if the 3D arm still moves the opposite way after learning.</small></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><button data-flip="roll">Roll ⇄</button><button data-flip="up">Up/down ⇄</button><button data-flip="swing">Swing ⇄</button></div><span></span></div>
+    </div>
+  </section>
+
+  <!-- 3 MOUSE -->
+  <section class="card" id="cMouse">
+    <h2><span class="num">3</span>Hand directions: cursor, flicks, scroll<span class="state" id="stMouse">not set</span></h2>
+    <p class="sub">Hold your hand in the air like holding a mouse. These three moves set which way is right, up and roll: the air-mouse cursor, the slide flicks and the scrolling all use them.</p>
+    <div class="steps" id="mouseSteps"></div>
+    <div class="rules" style="margin-top:10px">
+      <div class="rule"><div><b>Speed</b><small>How far the cursor moves per turn.</small></div><input type="range" data-set="sens" min="3" max="40" step="1"><output></output></div>
+      <div class="rule"><div><b>Dead zone</b><small>Turns slower than this are ignored, so a resting hand keeps the cursor still.</small></div><input type="range" data-set="dead" min="0" max="20" step="1"><output></output></div>
+      <div class="rule"><div><b>Test it</b><small>Moves the real cursor. Needs Accessibility permission for the terminal.</small></div><button id="mouseTest">Air mouse: off</button><span></span></div>
+    </div>
+  </section>
+
+  <!-- 4 SQUEEZE (FSR) -->
+  <section class="card" id="cFsr">
+    <h2><span class="num">4</span>Squeeze sensors (FSR)<span class="state" id="stFsr">not set</span></h2>
+    <p class="sub">The two pressure strips on the forearm. The big numbers are live (0 = no pressure, 4095 = maximum). For each strip: measure it resting, then a light squeeze, then a hard squeeze. The threshold is set halfway between resting and your light squeeze.</p>
+    <div class="fsrlive" id="fsrLive"></div>
+    <div class="steps" id="fsrSteps"></div>
+    <div id="fsrOut" style="margin-top:10px"></div>
+  </section>
+
+  <!-- 5 NOISE -->
+  <section class="card" id="cNoise">
+    <h2><span class="num">5</span>Background noise<span class="state" id="stNoise">not measured</span></h2>
+    <p class="sub">Measures what each sensor reads when you are NOT doing a gesture, then puts every threshold safely above it.</p>
+    <div class="steps" id="noiseSteps"></div>
+    <div id="noiseOut" style="margin-top:10px"></div>
+  </section>
+
+  <!-- 5 RULES -->
+  <section class="card" id="cRules">
+    <h2><span class="num">6</span>False-trigger filters<span class="state">live</span></h2>
+    <p class="sub">Rules that stop one gesture setting off another. Changes apply instantly and are saved. Ignored triggers show grey in the log on the right.</p>
+    <div class="rules" id="rules"></div>
+    <h3 style="font-size:13px;margin:16px 0 6px;color:var(--muted)">Thresholds (red line) with live readings</h3>
+    <div class="bars" id="thrBars"></div>
+  </section>
+
+  <!-- 6 LAB -->
+  <section class="card" id="cLab">
+    <h2><span class="num">7</span>Gesture lab: test each gesture<span class="state" id="stLab">0 tested</span></h2>
+    <p class="sub">Press Test, wait for the countdown, then do the gesture <b>5 times</b> in 8 seconds. It shows what fired, what else fired by mistake, and offers a fix. Results are saved.</p>
+    <div class="lab" id="lab"></div>
+  </section>
+
+</div>
+
+<aside class="preview">
+  <div class="card"><h3>Live arm (with your settings)</h3><div id="stage"><div id="world"></div></div>
+    <div class="ang"><span>Forearm <b id="aF">–</b></span><span>Hand <b id="aH">–</b></span><button id="recenter" style="padding:3px 8px;font-size:12px">Re-centre swing</button></div></div>
+  <div class="card"><h3>Gestures (green) and ignored noise (grey)</h3><ul id="evlog"></ul></div>
+</aside>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+/* ================= state ================= */
+let S={}, CAL={}, last=null, yaw0=[0,0];
+const FR=[];                                   // recent frames {t, m}
+const PLACES=[["top","Top","back of wrist",150,22],["thumb","Thumb side","radial",262,125],["palm","Palm side","under",150,228],["pinky","Little finger","ulnar",38,125]];
+const PNAME={top:"top",thumb:"thumb side",palm:"palm side",pinky:"little-finger side"};
+const discPlace=k=>{const d=CAL.discs||{};return Object.keys(d).find(p=>d[p]===k);};
+const discName=k=>{const p=discPlace(k);return p?`${PNAME[p]} (P${k})`:`P${k}`;};
+
+/* ================= server I/O ================= */
+async function postSettings(upd){ const r=await fetch("/",{method:"POST",body:JSON.stringify(upd)}); S=await r.json(); syncRules();
+  const keep={}; for(const k of ["tap_thr_d","one_disc","bump_discs","echo_ms","tap_motion_dps","tap_lock_ms","flick_lock_ms","flick_dps","fsr_thr_d","fsr_hyst","double_ms","sens","dead","smooth_hz","return_ms","rearm"]) keep[k]=S[k];
+  await saveCal({settings:keep}); }
+async function saveCal(upd){ Object.assign(CAL,upd); const r=await fetch("/calib",{method:"POST",body:JSON.stringify(upd)}); CAL=await r.json(); flashSaved(); syncCal(); }
+let svT; function flashSaved(){ $("saved").classList.add("on"); clearTimeout(svT); svT=setTimeout(()=>$("saved").classList.remove("on"),1400); }
+
+const es=new EventSource("/stream");
+es.onmessage=e=>{ const m=JSON.parse(e.data);
+  if(m.settings){ S=m.settings; syncRules(); return; }
+  if(m.calib){ CAL=m.calib; syncCal(); return; }
+  last=m; FR.push({t:performance.now(),m}); while(FR.length>1200) FR.shift();
+  $("src").textContent=m.status; $("rate").textContent=m.rate; $("dot").classList.toggle("on",m.rate>20);
+  if(m.rec) syncRec(m.rec);
+  if(m.imu) drawArm(m);
+  if(m.piezo) liveBars(m);
+  if(m.fsr) fsrLive(m);
+  for(const ev of m.events||[]) logEvent(ev);
+  if(m.mouse!==undefined) $("mouseTest").textContent="Air mouse: "+(m.mouse?"ON":"off");
+};
+es.onerror=()=>{ $("src").textContent="demo server not running: ./demo.sh --ble --no-open"; $("dot").classList.remove("on"); };
+fetch("/calib").then(r=>r.json()).then(c=>{CAL=c||{}; syncCal();});
+
+/* capture frames for ms after an optional countdown, driving a button's progress fill */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function runBtn(btn, prepS, recMs, label){
+  const fill=btn.querySelector(".fill"), span=btn.querySelector("span"), old=span.textContent;
+  document.querySelectorAll(".run").forEach(b=>b.disabled=true);
+  for(let i=prepS;i>0;i--){ span.textContent=`Get ready… ${i}`; fill.style.width="0"; await sleep(1000); }
+  span.textContent=label||"Measuring…"; const t0=performance.now();
+  while(performance.now()-t0<recMs){ fill.style.width=((performance.now()-t0)/recMs*100)+"%"; await sleep(50); }
+  fill.style.width="0"; span.textContent=old;
+  document.querySelectorAll(".run").forEach(b=>b.disabled=false);
+  return FR.filter(f=>f.t>=t0).map(f=>f.m);
+}
+function runButton(text){ const b=document.createElement("button"); b.className="run primary"; b.innerHTML=`<div class="fill"></div><span>${text}</span>`; return b; }
+const avg=xs=>{xs=xs.filter(x=>x!=null&&!isNaN(x));return xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:0;};
+const pct=(xs,p)=>{xs=xs.slice().sort((a,b)=>a-b);return xs.length?xs[Math.min(xs.length-1,Math.floor(p*xs.length))]:0;};
+
+/* ================= 1. DISCS ================= */
+const slots={};
+PLACES.forEach(([key,name,sub,x,y])=>{ const b=document.createElement("button"); b.className="slot"; b.style.left=x+"px"; b.style.top=y+"px";
+  b.innerHTML=`<small>${name}</small><b>?</b><small>click, then tap ×3</small>`; b.onclick=()=>learnDisc(key,b); $("wrist").appendChild(b); slots[key]=b; });
+async function learnDisc(place,b){
+  b.classList.add("listening"); b.querySelector("small:last-child").textContent="tap it now ×3…";
+  const t0=performance.now(); await sleep(4000); b.classList.remove("listening");
+  const fr=FR.filter(f=>f.t>=t0).map(f=>f.m), score=[0,0,0,0];
+  for(const m of fr) if(m.piezo){ const mx=Math.max(...m.piezo); if(mx>120) score[m.piezo.indexOf(mx)]+=mx; }
+  const best=score.indexOf(Math.max(...score));
+  if(score[best]===0){ b.querySelector("small:last-child").textContent="no tap felt: try again"; return; }
+  const d=Object.assign({},CAL.discs||{}); for(const p in d) if(d[p]===best&&p!==place) delete d[p];
+  d[place]=best; await saveCal({discs:d});
+}
+const pzBars=[0,1,2,3].map(k=>{ const r=document.createElement("div"); r.className="bar"; r.innerHTML=`<span id="pzL${k}">P${k}</span><div class="track"><div class="f"></div></div><span>0</span>`; $("pzBars").appendChild(r); return r; });
+
+/* ================= 2. MOTION ================= */
+const ARM=[
+ {id:"level",b:"Level pose",s:"Forearm flat on the table, palm down, hand straight. Stay still.",run:async(btn,res)=>{
+   const fr=await runBtn(btn,3,2000); const ok=fr.filter(m=>m.imu&&m.imu[0].ok&&m.imu[1].ok);
+   if(!ok.length) return bad(res,"both sensors must be live");
+   ARMT.level=[0,1].map(k=>({roll:avg(ok.map(m=>m.imu[k].roll)),pitch:avg(ok.map(m=>m.imu[k].pitch))}));
+   good(res,"level saved"); }},
+ {id:"roll",b:"Roll",s:"Turn your palm UP, all the way, and hold.",need:"level",run:async(btn,res)=>{
+   const fr=await runBtn(btn,3,2000); const imu=[{},{}];
+   for(const k of [0,1]){ const r=axis(fr,k,null); if(!r) return bad(res,"no change seen: turn further");
+     imu[k].roll={src:r.a,sign:r.s,zero:+ARMT.level[k][r.a].toFixed(1)}; ARMT.rollSrc[k]=r.a; }
+   ARMT.imu=mergeImu(imu); await saveCal({imu:ARMT.imu}); good(res,`forearm ${sg(ARMT.imu[0].roll)} · hand ${sg(ARMT.imu[1].roll)}`); }},
+ {id:"upH",b:"Hand up (wrist bend)",s:"Palm down again. Bend only the WRIST so the hand points up. Forearm stays on the table.",need:"roll",run:async(btn,res)=>{
+   const fr=await runBtn(btn,3,2000); const r=axis(fr,1,ARMT.rollSrc[1]); if(!r) return bad(res,"no bend seen");
+   const imu=[{},{pitch:{src:r.a,sign:r.s,zero:+ARMT.level[1][r.a].toFixed(1)}}]; ARMT.imu=mergeImu(imu); await saveCal({imu:ARMT.imu}); good(res,"hand "+sg(ARMT.imu[1].pitch)); }},
+ {id:"upF",b:"Forearm up",s:"Hand straight. Lift the forearm up from the elbow, elbow stays on the table.",need:"roll",run:async(btn,res)=>{
+   const fr=await runBtn(btn,3,2000); const r=axis(fr,0,ARMT.rollSrc[0]); if(!r) return bad(res,"no lift seen");
+   const imu=[{pitch:{src:r.a,sign:r.s,zero:+ARMT.level[0][r.a].toFixed(1)}},{}]; ARMT.imu=mergeImu(imu); await saveCal({imu:ARMT.imu}); good(res,"forearm "+sg(ARMT.imu[0].pitch)); }},
+ {id:"swing",b:"Swing",s:"Forearm flat. After the countdown, slide the whole arm to the RIGHT and stop.",run:async(btn,res)=>{
+   await runBtn(btn,3,300,"Hold still…"); const base=[0,1].map(k=>last.imu[k].yaw);
+   const fr=await runBtn(btn,0,2500,"Slide RIGHT now…");
+   const end=fr.slice(-10); const imu=[{},{}];
+   for(const k of [0,1]){ const d=avg(end.map(m=>m.imu[k].yaw))-base[k]; if(Math.abs(d)<3) return bad(res,"no swing seen: slide further"); imu[k].yaw={sign:d>0?1:-1}; }
+   ARMT.imu=mergeImu(imu); await saveCal({imu:ARMT.imu}); yaw0=[last.imu[0].yaw,last.imu[1].yaw]; good(res,"swing learned"); }},
+];
+const ARMT={level:null,rollSrc:[null,null],imu:null};
+function axis(fr,k,exclude){ const ok=fr.filter(m=>m.imu&&m.imu[k].ok); if(!ok.length||!ARMT.level) return null;
+  const end=ok.slice(-Math.max(5,Math.floor(ok.length/2)));
+  const d={roll:avg(end.map(m=>m.imu[k].roll))-ARMT.level[k].roll, pitch:avg(end.map(m=>m.imu[k].pitch))-ARMT.level[k].pitch};
+  if(exclude) delete d[exclude]; const a=Object.keys(d).reduce((x,y)=>Math.abs(d[x])>Math.abs(d[y])?x:y);
+  return Math.abs(d[a])<12?null:{a,s:d[a]>0?1:-1}; }
+function mergeImu(n){ const cur=JSON.parse(JSON.stringify(CAL.imu||[{},{}])); n.forEach((o,k)=>Object.assign(cur[k],o)); return cur; }
+const sg=c=>c?`${c.sign>0?"+":"−"}${c.src}`:"?";
+function good(res,t){ res.className="res ok"; res.textContent="✓ "+t; syncCal(); }
+function bad(res,t){ res.className="res bad"; res.textContent=t; }
+function buildSteps(host,list){ list.forEach((st,i)=>{ const row=document.createElement("div"); row.className="step";
+  const btn=runButton("Learn"); const res=document.createElement("div"); res.className="res"; res.textContent=st.done||"–"; res.id="res-"+st.id;
+  row.innerHTML=`<div class="num" style="width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--bg);font-size:12px">${i+1}</div><div class="what"><b>${st.b}</b><small>${st.s}</small></div>`;
+  const right=document.createElement("div"); right.style.cssText="display:flex;gap:10px;align-items:center"; right.append(res,btn); row.appendChild(right);
+  btn.onclick=()=>{ if(st.need==="level"&&!ARMT.level) return bad(res,"do Level first"); if(st.need==="roll"&&!ARMT.rollSrc[0]) return bad(res,"do Roll first"); st.run(btn,res); };
+  host.appendChild(row); }); }
+buildSteps($("armSteps"),ARM);
+document.querySelectorAll("[data-flip]").forEach(b=>b.onclick=()=>{ const f=Object.assign({roll:1,up:1,swing:1},CAL.flip||{}); f[b.dataset.flip]*=-1; saveCal({flip:f}); });
+
+/* ================= 3. MOUSE ================= */
+function gyroDom(fr){ const g=fr.map(m=>m.gyro&&m.gyro[1]).filter(Boolean); if(!g.length) return null;
+  const tot=[0,1,2].map(i=>g.reduce((a,v)=>a+v[i],0)); const i=[0,1,2].reduce((a,b)=>Math.abs(tot[a])>Math.abs(tot[b])?a:b); return {ax:"g"+"xyz"[i],s:tot[i]>0?1:-1,tot}; }
+const MOUSE=[
+ {id:"mR",b:"Cursor right",s:"Turn your hand to the RIGHT (like moving a mouse right) and stop.",run:async(btn,res)=>{
+   const fr=await runBtn(btn,2,2000,"Turn RIGHT now…"); const d=gyroDom(fr); if(!d) return bad(res,"no hand data");
+   MOUSE.r=d; const mo=Object.assign({},CAL.mouse||{},{mx:d.ax,mx_sign:d.s}); await saveCal({mouse:mo}); good(res,`right = ${d.s>0?"+":"−"}${d.ax}`); }},
+ {id:"mU",b:"Cursor up",s:"Back to the middle. Tilt your hand UP and stop.",run:async(btn,res)=>{
+   const fr=await runBtn(btn,2,2000,"Tilt UP now…"); let d=gyroDom(fr); if(!d) return bad(res,"no hand data");
+   const mx=(CAL.mouse||{}).mx; if(d.ax===mx){ const o=[0,1,2].filter(i=>"g"+"xyz"[i]!==mx).reduce((a,b)=>Math.abs(d.tot[a])>Math.abs(d.tot[b])?a:b); d={ax:"g"+"xyz"[o],s:d.tot[o]>0?1:-1}; }
+   const mo=Object.assign({},CAL.mouse||{},{my:d.ax,my_sign:-d.s}); await saveCal({mouse:mo}); good(res,`up = ${d.s>0?"+":"−"}${d.ax}`); }},
+ {id:"mRoll",b:"Roll right",s:"Back to the middle. Roll your wrist to the RIGHT (clockwise, like turning a key) and stop.",run:async(btn,res)=>{
+   const mo0=CAL.mouse||{}; if(!mo0.mx||!mo0.my) return bad(res,"do right and up first");
+   const fr=await runBtn(btn,2,2000,"Roll RIGHT now…"); const d=gyroDom(fr); if(!d) return bad(res,"no hand data");
+   const i=[0,1,2].find(j=>"g"+"xyz"[j]!==mo0.mx&&"g"+"xyz"[j]!==mo0.my); if(Math.abs(d.tot[i])<50) return bad(res,"no roll seen: roll further");
+   const mo=Object.assign({},mo0,{roll_sign:d.tot[i]>0?1:-1}); await saveCal({mouse:mo}); good(res,"roll learned"); }},
+];
+buildSteps($("mouseSteps"),MOUSE);
+$("mouseTest").onclick=()=>postSettings({mouse:!S.mouse});
+
+/* ================= 4. SQUEEZE (FSR) ================= */
+const FSRM=[{},{}];   // per strip: rest, light, hard (max readings)
+const fsrBox=[0,1].map(k=>{ const b=document.createElement("div"); b.className="fsrbox";
+  b.innerHTML=`<small>FSR ${k}</small><div class="v">0</div><div class="track"><div class="f"></div><div class="thr"></div></div><div class="meta">threshold –</div>`; $("fsrLive").appendChild(b); return b; });
+function fsrLive(m){ fsrBox.forEach((b,k)=>{ const v=m.fsr[k], t=(S.fsr_thr_d||[])[k]; const el=b.querySelector(".v"); el.textContent=v; el.classList.toggle("on",t!=null&&v>t);
+  b.querySelector(".f").style.width=Math.min(100,v/40.95)+"%"; if(t!=null){ b.querySelector(".thr").style.left=Math.min(100,t/40.95)+"%"; b.querySelector(".meta").textContent=`threshold ${t} · turns yellow when squeezed`; } }); }
+const fsrMax=(fr,k)=>Math.max(0,...fr.map(m=>m.fsr?m.fsr[k]:0));
+const fsrMed=(fr,k)=>pct(fr.map(m=>m.fsr?m.fsr[k]:0),.5);
+const FSTEPS=[];
+[0,1].forEach(k=>{
+  FSTEPS.push({id:`f${k}r`,b:`FSR ${k}: resting`,s:"Don't press it at all.",run:async(btn,res)=>{ const fr=await runBtn(btn,2,3000); FSRM[k].rest=fsrMax(fr,k); good(res,`rest max ${FSRM[k].rest}`); fsrTable(); }});
+  FSTEPS.push({id:`f${k}l`,b:`FSR ${k}: light squeeze`,s:"Squeeze gently, the softest squeeze you want to count, and hold.",run:async(btn,res)=>{ const fr=await runBtn(btn,2,3000,"Squeeze lightly…"); FSRM[k].light=fsrMed(fr.slice(Math.floor(fr.length/3)),k);
+    if(FSRM[k].light<50) return bad(res,`reads ${FSRM[k].light}: no pressure seen. Check the strip and its wires.`); good(res,`light ${FSRM[k].light}`); fsrTable(); }});
+  FSTEPS.push({id:`f${k}h`,b:`FSR ${k}: hard squeeze`,s:"Squeeze as hard as is comfortable and hold.",run:async(btn,res)=>{ const fr=await runBtn(btn,2,3000,"Squeeze HARD…"); FSRM[k].hard=fsrMax(fr,k); good(res,`hard ${FSRM[k].hard}`); fsrTable(); }});
+});
+buildSteps($("fsrSteps"),FSTEPS);
+function fsrTable(){
+  const sug=[0,1].map(k=>{ const f=FSRM[k]; if(f.light==null) return null; return Math.max(Math.round(((f.rest||0)+f.light)/2),(f.rest||0)+60); });
+  let h=`<table><tr><th>Strip</th><th>resting</th><th>light</th><th>hard</th><th>threshold now</th><th>new</th></tr>`;
+  [0,1].forEach(k=>{ const f=FSRM[k]; h+=`<tr><td>FSR ${k}</td><td>${f.rest??"–"}</td><td>${f.light??"–"}</td><td>${f.hard??"–"}</td><td>${(S.fsr_thr_d||[])[k]}</td><td><b>${sug[k]??"–"}</b></td></tr>`; });
+  h+=`</table>`;
+  [0,1].forEach(k=>{ const f=FSRM[k]; if(f.rest!=null&&f.rest>300) h+=`<p class="out also" style="margin:6px 0 0">FSR ${k} reads ${f.rest} with no pressure: its 10 kΩ resistor to ground is loose, or the strip is being bent by the strap.</p>`; });
+  if(sug.some(v=>v!=null)) h+=`<div style="margin-top:10px"><button class="primary" id="applyFsr">Use these thresholds</button></div>`;
+  $("fsrOut").innerHTML=h;
+  const b=$("applyFsr"); if(b) b.onclick=async()=>{ const a=(S.fsr_thr_d||[900,900]).slice(); sug.forEach((v,k)=>{ if(v!=null) a[k]=v; }); await postSettings({fsr_thr_d:a}); await saveCal({fsr_done:true}); $("stFsr").textContent="set"; $("stFsr").classList.add("done"); fsrTable(); };
+}
+if(false) fsrTable();
+
+/* ================= 4. NOISE ================= */
+const NOISE={still:null,move:null};
+function noiseStats(fr){ return { pz:[0,1,2,3].map(k=>Math.max(0,...fr.map(m=>m.piezo?m.piezo[k]:0))), fsr:[0,1].map(k=>Math.max(0,...fr.map(m=>m.fsr?m.fsr[k]:0))),
+  g:pct(fr.map(m=>m.gmax||0),.95), events:fr.flatMap(m=>m.events||[]).filter(e=>e.kind!=="ignored") }; }
+const NSTEPS=[
+ {id:"nS",b:"Still",s:"Arm resting, do nothing for 5 s.",run:async(btn,res)=>{ NOISE.still=noiseStats(await runBtn(btn,2,5000)); good(res,"measured"); noiseTable(); }},
+ {id:"nM",b:"Moving, no gestures",s:"Move your arm and wrist around normally for 6 s, but do NOT tap, squeeze or flick.",run:async(btn,res)=>{ NOISE.move=noiseStats(await runBtn(btn,2,6000)); good(res,`${NOISE.move.events.length} false gestures`); noiseTable(); saveCal({noise_done:true}); }},
+];
+buildSteps($("noiseSteps"),NSTEPS);
+function noiseTable(){
+  const o=$("noiseOut"), st=NOISE.still, mv=NOISE.move; if(!st&&!mv) return;
+  const row=(name,a,b,cur,sug)=>`<tr><td>${name}</td><td>${a??"–"}</td><td>${b??"–"}</td><td>${cur}</td><td><b>${sug}</b></td></tr>`;
+  const sugP=[0,1,2,3].map(k=>Math.max(100,Math.round(1.3*Math.max(st?st.pz[k]:0,mv?mv.pz[k]:0))));
+  const sugF=[0,1].map(k=>Math.max(300,Math.round(1.5*Math.max(st?st.fsr[k]:0,mv?mv.fsr[k]:0))));
+  const sugFl=Math.max(200,Math.round(1.2*(mv?mv.g:0)));
+  let h=`<table><tr><th>Sensor</th><th>still max</th><th>moving max</th><th>threshold now</th><th>suggested</th></tr>`;
+  [0,1,2,3].forEach(k=>h+=row(discName(k),st?.pz[k],mv?.pz[k],S.tap_thr_d?.[k],sugP[k]));
+  [0,1].forEach(k=>h+=row("FSR "+k,st?.fsr[k],mv?.fsr[k],S.fsr_thr_d?.[k],sugF[k]));
+  h+=row("Flick (hand turn °/s)",st?Math.round(st.g):"–",mv?Math.round(mv.g):"–",S.flick_dps,sugFl)+`</table>`;
+  if(mv&&mv.events.length) h+=`<p class="out also" style="margin:8px 0 0">While moving, these fired by mistake: ${summ(mv.events)}</p>`;
+  h+=`<div style="margin-top:10px"><button class="primary" id="applyNoise">Apply suggested thresholds</button></div>`;
+  o.innerHTML=h; $("stNoise").textContent=mv?"measured":"still only"; $("stNoise").classList.toggle("done",!!mv);
+  $("applyNoise").onclick=()=>postSettings({tap_thr_d:sugP,fsr_thr_d:sugF,flick_dps:sugFl});
+}
+const summ=evs=>{ const c={}; evs.forEach(e=>{const n=evName(e); c[n]=(c[n]||0)+1;}); return Object.entries(c).map(([n,x])=>`${n} ×${x}`).join(" · "); };
+const evName=e=>e.disc!=null&&/tap/.test(e.kind)?`${e.kind} ${discName(e.disc)}`:e.fsr!=null?`squeeze F${e.fsr}`:e.kind;
+
+/* ================= 5. RULES ================= */
+const RULES=[
+ {k:"one_disc",type:"toggle",b:"One tap = one disc",s:"When several discs spike at once, only the strongest counts."},
+ {k:"bump_discs",type:"range",min:0,max:4,step:1,fmt:v=>v?v+"+ discs":"off",b:"Ignore bumps",s:"This many discs spiking together = a knock on the desk, not a tap."},
+ {k:"echo_ms",type:"range",min:0,max:400,step:10,fmt:v=>v?v+" ms":"off",b:"Ignore echoes",s:"After a tap, other discs are ignored this long (a tap shakes the neighbours)."},
+ {k:"tap_motion_dps",type:"range",min:0,max:800,step:10,fmt:v=>v?v+" °/s":"off",b:"No taps while moving fast",s:"Taps are ignored while the hand turns faster than this (flicks shake the discs)."},
+ {k:"tap_lock_ms",type:"range",min:0,max:800,step:10,fmt:v=>v?v+" ms":"off",b:"No taps after flick/squeeze",s:"Taps are ignored this long after a flick or squeeze."},
+ {k:"flick_lock_ms",type:"range",min:0,max:1000,step:10,fmt:v=>v?v+" ms":"off",b:"No flicks after a tap",s:"A tap jolts the hand; flicks are ignored this long after one."},
+ {k:"smooth_hz",type:"range",min:.3,max:5,step:.1,fmt:v=>v<=.8?"very smooth":v<=2?"smooth":"fast",b:"Arm smoothness",s:"Lower = steadier arm when you hold still. Fast moves are never slowed down."},
+ {k:"return_ms",type:"range",min:0,max:1500,step:50,fmt:v=>v?v+" ms":"off",b:"Ignore the way back",s:"After roll right, rolling back to the middle is not a roll left. Same for flicks. Ignored this long."},
+ {k:"rearm",type:"range",min:.1,max:.8,step:.05,fmt:v=>Math.round(v*100)+"%",b:"Settle before next flick",s:"The hand must slow below this share of the flick strength before another flick can count. Stops one shake firing many."},
+ {k:"flick_dps",type:"range",min:120,max:900,step:10,fmt:v=>v+" °/s",b:"Flick strength",s:"How fast the hand must turn to count as a flick."},
+ {k:"double_ms",type:"range",min:150,max:800,step:10,fmt:v=>v+" ms",b:"Double-tap window",s:"Two taps inside this time = a double tap."},
+ {k:"fsr_hyst",type:"range",min:.4,max:.95,step:.05,fmt:v=>Math.round(v*100)+"%",b:"Squeeze release",s:"A squeeze ends below this share of its threshold, so it doesn't flicker on and off."},
+];
+RULES.forEach(r=>{ const row=document.createElement("div"); row.className="rule";
+  row.innerHTML=`<div><b>${r.b}</b><small>${r.s}</small></div>`;
+  let ctl; if(r.type==="toggle"){ ctl=document.createElement("button"); ctl.onclick=()=>postSettings({[r.k]:!S[r.k]}); }
+  else { ctl=document.createElement("input"); ctl.type="range"; ctl.min=r.min; ctl.max=r.max; ctl.step=r.step; ctl.onchange=e=>postSettings({[r.k]:+e.target.value}); ctl.oninput=e=>out.textContent=r.fmt(+e.target.value); }
+  const out=document.createElement("output"); row.append(ctl,out); r.ctl=ctl; r.out=out; $("rules").appendChild(row); });
+const THR=[...[0,1,2,3].map(k=>({lab:()=>discName(k),get:m=>m.piezo&&m.piezo[k],max:2000,key:"tap_thr_d",i:k})),...[0,1].map(k=>({lab:()=>"FSR "+k,get:m=>m.fsr&&m.fsr[k],max:4095,key:"fsr_thr_d",i:k})),{lab:()=>"Hand turn °/s",get:m=>m.gmax,max:900,key:"flick_dps"}];
+THR.forEach(t=>{ const r=document.createElement("div"); r.className="bar"; r.innerHTML=`<span></span><div class="track"><div class="f"></div><div class="thr"></div></div><span></span>`;
+  const sl=document.createElement("input"); sl.type="range"; sl.min=t.key==="flick_dps"?120:40; sl.max=t.max; sl.step=10; sl.style.cssText="grid-column:2;width:100%;accent-color:var(--bad)";
+  sl.onchange=e=>{ const v=+e.target.value; if(t.i==null) postSettings({[t.key]:v}); else { const a=S[t.key].slice(); a[t.i]=v; postSettings({[t.key]:a}); } };
+  t.row=r; t.sl=sl; t.peak=0; $("thrBars").append(r,sl); });
+function syncRules(){
+  RULES.forEach(r=>{ if(S[r.k]===undefined) return; if(r.type==="toggle"){ r.ctl.textContent=S[r.k]?"On":"Off"; r.ctl.className=S[r.k]?"primary":""; r.out.textContent=""; } else { r.ctl.value=S[r.k]; r.out.textContent=r.fmt(S[r.k]); } });
+  THR.forEach(t=>{ const v=t.i==null?S[t.key]:(S[t.key]||[])[t.i]; if(v==null) return; t.sl.value=v; t.row.querySelector(".thr").style.left=Math.min(100,v/t.max*100)+"%"; });
+  document.querySelectorAll("[data-set]").forEach(i=>{ if(S[i.dataset.set]!==undefined){ i.value=S[i.dataset.set]; i.nextElementSibling.textContent=S[i.dataset.set]; } });
+}
+document.querySelectorAll("[data-set]").forEach(i=>{ i.oninput=()=>i.nextElementSibling.textContent=i.value; i.onchange=()=>postSettings({[i.dataset.set]:+i.value}); });
+function liveBars(m){
+  pzBars.forEach((r,k)=>{ const v=m.piezo[k]; r.querySelector(".f").style.width=Math.min(100,v/20)+"%"; r.lastChild.textContent=v; r.firstChild.textContent=discName(k); });
+  THR.forEach(t=>{ const v=t.get(m)||0; t.peak=Math.max(v,t.peak*0.97); t.row.firstChild.textContent=t.lab(); t.row.querySelector(".f").style.width=Math.min(100,t.peak/t.max*100)+"%"; t.row.lastChild.textContent=Math.round(v); });
+}
+
+/* ================= 6. LAB ================= */
+const tapPlaces=()=>[0,1,2,3].map(k=>({id:"tap"+k,b:"Tap "+discName(k),s:"5 taps on this disc",exp:e=>/tap/.test(e.kind)&&e.disc===k,disc:k,n:5}));
+const labRows=()=>[...tapPlaces(),
+ {id:"dbl",b:"Double tap",s:"5 double taps, any disc",exp:e=>e.kind==="double tap",n:5},
+ {id:"sq0",b:"Squeeze F0",s:"5 squeezes (make a fist)",exp:e=>e.kind==="squeeze"&&e.fsr===0,n:5,sq:true},
+ {id:"sq1",b:"Squeeze F1",s:"5 squeezes on F1",exp:e=>e.kind==="squeeze"&&e.fsr===1,n:5,sq:true},
+ {id:"fl",b:"Flick left",s:"5 flicks to the left",exp:e=>e.kind==="flick left",n:5,motion:true},
+ {id:"fr",b:"Flick right",s:"5 flicks to the right",exp:e=>e.kind==="flick right",n:5,motion:true},
+ {id:"fu",b:"Flick up",s:"5 flicks up",exp:e=>e.kind==="flick up",n:5,motion:true},
+ {id:"fd",b:"Flick down",s:"5 flicks down",exp:e=>e.kind==="flick down",n:5,motion:true},
+ {id:"rot",b:"Wrist roll",s:"5 fast wrist turns",exp:e=>/^roll /.test(e.kind),n:5,motion:true},
+ {id:"none",b:"Typing / resting",s:"Type or move normally: NOTHING should fire",exp:()=>false,n:0,motion:true},
+];
+function buildLab(){ $("lab").innerHTML=""; labRows().forEach(r=>{ const row=document.createElement("div"); row.className="lrow";
+  const btn=runButton("Test ×"+(r.n||"8 s")); const out=document.createElement("div"); out.className="out"; out.id="out-"+r.id;
+  const prev=(CAL.lab||{})[r.id]; out.innerHTML=prev?`<span class="score ${prev.ok?"ok":"bad"}">${prev.text}</span> <small class="ign">(saved result)</small>`:`<small>not tested</small>`;
+  row.innerHTML=`<div><b>${r.b}</b><small>${r.s}</small></div>`; row.append(btn,out);
+  btn.onclick=()=>labTest(r,btn,out); $("lab").appendChild(row); }); countLab(); }
+function countLab(){ const n=Object.keys(CAL.lab||{}).length; $("stLab").textContent=n+" tested"; $("stLab").classList.toggle("done",n>=8); }
+async function labTest(r,btn,out){
+  const fr=await runBtn(btn,3,8000,r.n?"Do it 5 times…":"Type / move…");
+  const evs=fr.flatMap(m=>(m.events||[]).map(e=>Object.assign({},e,{_g:m.gmax||0})));
+  const acc=evs.filter(e=>e.kind!=="ignored"), ign=evs.filter(e=>e.kind==="ignored");
+  let got=acc.filter(r.exp); const other=acc.filter(e=>!r.exp(e)&&!(r.id==="dbl"&&e.kind==="tap")&&!(r.disc!=null&&e.kind==="double tap"&&e.disc===r.disc));
+  if(r.id==="dbl") got=acc.filter(e=>e.kind==="double tap");
+  const ok=r.n?got.length>=r.n-1&&other.length===0:other.length===0;
+  const text=r.n?`${got.length}/${r.n} detected`:`${other.length} false triggers`;
+  let h=`<span class="score ${ok?"ok":"bad"}">${ok?"✓ ":""}${text}</span>`;
+  if(other.length) h+=`<br><span class="also">Also fired: ${summ(other)}</span>`;
+  if(ign.length) h+=`<br><span class="ign">Filtered out: ${ign.length} (${[...new Set(ign.map(e=>e.why.replace(/\(.*\)/,"").trim()))].join(", ")})</span>`;
+  const fixes=suggest(r,fr,got,other,ign);
+  out.innerHTML=h; if(fixes.length){ const f=document.createElement("div"); f.className="fix";
+    fixes.forEach(x=>{ const b=document.createElement("button"); b.textContent=x.label; b.title=x.why; b.onclick=async()=>{ await postSettings(x.set); b.textContent="✓ applied: test again"; b.disabled=true; }; f.append(b); });
+    out.appendChild(f); }
+  const lab=Object.assign({},CAL.lab||{}); lab[r.id]={ok,text,other:summ(other),at:new Date().toISOString()}; await saveCal({lab}); countLab();
+}
+function suggest(r,fr,got,other,ign){
+  const fx=[]; const peaksOf=k=>fr.map(m=>m.piezo?m.piezo[k]:0);
+  // missed taps on the tested disc
+  if(r.disc!=null&&got.length<r.n-1){
+    const pk=peaksOf(r.disc).filter(v=>v>60); const blamed=ign.filter(e=>e.disc===r.disc).map(e=>e.why);
+    if(blamed.length){ const w=blamed[0];
+      if(/weaker/.test(w)) fx.push({label:"Turn off ‘one disc’",set:{one_disc:false},why:w});
+      else if(/echo/.test(w)) fx.push({label:"Shorter echo time",set:{echo_ms:Math.max(0,(S.echo_ms||0)-60)},why:w});
+      else if(/moving/.test(w)) fx.push({label:"Allow taps while moving more",set:{tap_motion_dps:Math.round((S.tap_motion_dps||0)*1.4)},why:w});
+      else if(/bump/.test(w)) fx.push({label:"Bump rule: 4 discs",set:{bump_discs:4},why:w}); }
+    if(pk.length){ const a=S.tap_thr_d.slice(); a[r.disc]=Math.max(60,Math.round(pct(pk,.5)*0.7)); fx.push({label:`Lower ${discName(r.disc)} threshold to ${a[r.disc]}`,set:{tap_thr_d:a},why:"taps were weaker than the threshold"}); }
+  }
+  // other things fired
+  const oTaps=other.filter(e=>/tap/.test(e.kind));
+  if(oTaps.length){
+    if(r.disc!=null){ if(!S.one_disc) fx.push({label:"Turn on ‘one disc’",set:{one_disc:true}});
+      else fx.push({label:`Echo time ${Math.min(400,(S.echo_ms||0)+80)} ms`,set:{echo_ms:Math.min(400,(S.echo_ms||0)+80)}});
+      const a=S.tap_thr_d.slice(); [...new Set(oTaps.map(e=>e.disc))].forEach(d=>a[d]=Math.round(Math.max(a[d],1.15*Math.max(...oTaps.filter(e=>e.disc===d).map(e=>e.v||0))))); fx.push({label:"Raise the neighbours’ thresholds",set:{tap_thr_d:a}}); }
+    else if(r.motion){ const g=Math.max(120,Math.round(0.8*pct(oTaps.map(e=>e._g),.3))); fx.push({label:`No taps above ${g} °/s`,set:{tap_motion_dps:g},why:"the motion shook the discs"}); fx.push({label:"No taps 300 ms after a flick",set:{tap_lock_ms:Math.max(300,S.tap_lock_ms||0)}}); }
+    else if(r.sq){ const a=S.tap_thr_d.slice(); oTaps.forEach(e=>a[e.disc]=Math.round(Math.max(a[e.disc],1.15*(e.v||0)))); fx.push({label:"Raise tap thresholds above the squeeze shake",set:{tap_thr_d:a}}); fx.push({label:"No taps 300 ms after a squeeze",set:{tap_lock_ms:Math.max(300,S.tap_lock_ms||0)}}); }
+  }
+  const oFl=other.filter(e=>/flick|roll /.test(e.kind));
+  if(oFl.length){ const top=Math.max(...fr.map(m=>m.gmax||0)); fx.push({label:`Flick needs > ${Math.min(900,Math.round(top*1.15))} °/s`,set:{flick_dps:Math.min(900,Math.round(top*1.15))},why:"this gesture turned the hand fast enough to look like a flick"});
+    if(r.disc!=null||r.id==="dbl") fx.push({label:"No flicks 500 ms after a tap",set:{flick_lock_ms:Math.max(500,S.flick_lock_ms||0)}}); }
+  const oSq=other.filter(e=>e.kind==="squeeze");
+  if(oSq.length){ const a=S.fsr_thr_d.slice(); [0,1].forEach(k=>{ const mx=Math.max(...fr.map(m=>m.fsr?m.fsr[k]:0)); if(oSq.some(e=>e.fsr===k)) a[k]=Math.min(4000,Math.round(mx*1.15)); }); fx.push({label:"Raise squeeze thresholds",set:{fsr_thr_d:a}}); }
+  // missed flicks / squeezes
+  if(r.motion&&r.n&&got.length<r.n-1){ const g=pct(fr.map(m=>m.gmax||0),.97); if(g>100) fx.push({label:`Flick needs only ${Math.round(g*0.75)} °/s`,set:{flick_dps:Math.max(120,Math.round(g*0.75))},why:"your flicks were slower than the threshold"}); }
+  if(r.sq&&got.length<r.n-1){ const k=r.id==="sq0"?0:1, mx=Math.max(...fr.map(m=>m.fsr?m.fsr[k]:0)); if(mx>100){ const a=S.fsr_thr_d.slice(); a[k]=Math.round(mx*0.6); fx.push({label:`Squeeze F${k} threshold ${a[k]}`,set:{fsr_thr_d:a}}); } else fx.push({label:`F${k} reads 0: check its wiring`,set:{}}); }
+  return fx;
+}
+
+/* ================= preview: 3D arm + event log ================= */
+function cuboid(w,h,d,color){ const g=document.createElement("div"); g.className="g";
+  const F=(fw,fh,t,shade)=>{ const f=document.createElement("div"); f.className="face"; f.style.cssText=`width:${fw}px;height:${fh}px;left:${-fw/2}px;top:${-fh/2}px;transform:${t};background:color-mix(in srgb, ${color} ${shade}%, black)`; g.appendChild(f); };
+  F(w,h,`translateZ(${d/2}px)`,100); F(w,h,`rotateY(180deg) translateZ(${d/2}px)`,70); F(d,h,`rotateY(90deg) translateZ(${w/2}px)`,80); F(d,h,`rotateY(-90deg) translateZ(${w/2}px)`,80);
+  F(w,d,`rotateX(90deg) translateZ(${h/2}px)`,115); F(w,d,`rotateX(-90deg) translateZ(${h/2}px)`,55); return g; }
+const css=getComputedStyle(document.documentElement);
+const arm=document.createElement("div"); arm.className="g"; const ab=cuboid(260,46,62,css.getPropertyValue("--arm")); ab.style.transform="translateX(-130px)"; arm.appendChild(ab);
+const thumbMark=cuboid(40,10,16,"#f2b134"); thumbMark.style.transform="translate3d(-20px,0,34px)"; arm.appendChild(thumbMark);
+const hand=document.createElement("div"); hand.className="g"; const hb=cuboid(150,26,80,css.getPropertyValue("--hand")); hb.style.transform="translateX(75px)"; hand.appendChild(hb); arm.appendChild(hand); $("world").appendChild(arm);
+const W=a=>((a+180)%360+360)%360-180;   // short way round: 350 deg -> -10 deg
+function disp(m,k){ const c=(CAL.imu||[])[k]||{}, i=m.imu[k], r=c.roll||{src:"roll",sign:1,zero:0}, p=c.pitch||{src:"pitch",sign:1,zero:0}, y=c.yaw||{sign:1}, f=CAL.flip||{};
+  return {ok:i.ok, roll:(f.roll||1)*r.sign*W(i[r.src]-r.zero), up:(f.up||1)*p.sign*W(i[p.src]-p.zero), swing:(f.swing||1)*y.sign*(i.yaw-yaw0[k])}; }
+function drawArm(m){ const a=disp(m,0), h=disp(m,1);
+  if(a.ok) arm.style.transform=`rotateY(${-a.swing}deg) rotateZ(${-a.up}deg) rotateX(${a.roll}deg)`;
+  if(h.ok) hand.style.transform=`rotateY(${-(h.swing-a.swing)}deg) rotateZ(${-(h.up-a.up)}deg) rotateX(${h.roll-a.roll}deg)`;
+  $("aF").textContent=a.ok?`roll ${a.roll.toFixed(0)}° · up ${a.up.toFixed(0)}°`:"missing"; $("aH").textContent=h.ok?`roll ${h.roll.toFixed(0)}° · up ${h.up.toFixed(0)}°`:"missing"; }
+$("recenter").onclick=()=>{ if(last&&last.imu) yaw0=[last.imu[0].yaw,last.imu[1].yaw]; };
+function logEvent(ev){ const li=document.createElement("li"); const t=new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  if(ev.kind==="ignored"){ li.className="ign"; li.textContent=`${t}  ignored · ${ev.disc!=null?discName(ev.disc)+" · ":""}${ev.flick?ev.flick+" · ":""}${ev.why}`; }
+  else { li.className="acc"; li.innerHTML=`${t}  <b>${evName(ev)}</b>${ev.v?` · ${ev.v}`:""}${ev.dps?` · ${ev.dps}°/s`:""}`;
+    if(ev.disc!=null){ const p=discPlace(ev.disc); if(p&&slots[p]){ slots[p].classList.add("hit"); setTimeout(()=>slots[p].classList.remove("hit"),200); } } }
+  $("evlog").prepend(li); while($("evlog").children.length>14) $("evlog").lastChild.remove(); }
+
+/* ================= sync from calib ================= */
+function syncCal(){
+  const d=CAL.discs||{}; PLACES.forEach(([key])=>{ const b=slots[key]; b.querySelector("b").textContent=d[key]!=null?"P"+d[key]:"?"; b.querySelector("small:last-child").textContent=d[key]!=null?"click to re-learn":"click, then tap ×3"; });
+  const nd=Object.keys(d).length; $("stDiscs").textContent=nd===4?"all 4 placed":nd+" of 4"; $("stDiscs").classList.toggle("done",nd===4);
+  const im=CAL.imu||[{},{}]; const armDone=im[0]&&im[0].roll&&im[0].pitch&&im[0].yaw&&im[1]&&im[1].roll&&im[1].pitch;
+  $("stArm").textContent=armDone?"learned":"not set"; $("stArm").classList.toggle("done",!!armDone);
+  if(im[0]&&im[0].roll){ $("res-roll").textContent=`✓ forearm ${sg(im[0].roll)} · hand ${sg(im[1].roll)}`; $("res-roll").className="res ok"; }
+  if(im[1]&&im[1].pitch){ $("res-upH").textContent="✓ hand "+sg(im[1].pitch); $("res-upH").className="res ok"; }
+  if(im[0]&&im[0].pitch){ $("res-upF").textContent="✓ forearm "+sg(im[0].pitch); $("res-upF").className="res ok"; }
+  if(im[0]&&im[0].yaw){ $("res-swing").textContent="✓ swing learned"; $("res-swing").className="res ok"; }
+  if(im[0]&&im[0].roll&&!ARMT.level){ ARMT.level=[0,1].map(k=>({roll:(im[k].roll&&im[k].roll.src==="roll")?im[k].roll.zero:(im[k].pitch&&im[k].pitch.src==="roll"?im[k].pitch.zero:0),pitch:(im[k].roll&&im[k].roll.src==="pitch")?im[k].roll.zero:(im[k].pitch&&im[k].pitch.src==="pitch"?im[k].pitch.zero:0)})); ARMT.rollSrc=[im[0].roll.src,im[1].roll?im[1].roll.src:null]; $("res-level").textContent="✓ level saved"; $("res-level").className="res ok"; }
+  const mo=CAL.mouse||{}; if(mo.mx){ $("res-mR").textContent=`✓ right = ${mo.mx_sign>0?"+":"−"}${mo.mx}`; $("res-mR").className="res ok"; }
+  if(mo.my){ $("res-mU").textContent=`✓ up = ${mo.my_sign<0?"+":"−"}${mo.my}`; $("res-mU").className="res ok"; }
+  if(mo.roll_sign){ $("res-mRoll").textContent="✓ roll learned"; $("res-mRoll").className="res ok"; }
+  const handDone=!!(mo.mx&&mo.my&&mo.roll_sign);
+  $("stMouse").textContent=handDone?"learned":mo.mx||mo.my?"part done":"not set"; $("stMouse").classList.toggle("done",handDone);
+  readyBar({discs:nd===4,arm:!!armDone,hand:handDone,noise:!!NOISE.move||!!CAL.noise_done,lab:Object.keys(CAL.lab||{}).length});
+  document.querySelectorAll("[data-flip]").forEach(b=>b.className=((CAL.flip||{})[b.dataset.flip]||1)<0?"primary":"");
+  if(CAL.fsr_done){ $("stFsr").textContent="set"; $("stFsr").classList.add("done"); }
+  if(!$("lab").children.length) buildLab(); else countLab();
+}
+
+/* ================= ready bar: what is set, then go use it ================= */
+function readyBar(r){
+  const items=[["Discs placed",r.discs],["Arm directions",r.arm],["Hand directions",r.hand],["Noise measured",r.noise],[`Gestures tested (${r.lab})`,r.lab>=6]];
+  $("readyList").innerHTML=items.map(([t,ok])=>`<span class="it ${ok?"ok":""}">${ok?"✓":"○"} ${t}</span>`).join("");
+  const need=r.discs&&r.hand; $("readyGo").classList.toggle("go",need);
+  $("readyGo").textContent=need?"Ready: use it on the Try it page ↗":"Try it page ↗ (do 1 and 3 first)"; }
+
+/* ================= recording ================= */
+let recOn=false;
+function syncRec(r){ recOn=r.on; const b=$("recBtn"); b.classList.toggle("on",r.on);
+  b.textContent=r.on?`■ Stop · ${String(Math.floor(r.secs/60)).padStart(2,"0")}:${String(r.secs%60).padStart(2,"0")}`:(r.file?"● Record again":"● Record screen");
+  b.title=r.file?"Last file: photos/"+r.file:"Record the whole screen to photos/"; }
+$("recBtn").onclick=async()=>{ const r=await fetch("/record",{method:"POST",body:JSON.stringify({action:recOn?"stop":"start",audio:$("mic").checked})}).then(x=>x.json()); syncRec(r);
+  if(!r.on&&r.file) alert("Saved: WristTap/photos/"+r.file); };
+</script>
+</body>
+</html>
